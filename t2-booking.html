@@ -326,13 +326,12 @@
         // ========== SUPABASE CONFIGURATIE (zelfde als admin paneel) ==========
         const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5hdl73a9-jNd9n3lnsYVyQ_dMYgiSLA';
-        let supabaseClient = null;
+        let supabase = null;
 
         async function initSupabase() {
             try {
-                const { createClient } = supabaseJs;
-                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                const { error } = await supabaseClient.from('bookings').select('count', { count: 'exact', head: true });
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { error } = await supabase.from('bookings').select('count', { count: 'exact', head: true });
                 if (error) console.warn('Supabase test error:', error);
                 else console.log('Supabase ready');
             } catch(e) { console.error('Supabase init failed:', e); }
@@ -574,9 +573,9 @@
                 return;
             }
             const bookingData = collectBookingData();
-            if (supabaseClient) {
+            if (supabase) {
                 try {
-                    const { error } = await supabaseClient.from('bookings').insert([bookingData]);
+                    const { error } = await supabase.from('bookings').insert([bookingData]);
                     if (error) throw error;
                     showThankYou();
                     // After thanking, show fiche when popup closed
