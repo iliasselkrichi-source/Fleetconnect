@@ -458,8 +458,7 @@
 
         // ==================== INIT ====================
         async function init() {
-            const { createClient } = supabaseJs;
-            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await loadAllData();
             const now = getCurrentNOW();
             selectedDate = new Date(now);
