@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto M50 - Carrosserie & Takeldienst Brussel</title>
+    <title>Auto M50 | Carrosserie & Takeldienst Brussel | Onzichtbaar Schadeherstel</title>
+    <meta name="description" content="Auto M50 is uw specialist in Brussel voor carrosserie, spuitwerk en 24/7 takeldienst. Erkend schadeherstel met levenslange garantie op lakwerk. Bel nu!">
 
     <!-- Google Fonts: Inter for clean readability -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -262,7 +263,7 @@
 
         .slider-track {
             display: flex;
-            width: calc(350px * 20); /* 10 original + 10 cloned items */
+            width: max-content;
             animation: scroll 40s linear infinite;
         }
 
@@ -275,6 +276,13 @@
             height: 250px;
             padding: 10px;
             flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 280px;
+                height: 200px;
+            }
         }
 
         .slide img {
@@ -293,7 +301,7 @@
 
         @keyframes scroll {
             0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-350px * 10)); }
+            100% { transform: translateX(-50%); }
         }
 
         /* WhatsApp Fixed Button */
@@ -317,6 +325,33 @@
 
         .whatsapp-fixed:hover {
             transform: scale(1.1);
+        }
+
+        /* Pulse Animation for WhatsApp */
+        .whatsapp-pulse {
+            animation: pulse-red 2s infinite;
+            box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+        }
+
+        @keyframes pulse-red {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+
+        /* Input error state */
+        .input-error {
+            border: 2px solid var(--accent-red) !important;
+            background-color: rgba(223, 0, 0, 0.05) !important;
         }
     </style>
 </head>
@@ -380,10 +415,10 @@
             <div class="container-custom hero-content text-white">
                 <h2 class="text-accent font-bold uppercase tracking-widest mb-4">Meesterlijk Carrosseriewerk</h2>
                 <h1 class="text-5xl lg:text-7xl font-extrabold mb-6 leading-tight">
-                    Perfectie in elke <span class="text-accent">M-Performance</span> detail.
+                    Carrosserie Auto M50: Onzichtbaar Schadeherstel met de <span class="text-accent">'M-Serie' Standaard</span> in Brussel.
                 </h1>
                 <p class="text-xl text-gray-300 mb-10 max-w-2xl leading-relaxed">
-                    Auto M50 is uw gecertificeerde partner voor schadeherstel, exclusief spuitwerk en gespecialiseerde takeldienst in Brussel. Wij brengen uw wagen terug in showroomstaat.
+                    Van kleine krasjes (Smart Repair) tot zwaar chassis-herstel. Wij regelen alles met uw verzekering. Uw wagen terug in showroomstaat, gegarandeerd.
                 </p>
                 <div class="flex flex-wrap gap-4">
                     <a href="#contact" class="btn-primary">Afspraak maken</a>
@@ -422,7 +457,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <img src="https://images.unsplash.com/photo-1599256631110-534d47c4728f?auto=format&fit=crop&q=80&w=800" alt="Carrosserieherstel">
+                                <img src="https://images.unsplash.com/photo-1599256631110-534d47c4728f?auto=format&fit=crop&q=80&w=800" alt="Carrosserie herstel BMW Brussel" loading="lazy">
                                 <div class="flip-card-title">
                                     <i class="fas fa-car-crash text-3xl text-accent mb-4"></i>
                                     <h4 class="text-xl font-bold uppercase tracking-tight">Carrosserieherstel</h4>
@@ -440,7 +475,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <img src="https://images.unsplash.com/photo-1507136566006-cfc505b114fc?auto=format&fit=crop&q=80&w=800" alt="Smart Repair">
+                                <img src="https://images.unsplash.com/photo-1507136566006-cfc505b114fc?auto=format&fit=crop&q=80&w=800" alt="Auto spuiten prijs Brussel" loading="lazy">
                                 <div class="flip-card-title">
                                     <i class="fas fa-tools text-3xl text-accent mb-4"></i>
                                     <h4 class="text-xl font-bold uppercase tracking-tight">Smart Repair</h4>
@@ -458,7 +493,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <img src="https://images.unsplash.com/photo-1632733711679-5292d6bc28f4?auto=format&fit=crop&q=80&w=800" alt="Exclusief Spuitwerk">
+                                <img src="https://images.unsplash.com/photo-1632733711679-5292d6bc28f4?auto=format&fit=crop&q=80&w=800" alt="Professioneel spuitwerk Brussel" loading="lazy">
                                 <div class="flip-card-title">
                                     <i class="fas fa-paint-roller text-3xl text-accent mb-4"></i>
                                     <h4 class="text-xl font-bold uppercase tracking-tight">Exclusief Spuitwerk</h4>
@@ -476,7 +511,7 @@
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
-                                <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800" alt="Verzekeringsservice">
+                                <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800" alt="Verzekering schadeherstel Brussel" loading="lazy">
                                 <div class="flip-card-title">
                                     <i class="fas fa-file-invoice-dollar text-3xl text-accent mb-4"></i>
                                     <h4 class="text-xl font-bold uppercase tracking-tight">Verzekeringsservice</h4>
@@ -501,16 +536,16 @@
 
             <div class="slider-track" id="slider-track">
                 <!-- 10 Original Photos (Focus on reflection and glans) -->
-                <div class="slide"><img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="M5 Glans 1"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=600" alt="Reflection 2"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=600" alt="Paint Finish 3"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=600" alt="Carrosserie 4"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600" alt="Detailing 5"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600" alt="Sport Car 6"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600" alt="Luxury Car 7"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1583121274602-3e2820bc6988?auto=format&fit=crop&q=80&w=600" alt="Ferrari Detailing 8"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf0a3?auto=format&fit=crop&q=80&w=600" alt="Lamborghini Gloss 9"></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="Wheel Detail 10"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="Auto spuiten BMW Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=600" alt="Carrosserie herstel Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=600" alt="Professioneel lakwerk Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=600" alt="Schadeherstel wagen Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&q=80&w=600" alt="Showroomstaat auto Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600" alt="Exclusieve carrosserie Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600" alt="Premium schadeherstel Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1583121274602-3e2820bc6988?auto=format&fit=crop&q=80&w=600" alt="Detailing BMW M5 Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf0a3?auto=format&fit=crop&q=80&w=600" alt="Onzichtbaar schadeherstel Brussel" loading="lazy"></div>
+                <div class="slide"><img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="Takeldienst Brussel 24/7" loading="lazy"></div>
 
                 <!-- Cloned items for infinite loop (handled by JS) -->
             </div>
@@ -521,7 +556,7 @@
             <div class="container-custom flex flex-col lg:flex-row items-center gap-16">
                 <div class="lg:w-1/2">
                     <h2 class="text-accent font-bold uppercase tracking-widest mb-2">24/7 Depannage</h2>
-                    <h3 class="text-4xl lg:text-5xl font-extrabold text-primary mb-6">Takeldienst Brussel</h3>
+                    <h3 class="text-4xl lg:text-5xl font-extrabold text-primary mb-6">24/7 Takeldienst Brussel – Binnen 30 min ter plaatse in Laken, Jette, Schaarbeek & Centrum.</h3>
                     <p class="text-lg text-gray-700 mb-8 leading-relaxed">
                         Heeft u pech onderweg of een ongeval gehad? Onze <strong>Takeldienst in Brussel</strong> staat 24 uur per dag, 7 dagen per week voor u klaar. Wij garanderen een snelle interventie binnen 30 minuten in heel Brussel en omstreken.
                     </p>
@@ -547,7 +582,7 @@
                     </div>
                 </div>
                 <div class="lg:w-1/2 relative">
-                    <img src="https://images.unsplash.com/photo-1597328290883-50c5787b7c7e?auto=format&fit=crop&q=80&w=800" alt="Takeldienst Brussel Auto M50" class="rounded-lg shadow-2xl relative z-10">
+                    <img src="https://images.unsplash.com/photo-1597328290883-50c5787b7c7e?auto=format&fit=crop&q=80&w=800" alt="Takeldienst Brussel 24/7" class="rounded-lg shadow-2xl relative z-10" loading="lazy">
                     <div class="absolute -bottom-6 -right-6 w-64 h-64 bg-accent/10 -z-0 rounded-full blur-3xl"></div>
                 </div>
             </div>
@@ -557,7 +592,7 @@
         <section id="over-ons" class="py-24 bg-white">
             <div class="container-custom flex flex-col lg:flex-row items-center gap-16">
                 <div class="lg:w-1/2 order-2 lg:order-1">
-                    <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=800" alt="Werkplaats Auto M50" class="rounded-lg shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=800" alt="Erkend schadeherstel Brussel" class="rounded-lg shadow-2xl" loading="lazy">
                 </div>
                 <div class="lg:w-1/2 order-1 lg:order-2">
                     <h2 class="text-accent font-bold uppercase tracking-widest mb-2">Vakmanschap & Passie</h2>
@@ -566,7 +601,7 @@
                         Met meer dan 15 jaar ervaring in de carrosseriewereld, heeft Auto M50 zich gevestigd als dé referentie in Brussel voor premium wagens. Onze passie voor techniek en esthetiek vertaalt zich in elk project dat onze werkplaats verlaat.
                     </p>
                     <p class="text-lg text-gray-700 mb-8 leading-relaxed">
-                        Wij werken met de nieuwste technologieën en de hoogste kwaliteitsproducten om de integriteit en waarde van uw voertuig te bewaren. Of het nu gaat om een exclusieve sportwagen of een dagelijkse wagen, wij behandelen elke opdracht met dezelfde 'M-Serie' standaard.
+                        Erkend door alle grote verzekeringsmaatschappijen. Wij nemen de volledige papierwinkel van u over. Wij werken met de nieuwste technologieën en de hoogste kwaliteitsproducten om de integriteit en waarde van uw voertuig te bewaren.
                     </p>
                     <div class="grid grid-cols-2 gap-6">
                         <div class="flex items-center gap-3">
@@ -690,7 +725,7 @@
     </footer>
 
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/32486789012" class="whatsapp-fixed" target="_blank">
+    <a href="https://wa.me/32486789012" class="whatsapp-fixed whatsapp-pulse" target="_blank">
         <i class="fab fa-whatsapp"></i>
     </a>
 
@@ -719,16 +754,41 @@
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message').value;
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const messageInput = document.getElementById('message');
 
-            if(name && email && message) {
+            let hasError = false;
+
+            [nameInput, emailInput, messageInput].forEach(input => {
+                if(!input.value.trim()) {
+                    input.classList.add('input-error');
+                    hasError = true;
+                } else {
+                    input.classList.remove('input-error');
+                }
+            });
+
+            if(!hasError) {
                 // Hier zou de backend integratie komen. Voor nu loggen we naar de console.
-                console.log("Contact Aanvraag:", { name, email, message });
-                alert("Bedankt voor uw aanvraag, " + name + ". Wij nemen zo spoedig mogelijk contact met u op!");
+                console.log("Contact Aanvraag:", {
+                    name: nameInput.value,
+                    email: emailInput.value,
+                    message: messageInput.value
+                });
+
+                alert("Bedankt! Uw aanvraag voor Auto M50 is verzonden. We nemen binnen 2 uur contact met u op.");
                 contactForm.reset();
             }
+        });
+
+        // Real-time error removal
+        [document.getElementById('name'), document.getElementById('email'), document.getElementById('message')].forEach(input => {
+            input.addEventListener('input', () => {
+                if(input.value.trim()) {
+                    input.classList.remove('input-error');
+                }
+            });
         });
 
         /**
@@ -764,9 +824,11 @@
         const toggleMenu = (show) => {
             if (show) {
                 mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'pointer-events-auto');
                 document.body.style.overflow = 'hidden';
             } else {
                 mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'pointer-events-auto');
                 document.body.style.overflow = '';
             }
         };
