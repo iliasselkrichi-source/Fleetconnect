@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Fleet Connect - Admin Paneel (Supabase)</title>
+    <title>Fleet Connect - Admin Paneel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* --- alle bestaande CSS blijft ongewijzigd --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; height: 100vh; display: flex; }
         .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; overflow-y: auto; }
@@ -45,7 +45,6 @@
         .delete-btn { background: #ef4444; color: white; margin-left: 8px; }
         .add-btn { background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.75rem; }
         .secondary-btn { background: #f59e0b; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.7rem; margin-top: 8px; }
-        .reset-data-btn { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 40px; font-weight: 600; font-size: 0.7rem; margin-top: 20px; cursor: pointer; width: 100%; }
         .order-count { background: #2dd4bf20; padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 600; color: #0f172a; }
         .hidden { display: none; }
         .template-tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
@@ -85,6 +84,7 @@
         .person-detail { font-size: 0.8rem; color: #475569; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
         .person-detail i { width: 20px; color: #2dd4bf; }
         .item-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .sub-item { margin-left: 20px; margin-top: 8px; padding: 6px; background: #f1f5f9; border-radius: 6px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-card h4 { font-size: 0.75rem; text-transform: uppercase; color: #64748b; margin-bottom: 8px; }
@@ -93,11 +93,14 @@
         .period-btn { padding: 8px 20px; border-radius: 40px; border: none; cursor: pointer; font-weight: 500; background: #e2e8f0; transition: all 0.2s; }
         .period-btn.active { background: #2dd4bf; color: #0f172a; }
         .finance-summary { background: #f8fafc; border-radius: 16px; padding: 20px; margin-top: 20px; }
+
+        /* AGENDA STIJLEN */
         .calendar-container { background: white; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
         .calendar-header h2 { font-size: 1.3rem; font-weight: 600; }
         .calendar-nav { display: flex; gap: 12px; }
         .calendar-nav button { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; }
+        .calendar-nav button:hover { background: #e2e8f0; }
         .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; padding: 12px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 8px; }
         .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; position: relative; }
@@ -106,10 +109,17 @@
         .calendar-day.other-month { color: #94a3b8; }
         .calendar-day.today { border: 2px solid #2dd4bf; }
         .calendar-day.has-rides { background: #dbeafe; }
+        .calendar-day.has-rides.selected { background: #2dd4bf; }
         .ride-dot { width: 6px; height: 6px; background: #2dd4bf; border-radius: 50%; margin-top: 2px; }
+        .calendar-day.selected .ride-dot { background: white; }
+
         .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
         @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
-        .info-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; }
+        @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        .info-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; cursor: pointer; }
+        .info-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
         .mini-flip-container { perspective: 600px; height: 140px; }
         .mini-flip-card { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; }
         .mini-flip-card.flipped { transform: rotateY(180deg); }
@@ -117,36 +127,78 @@
         .mini-flip-front { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; transform: rotateY(0deg); }
         .mini-flip-back { background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%); color: #0f172a; transform: rotateY(180deg); }
         .mini-flip-front .value, .mini-flip-back .value { font-size: 1.8rem; font-weight: 700; margin: 8px 0; }
+        .mini-flip-front .label, .mini-flip-back .label { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
         .flip-hint { font-size: 0.6rem; margin-top: 8px; opacity: 0.6; }
+
         .stat-card-simple { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 16px; padding: 16px; height: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .stat-card-simple .value { font-size: 1.8rem; font-weight: 700; margin: 8px 0; }
+        .stat-card-simple .label { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card-simple .progress { font-size: 0.7rem; margin-top: 8px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 20px; }
+
         .planning-container { perspective: 1000px; margin-top: 20px; }
         .flip-card { background-color: transparent; width: 100%; height: 400px; position: relative; }
         .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
         .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
         .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; overflow-y: auto; }
-        .flip-card-front { background: white; transform: rotateY(0deg); }
-        .flip-card-back { background: #f8fafc; transform: rotateY(180deg); }
+        .flip-card-front { background: white; transform: rotateY(0deg); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .flip-card-back { background: #f8fafc; transform: rotateY(180deg); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .flip-header { background: #0f172a; color: white; padding: 15px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .flip-btn { background: #2dd4bf; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+        .flip-header h3 { margin: 0; font-size: 1rem; }
+        .flip-btn { background: #2dd4bf; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: 500; }
+        .flip-btn:hover { background: #14b8a6; }
         .planning-list { padding: 16px; }
         .planning-item { background: #f1f5f9; border-radius: 12px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #2dd4bf; }
-        .planning-time { font-weight: 700; }
+        .planning-time { font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+        .planning-ride { font-size: 0.85rem; color: #475569; }
+        .planning-driver { font-size: 0.75rem; color: #2dd4bf; margin-top: 5px; }
         .empty-planning { text-align: center; padding: 40px; color: #94a3b8; }
+        .current-time-bar { background: #f1f5f9; padding: 8px 16px; border-radius: 40px; margin-bottom: 16px; display: inline-block; font-size: 0.8rem; }
+
+        /* FINANCIEEL - EXTRA STIJLEN */
         .finance-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
         .date-range-picker { display: flex; gap: 12px; align-items: center; background: white; padding: 8px 16px; border-radius: 48px; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        .date-range-picker input { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 24px; font-family: 'Inter', sans-serif; }
+        .comparison-card { background: white; border-radius: 16px; padding: 20px; margin-top: 20px; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; }
+        .comparison-item { text-align: center; padding: 16px; background: #f8fafc; border-radius: 12px; }
+        .comparison-item .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
+        .comparison-item .value { font-size: 1.5rem; font-weight: 700; margin: 8px 0; }
+        .comparison-item .trend-up { color: #10b981; }
+        .comparison-item .trend-down { color: #ef4444; }
         .chart-container { background: white; border-radius: 16px; padding: 20px; margin-top: 24px; }
         canvas { max-height: 300px; width: 100% !important; }
         .export-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
+        .export-btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
+        .export-csv { background: #10b981; color: white; }
+        .export-json { background: #3b82f6; color: white; }
+        .export-pdf { background: #ef4444; color: white; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 1000px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+        .kpi-card { background: white; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .kpi-card .icon { font-size: 2rem; margin-bottom: 8px; }
+        .kpi-card .value { font-size: 1.8rem; font-weight: 700; }
+        .kpi-card .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; margin-top: 8px; }
+        .kpi-card .trend { font-size: 0.7rem; margin-top: 4px; }
+        .trend-up { color: #10b981; }
+        .trend-down { color: #ef4444; }
         .wiki-container { background: white; border-radius: 16px; padding: 24px; }
-        .loading { text-align: center; padding: 40px; color: #64748b; }
-        .no-results { text-align: center; padding: 20px; color: #94a3b8; }
-        @media (max-width: 768px) { .sidebar { width: 220px; } .content { padding: 16px; } }
+        .wiki-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #2dd4bf; }
+        .wiki-header i { font-size: 2.5rem; color: #2dd4bf; }
+        .wiki-header h2 { font-size: 1.5rem; font-weight: 600; }
+        .wiki-section { margin-bottom: 24px; }
+        .wiki-section h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; color: #0f172a; }
+        .wiki-tip { background: #f0fdf4; border-left: 4px solid #2dd4bf; padding: 12px 16px; border-radius: 8px; margin-top: 16px; }
+        .wiki-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .wiki-table th, .wiki-table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .wiki-table th { background: #f8fafc; font-weight: 600; }
+
+        @media (max-width: 768px) { .sidebar { width: 220px; } .content { padding: 16px; } .flip-card { height: 500px; } }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <div class="logo"><i class="fas fa-truck"></i> Fleet Connect<br><small>Supabase Cloud</small></div>
+        <div class="logo"><i class="fas fa-truck"></i> Fleet Connect<br><small>5 Boekingsplatforms</small></div>
         <div class="nav-menu">
             <div class="nav-section"><div class="nav-section-title">📋 BOEKINGEN</div>
                 <div class="nav-item" data-tab="neworders" onclick="switchTab('neworders')"><i class="fas fa-clipboard-list"></i> New Orders</div>
@@ -164,9 +216,6 @@
             <div class="nav-section"><div class="nav-section-title">ℹ️ INFORMATIE</div>
                 <div class="nav-item" data-tab="wiki" onclick="switchTab('wiki')"><i class="fas fa-robot"></i> Wiki Agent</div>
             </div>
-            <div class="nav-section">
-                <button class="reset-data-btn" onclick="resetToDemoData()"><i class="fas fa-undo-alt"></i> Reset naar demo (Supabase)</button>
-            </div>
         </div>
     </div>
     <div class="main">
@@ -177,346 +226,1424 @@
                 <button class="download-btn" onclick="downloadJSON()"><i class="fas fa-code"></i> JSON</button>
             </div>
         </div>
-        <div class="content" id="contentArea"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Gegevens laden uit Supabase...</div></div>
+        <div class="content" id="contentArea"></div>
     </div>
 
-    <div id="bookingModal" class="modal"><div class="modal-content"><div class="fiche-header"><h3><i class="fas fa-file-invoice"></i> Boekingsfiche</h3><button class="close-modal" onclick="closeModal()">&times;</button></div><div class="fiche-body" id="ficheBody"></div></div></div>
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="fiche-header"><h3><i class="fas fa-file-invoice"></i> Boekingsfiche</h3><button class="close-modal" onclick="closeModal()">&times;</button></div>
+            <div class="fiche-body" id="ficheBody"></div>
+        </div>
+    </div>
 
     <script>
-        // ==================== SUPABASE CONFIG ====================
+        // ============================================
+        // 0. SUPABASE CONFIGURATIE
+        // ============================================
         const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5hdl73a9-jNd9n3lnsYVyQ_dMYgiSLA';
-        let supabase = null;
-        let useSupabase = true;  // valt terug naar localStorage bij fouten
+        let supabaseClient = null;
+        let supabaseConnected = false;
 
-        // ===== NIEUW: sendToSupabase functie (vervangt de bestaande) =====
-        async function sendToSupabase(record, paymentMethod) {
-            console.log('📦 Verzenden naar Supabase:', record);
-
+        async function initSupabase() {
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify(record)
-                });
-
-                if (!response.ok) {
-                    // Probeer foutmelding te lezen als tekst
-                    const errorText = await response.text();
-                    console.error('❌ Supabase fout response:', errorText);
-                    throw new Error(`HTTP ${response.status}: ${errorText || 'Geen verdere details'}`);
-                }
-
-                // Controleer of er een body is voordat we json() proberen
-                const contentType = response.headers.get('content-type');
-                let data = null;
-                if (contentType && contentType.includes('application/json')) {
-                    data = await response.json();
-                    console.log('✅ Supabase response:', data);
+                const { createClient } = supabaseJs;
+                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await supabaseClient.from('bookings').select('count', { count: 'exact', head: true });
+                if (!error) {
+                    supabaseConnected = true;
+                    console.log('Supabase connected successfully');
                 } else {
-                    console.log('✅ Supabase insert geslaagd (geen JSON body)');
+                    supabaseConnected = false;
                 }
-
-                alert(`✅ Boeking succesvol opgeslagen!\n\nID: ${record.id}\nStatus: pending`);
-
-                // Ververs admin paneel als actief
-                if (document.getElementById('tab-admin')?.classList.contains('active')) {
-                    loadAdminOrders();
-                }
-                return true;
-
-            } catch (error) {
-                console.error('❌ Supabase fout:', error);
-                alert(`❌ Fout bij opslaan: ${error.message}\n\nControleer:\n- Supabase URL en Anon Key\n- Tabel 'bookings' bestaat\n- Kolom 'id' is van type TEXT\n- RLS policies staan INSERT toe`);
-                return false;
+            } catch (e) {
+                supabaseConnected = false;
+                console.error('Failed to initialize Supabase:', e);
             }
         }
 
-        async function loadFromSupabase() {
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings?select=*`, {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-
-                rawNewOrders = data.filter(b => b.status === 'pending');
-                rawConfirmedOrders = data.filter(b => b.status === 'confirmed');
-
-                filterAndSortData();
-                updateAgendaData();
-            } catch (error) {
-                console.error('Supabase load error:', error);
-            }
+        async function laadPendingOrders() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from('bookings')
+                .select('*')
+                .eq('status', 'pending');
+            if (!error && data) rawNewOrders = data;
         }
 
-        // ==================== GLOBALE DATA (in-memory cache) ====================
-        let rawNewOrders = [];      // status = 'pending'
-        let rawConfirmedOrders = []; // status = 'confirmed'
-        let driversList = [];
-        let onderaannemersList = [];
-        let allRides = [];
-        let selectedDate = null, currentMonth = null, isFlipped = false;
-        let flipStates = { omzet: false, cash: false, orders: false };
-        let newOrders = [], ordersList = [], historyOrders = [];
-        let currentTab = 'agenda';
-        let currentSelectedOrder = null, selectedDriverId = null;
-        let financePeriod = 'month', customStartDate = null, customEndDate = null, financeChart = null;
+        // ============================================
+        // 1. CONFIGURATIE & HUIDIGE TIJD
+        // ============================================
+        const NOW = new Date(2026, 3, 26, 9, 18);
 
-        // ==================== HULPFUNCTIES ====================
-        function getCurrentNOW() { return new Date(); }
+        function formatCurrentTime() {
+            const dagen = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+            const dag = dagen[NOW.getDay()];
+            const datum = `${NOW.getDate().toString().padStart(2,'0')}-${(NOW.getMonth()+1).toString().padStart(2,'0')}-${NOW.getFullYear()}`;
+            const tijd = `${NOW.getHours().toString().padStart(2,'0')}:${NOW.getMinutes().toString().padStart(2,'0')}`;
+            return `${dag} ${datum} om ${tijd} uur`;
+        }
+
+        // ============================================
+        // 2. DATUM & TIJD HELPER FUNCTIES
+        // ============================================
         function parseDateTime(dateStr, timeStr) {
             const parts = dateStr.split('-');
-            const timeParts = timeStr ? timeStr.split(':') : ['00','00'];
-            return new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]), parseInt(timeParts[0]), parseInt(timeParts[1]));
+            const timeParts = timeStr ? timeStr.split(':') : ['00', '00'];
+            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]), parseInt(timeParts[0]), parseInt(timeParts[1]));
         }
+
         function isOrderInFuture(order) {
-            return parseDateTime(order.datetime, order.time) > getCurrentNOW();
+            const orderDateTime = parseDateTime(order.datetime, order.time);
+            return orderDateTime > NOW;
         }
+
+        // ============================================
+        // 3. RAW DATA (TESTDATA)
+        // ============================================
+        let rawNewOrders = [];
+
+        let rawConfirmedOrders = [
+            { id: "FX-20260420-001", template: "T1", datetime: "20-04-2026", time: "10:00", name: "Vroege Klant", email: "vroeg@example.com", phone: "+31 6 1111111", pickup: "Amsterdam", destination: "Utrecht", vehicle: "Sedan", payment: "Cash", amount: 65.00, status: "confirmed", extras: "Geen", assignedDriver: { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", vehicle: "Sedan", plate: "AB-123-CD" }, canceled: false, completed: true, onderaannemerId: null },
+            { id: "FX-20260421-002", template: "T1", datetime: "21-04-2026", time: "14:30", name: "Middag Klant", email: "middag@example.com", phone: "+31 6 2222222", pickup: "Rotterdam", destination: "Den Haag", vehicle: "Executive", payment: "Factuur", amount: 120.00, status: "confirmed", extras: "WiFi", assignedDriver: { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", vehicle: "S-Class", plate: "XY-456-ZT" }, canceled: false, completed: true, onderaannemerId: null },
+            { id: "FX-20260422-003", template: "T1", datetime: "22-04-2026", time: "09:00", name: "Ochtend Klant", email: "ochtend@example.com", phone: "+31 6 3333333", pickup: "Utrecht", destination: "Amsterdam", vehicle: "Economy", payment: "Cash", amount: 55.00, status: "confirmed", extras: "Geen", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
+            { id: "LM-20260423-004", template: "T2", datetime: "23-04-2026", time: "19:00", name: "Avond Klant", email: "avond@example.com", phone: "+31 6 4444444", pickup: "Schiphol", destination: "Amsterdam", vehicle: "S-Class", payment: "Factuur", amount: 350.00, status: "confirmed", extras: "Champagne", assignedDriver: { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", vehicle: "Van", plate: "NL-789-TR" }, canceled: false, completed: true, onderaannemerId: null },
+            { id: "FD-20260424-005", template: "T3", datetime: "24-04-2026", time: "11:30", name: "Budget Klant", email: "budget@example.com", phone: "+31 6 5555555", pickup: "Leiden", destination: "Den Haag", vehicle: "Economy", payment: "Cash", amount: 35.00, status: "confirmed", extras: "Geen", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
+            { id: "BS-20260425-006", template: "T4", datetime: "25-04-2026", time: "13:00", name: "Zakelijke Klant", email: "zakelijk@company.nl", phone: "+31 20 6666666", pickup: "Amsterdam", destination: "Rotterdam", vehicle: "Business Sedan", payment: "Factuur", amount: 210.00, status: "confirmed", extras: "WiFi, Koffie", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
+            { id: "AP-20260425-007", template: "T5", datetime: "25-04-2026", time: "07:00", name: "Vliegveld Klant", email: "vlieg@example.com", phone: "+31 6 7777777", pickup: "Rotterdam", destination: "Schiphol", vehicle: "Airport Van", payment: "Cash", amount: 85.00, status: "confirmed", extras: "Bagage", assignedDriver: { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", vehicle: "Business Sedan", plate: "AM-001-BC" }, canceled: false, completed: true, onderaannemerId: null },
+            { id: "FX-20260426-008", template: "T1", datetime: "26-04-2026", time: "06:00", name: "Vroege Rit", email: "vroeg@example.com", phone: "+31 6 8888888", pickup: "Amsterdam", destination: "Utrecht", vehicle: "Sedan", payment: "Cash", amount: 75.00, status: "confirmed", extras: "Geen", assignedDriver: { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", vehicle: "Sedan", plate: "AB-123-CD" }, canceled: false, completed: false, onderaannemerId: null },
+            { id: "LM-20260426-009", template: "T2", datetime: "26-04-2026", time: "11:00", name: "Limo Rit", email: "limo@example.com", phone: "+31 6 9999999", pickup: "Schiphol", destination: "Amsterdam", vehicle: "S-Class", payment: "Factuur", amount: 320.00, status: "confirmed", extras: "Champagne", assignedDriver: { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", vehicle: "S-Class", plate: "XY-456-ZT" }, canceled: false, completed: false, onderaannemerId: null },
+            { id: "BS-20260426-010", template: "T4", datetime: "26-04-2026", time: "15:00", name: "Zakelijke Rit", email: "zakelijk@company.nl", phone: "+31 20 1234567", pickup: "Utrecht", destination: "Amsterdam", vehicle: "Business Sedan", payment: "Factuur", amount: 185.00, status: "confirmed", extras: "WiFi", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null },
+            { id: "AP-20260427-011", template: "T5", datetime: "27-04-2026", time: "08:00", name: "Morgen Vlieg", email: "morgen@example.com", phone: "+31 6 1112223", pickup: "Amsterdam", destination: "Schiphol", vehicle: "Airport Van", payment: "Cash", amount: 65.00, status: "confirmed", extras: "Bagage", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null },
+            { id: "FX-20260428-012", template: "T1", datetime: "28-04-2026", time: "13:00", name: "Volgende Week", email: "week@example.com", phone: "+31 6 4445556", pickup: "Den Haag", destination: "Rotterdam", vehicle: "Executive", payment: "Factuur", amount: 95.00, status: "confirmed", extras: "WiFi", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null }
+        ];
+
+        // ============================================
+        // 4. DRIVERS & ONDERAANNEMERS DATA
+        // ============================================
+        let onderaannemersList = [
+            { id: 1, name: "Transport Solutions", contact: "Jan Jansen", phone: "+31 10 1234567", email: "info@transport.nl", services: "Koerier, Pakket", drivers: [] },
+            { id: 2, name: "City Logistics", contact: "Peter de Boer", phone: "+31 20 7654321", email: "info@citylogistics.nl", services: "Stadsdistributie", drivers: [] }
+        ];
+
+        let driversList = [
+            { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", email: "mark@fleet.nl", license: "B", vehicle: "Sedan", plate: "AB-123-CD", onderaannemerId: 1, onderaannemerNaam: "Transport Solutions" },
+            { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", email: "lisa@fleet.nl", license: "B, C", vehicle: "S-Class", plate: "XY-456-ZT", onderaannemerId: 1, onderaannemerNaam: "Transport Solutions" },
+            { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", email: "thomas@fleet.nl", license: "C", vehicle: "Van", plate: "NL-789-TR", onderaannemerId: 2, onderaannemerNaam: "City Logistics" },
+            { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", email: "ahmed@fleet.nl", license: "B", vehicle: "Business Sedan", plate: "AM-001-BC", onderaannemerId: null, onderaannemerNaam: null }
+        ];
+
+        // Update onderaannemer drivers arrays
+        onderaannemersList.forEach(oa => {
+            oa.drivers = driversList.filter(d => d.onderaannemerId === oa.id);
+        });
+
+        // ============================================
+        // 5. GLOBALE VARIABELEN
+        // ============================================
+        let allRides = [];
+        let selectedDate = new Date(NOW);
+        let isFlipped = false;
+        let currentMonth = new Date(NOW);
+        let flipStates = { omzet: false, cash: false, orders: false };
+        let newOrders = [];
+        let ordersList = [];
+        let historyOrders = [];
+        let currentTab = 'agenda';
+        let currentSelectedOrder = null;
+        let selectedDriverId = null;
+
+        // Financiële filters
+        let financePeriod = 'month';
+        let customStartDate = null;
+        let customEndDate = null;
+        let financeChart = null;
+
+        // ============================================
+        // 6. AGENDA DATA FUNCTIES
+        // ============================================
         function updateAgendaData() {
-            allRides = rawConfirmedOrders.map(order => ({
-                id: order.id, date: order.datetime, time: order.time, name: order.name,
-                pickup: order.pickup, destination: order.destination, vehicle: order.vehicle,
-                driver: order.assignedDriver, amount: order.amount, template: order.template,
-                completed: order.completed || false, canceled: order.canceled || false, payment: order.payment
-            }));
+            allRides = [];
+            rawConfirmedOrders.forEach(order => {
+                allRides.push({
+                    id: order.id, date: order.datetime, time: order.time, name: order.name,
+                    pickup: order.pickup, destination: order.destination, vehicle: order.vehicle,
+                    driver: order.assignedDriver, amount: order.amount, template: order.template,
+                    completed: order.completed || false, canceled: order.canceled || false, payment: order.payment
+                });
+            });
         }
+
+        function getRidesByDate(dateStr) {
+            return allRides.filter(ride => ride.date === dateStr);
+        }
+
+        // ============================================
+        // 7. DATA SORTERING
+        // ============================================
         function filterAndSortData() {
-            const now = getCurrentNOW();
-            newOrders = rawNewOrders.filter(o => isOrderInFuture(o));
+            newOrders = rawNewOrders.filter(order => isOrderInFuture(order));
             ordersList = [];
             historyOrders = [];
+
             rawConfirmedOrders.forEach(order => {
-                if (isOrderInFuture(order)) ordersList.push({...order});
-                else historyOrders.push({...order});
-            });
-            ordersList.sort((a,b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
-            historyOrders.sort((a,b) => parseDateTime(b.datetime, b.time) - parseDateTime(a.datetime, a.time));
-        }
-
-        // ==================== SUPABASE CRUD ====================
-        async function loadAllFromSupabase() {
-            if (!supabase) return false;
-            try {
-                // Laad alle boekingen
-                const { data: bookings, error: bErr } = await supabase.from('bookings').select('*');
-                if (bErr) throw bErr;
-                const { data: drivers, error: dErr } = await supabase.from('drivers').select('*');
-                if (dErr) throw dErr;
-                const { data: subs, error: sErr } = await supabase.from('subcontractors').select('*');
-                if (sErr) throw sErr;
-
-                rawNewOrders = bookings.filter(b => b.status === 'pending');
-                rawConfirmedOrders = bookings.filter(b => b.status === 'confirmed');
-                driversList = drivers || [];
-                onderaannemersList = (subs || []).map(s => ({ ...s, drivers: driversList.filter(d => d.onderaannemer_id === s.id) }));
-                return true;
-            } catch(e) {
-                console.warn('Supabase load error, falling back to localStorage', e);
-                return false;
-            }
-        }
-
-        async function saveBookingToSupabase(booking, isNew = false) {
-            if (!supabase) return false;
-            try {
-                if (isNew) {
-                    const { error } = await supabase.from('bookings').insert([booking]);
-                    if (error) throw error;
+                if (isOrderInFuture(order)) {
+                    ordersList.push({ ...order });
                 } else {
-                    const { error } = await supabase.from('bookings').update(booking).eq('id', booking.id);
-                    if (error) throw error;
+                    historyOrders.push({ ...order });
                 }
-                return true;
-            } catch(e) { console.error('Supabase save error', e); return false; }
-        }
-
-        async function deleteBookingFromSupabase(bookingId) {
-            if (!supabase) return false;
-            try {
-                const { error } = await supabase.from('bookings').delete().eq('id', bookingId);
-                if (error) throw error;
-                return true;
-            } catch(e) { return false; }
-        }
-
-        async function saveDriverToSupabase(driver, isNew = false) {
-            if (!supabase) return false;
-            try {
-                if (isNew) await supabase.from('drivers').insert([driver]);
-                else await supabase.from('drivers').update(driver).eq('id', driver.id);
-                return true;
-            } catch(e) { return false; }
-        }
-
-        async function saveSubcontractorToSupabase(sub, isNew = false) {
-            if (!supabase) return false;
-            try {
-                if (isNew) await supabase.from('subcontractors').insert([sub]);
-                else await supabase.from('subcontractors').update(sub).eq('id', sub.id);
-                return true;
-            } catch(e) { return false; }
-        }
-
-        async function deleteSubcontractorFromSupabase(id) {
-            if (!supabase) return false;
-            try {
-                await supabase.from('subcontractors').delete().eq('id', id);
-                return true;
-            } catch(e) { return false; }
-        }
-
-        // ==================== PERSISTENTIE (Supabase eerst, fallback localStorage) ====================
-        async function persistAll() {
-            if (useSupabase && supabase) {
-                // Voor elk gewijzigd item moeten we updates doen, maar we doen nu een bulk sync
-                // Eenvoudig: alle huidige data naar Supabase sturen (upsert)
-                for (let b of [...rawNewOrders, ...rawConfirmedOrders]) await saveBookingToSupabase(b);
-                for (let d of driversList) await saveDriverToSupabase(d);
-                for (let s of onderaannemersList) await saveSubcontractorToSupabase(s);
-            } else {
-                // Fallback naar localStorage
-                localStorage.setItem('fleet_rawNewOrders', JSON.stringify(rawNewOrders));
-                localStorage.setItem('fleet_rawConfirmedOrders', JSON.stringify(rawConfirmedOrders));
-                localStorage.setItem('fleet_driversList', JSON.stringify(driversList));
-                localStorage.setItem('fleet_onderaannemersList', JSON.stringify(onderaannemersList));
-            }
-        }
-
-        async function loadAllData() {
-            if (supabase) {
-                const ok = await loadAllFromSupabase();
-                if (!ok) {
-                    useSupabase = false;
-                    loadFromLocalStorageFallback();
-                }
-            } else {
-                loadFromLocalStorageFallback();
-            }
-            // Zorg dat onderaannemer.drivers up-to-date is
-            onderaannemersList.forEach(oa => {
-                oa.drivers = driversList.filter(d => d.onderaannemer_id === oa.id);
             });
-            filterAndSortData();
-            updateAgendaData();
+
+            ordersList.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
+            historyOrders.sort((a, b) => parseDateTime(b.datetime, b.time) - parseDateTime(a.datetime, a.time));
         }
 
-        function loadFromLocalStorageFallback() {
-            const storedNew = localStorage.getItem('fleet_rawNewOrders');
-            const storedConfirmed = localStorage.getItem('fleet_rawConfirmedOrders');
-            const storedDrivers = localStorage.getItem('fleet_driversList');
-            const storedSubs = localStorage.getItem('fleet_onderaannemersList');
-            rawNewOrders = storedNew ? JSON.parse(storedNew) : getDefaultNewOrders();
-            rawConfirmedOrders = storedConfirmed ? JSON.parse(storedConfirmed) : getDefaultConfirmedOrders();
-            driversList = storedDrivers ? JSON.parse(storedDrivers) : getDefaultDrivers();
-            onderaannemersList = storedSubs ? JSON.parse(storedSubs) : getDefaultSubcontractors();
+        // ============================================
+        // 8. AGENDA DASHBOARD STATISTIEKEN
+        // ============================================
+        function getTodayStats() {
+            const todayStr = `${NOW.getDate().toString().padStart(2,'0')}-${(NOW.getMonth()+1).toString().padStart(2,'0')}-${NOW.getFullYear()}`;
+            const todayRides = getRidesByDate(todayStr);
+            const todayCompleted = todayRides.filter(r => r.completed === true);
+            const todayCanceled = todayRides.filter(r => r.canceled === true);
+            const todayCash = todayRides.filter(r => r.payment === 'Cash').reduce((sum, r) => sum + r.amount, 0);
+            const todayFactuur = todayRides.filter(r => r.payment === 'Factuur').reduce((sum, r) => sum + r.amount, 0);
+            const todayTotal = todayCash + todayFactuur;
+            const commission = todayTotal * 0.10;
+
+            const nowTime = `${NOW.getHours().toString().padStart(2,'0')}:${NOW.getMinutes().toString().padStart(2,'0')}`;
+            const futureRidesToday = todayRides.filter(r => {
+                if (r.completed || r.canceled) return false;
+                return r.time > nowTime;
+            });
+
+            return {
+                total: todayTotal,
+                cash: todayCash,
+                factuur: todayFactuur,
+                commission: commission,
+                completed: todayCompleted.length,
+                canceled: todayCanceled.length,
+                futureRides: futureRidesToday.length,
+                totalRides: todayRides.length
+            };
         }
 
-        // Default data (vervangen door lege arrays voor Supabase integratie)
-        function getDefaultNewOrders() { return []; }
-        function getDefaultConfirmedOrders() { return []; }
-        function getDefaultDrivers() { return [ { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", email: "mark@fleet.nl", license: "B", vehicle: "Sedan", plate: "AB-123-CD", onderaannemer_id: 1, onderaannemer_naam: "Transport Solutions" }, { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", email: "lisa@fleet.nl", license: "B, C", vehicle: "S-Class", plate: "XY-456-ZT", onderaannemer_id: 1, onderaannemer_naam: "Transport Solutions" }, { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", email: "thomas@fleet.nl", license: "C", vehicle: "Van", plate: "NL-789-TR", onderaannemer_id: 2, onderaannemer_naam: "City Logistics" }, { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", email: "ahmed@fleet.nl", license: "B", vehicle: "Business Sedan", plate: "AM-001-BC", onderaannemer_id: null, onderaannemer_naam: null } ]; }
-        function getDefaultSubcontractors() { return [ { id: 1, name: "Transport Solutions", contact: "Jan Jansen", phone: "+31 10 1234567", email: "info@transport.nl", services: "Koerier, Pakket", drivers: [] }, { id: 2, name: "City Logistics", contact: "Peter de Boer", phone: "+31 20 7654321", email: "info@citylogistics.nl", services: "Stadsdistributie", drivers: [] } ]; }
+        function renderDashboardGrid() {
+            const stats = getTodayStats();
+            return `
+                <div class="dashboard-grid">
+                    <div class="info-card" onclick="toggleFlipCard('omzet')">
+                        <div class="mini-flip-container">
+                            <div class="mini-flip-card ${flipStates.omzet ? 'flipped' : ''}">
+                                <div class="mini-flip-front">
+                                    <i class="fas fa-euro-sign" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                    <div class="value">€ ${stats.total.toFixed(2)}</div>
+                                    <div class="label">Dagelijkse Omzet</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor commissie</div>
+                                </div>
+                                <div class="mini-flip-back">
+                                    <i class="fas fa-percent" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                    <div class="value">€ ${stats.commission.toFixed(2)}</div>
+                                    <div class="label">10% Commissie</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-card" onclick="toggleFlipCard('cash')">
+                        <div class="mini-flip-container">
+                            <div class="mini-flip-card ${flipStates.cash ? 'flipped' : ''}">
+                                <div class="mini-flip-front">
+                                    <i class="fas fa-money-bill-wave" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                    <div class="value">€ ${stats.cash.toFixed(2)}</div>
+                                    <div class="label">Cash Betalingen</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor factuur</div>
+                                </div>
+                                <div class="mini-flip-back">
+                                    <i class="fas fa-file-invoice" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                    <div class="value">€ ${stats.factuur.toFixed(2)}</div>
+                                    <div class="label">Factuur Betalingen</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-card" onclick="toggleFlipCard('orders')">
+                        <div class="mini-flip-container">
+                            <div class="mini-flip-card ${flipStates.orders ? 'flipped' : ''}">
+                                <div class="mini-flip-front">
+                                    <i class="fas fa-check-circle" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                    <div class="value">${stats.completed}</div>
+                                    <div class="label">Uitgevoerde Orders</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor annuleringen</div>
+                                </div>
+                                <div class="mini-flip-back">
+                                    <i class="fas fa-ban" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                                    <div class="value">${stats.canceled}</div>
+                                    <div class="label">Geannuleerde Ritten</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="stat-card-simple">
+                            <i class="fas fa-clock" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                            <div class="value">${stats.futureRides}</div>
+                            <div class="label">Toekomstige ritten vandaag</div>
+                            <div class="progress">Nog te rijden</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-        async function resetToDemoData() {
-            if (confirm("Reset alle data naar demo? Dit overschrijft ook Supabase.")) {
-                rawNewOrders = getDefaultNewOrders();
-                rawConfirmedOrders = getDefaultConfirmedOrders();
-                driversList = getDefaultDrivers();
-                onderaannemersList = getDefaultSubcontractors();
-                onderaannemersList.forEach(oa => oa.drivers = driversList.filter(d => d.onderaannemer_id === oa.id));
-                await persistAll();
-                await loadAllData();
-                if (currentTab === 'agenda') refreshAgenda();
-                else if (currentTab === 'neworders') renderNewOrders();
-                else if (currentTab === 'orders') renderOrders();
-                else if (currentTab === 'history') renderHistory();
-                else if (currentTab === 'drivers') renderDrivers();
-                else if (currentTab === 'onderaannemers') renderOnderaannemers();
-                else if (currentTab === 'financieel') renderFinance();
-                alert("Data gereset!");
+        function toggleFlipCard(cardName) {
+            flipStates[cardName] = !flipStates[cardName];
+            refreshAgenda();
+        }
+
+        // ============================================
+        // 9. AGENDA KALENDER FUNCTIES
+        // ============================================
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+
+            const firstDayOfMonth = new Date(year, month, 1);
+            const startDay = firstDayOfMonth.getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+
+            let calendarHTML = `
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <h2>${firstDayOfMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })}</h2>
+                        <div class="calendar-nav">
+                            <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <button onclick="goToToday()">Vandaag</button>
+                            <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Ma</div><div>Di</div><div>Wo</div><div>Do</div><div>Vr</div><div>Za</div><div>Zo</div>
+                    </div>
+                    <div class="calendar-days">
+            `;
+
+            let adjustedStartDay = startDay === 0 ? 6 : startDay - 1;
+
+            for (let i = adjustedStartDay - 1; i >= 0; i--) {
+                const day = prevMonthDays - i;
+                const dateStr = `${day.toString().padStart(2,'0')}-${(month).toString().padStart(2,'0')}-${year}`;
+                calendarHTML += `<div class="calendar-day other-month" data-date="${dateStr}" onclick="selectDateByString('${dateStr}')">${day}</div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${day.toString().padStart(2,'0')}-${(month+1).toString().padStart(2,'0')}-${year}`;
+                const hasRides = getRidesByDate(dateStr).length > 0;
+                const isToday = (day === NOW.getDate() && month === NOW.getMonth() && year === NOW.getFullYear());
+                const isSelected = (selectedDate && day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear());
+
+                let classes = 'calendar-day';
+                if (isToday) classes += ' today';
+                if (isSelected) classes += ' selected';
+                if (hasRides) classes += ' has-rides';
+
+                calendarHTML += `<div class="${classes}" data-date="${dateStr}" onclick="selectDateByString('${dateStr}')">
+                    ${day}
+                    ${hasRides ? '<div class="ride-dot"></div>' : ''}
+                </div>`;
+            }
+
+            const remainingDays = 42 - (adjustedStartDay + daysInMonth);
+            for (let day = 1; day <= remainingDays; day++) {
+                const dateStr = `${day.toString().padStart(2,'0')}-${(month+2).toString().padStart(2,'0')}-${year}`;
+                calendarHTML += `<div class="calendar-day other-month" data-date="${dateStr}" onclick="selectDateByString('${dateStr}')">${day}</div>`;
+            }
+
+            calendarHTML += `</div></div>`;
+            return calendarHTML;
+        }
+
+        function renderPlanning() {
+            const selectedDateStr = `${selectedDate.getDate().toString().padStart(2,'0')}-${(selectedDate.getMonth()+1).toString().padStart(2,'0')}-${selectedDate.getFullYear()}`;
+            const rides = getRidesByDate(selectedDateStr);
+            const formattedDate = selectedDate.toLocaleDateString('nl-NL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            let ridesHtml = '';
+            if (rides.length === 0) {
+                ridesHtml = '<div class="empty-planning"><i class="fas fa-calendar-day"></i> Geen ritten op deze dag</div>';
+            } else {
+                rides.sort((a, b) => a.time.localeCompare(b.time));
+                ridesHtml = rides.map(ride => `
+                    <div class="planning-item">
+                        <div class="planning-time"><i class="fas fa-clock"></i> ${ride.time} uur ${ride.completed ? '<span style="color:#10b981;">✓ Uitgevoerd</span>' : (ride.canceled ? '<span style="color:#ef4444;">✗ Geannuleerd</span>' : '')}</div>
+                        <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
+                        <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
+                        ${ride.driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.driver.name}</div>` : '<div class="planning-driver"><i class="fas fa-user-clock"></i> Nog geen chauffeur toegewezen</div>'}
+                    </div>
+                `).join('');
+            }
+
+            // Toekomstige ritten (alle toekomstige data)
+            const futureRidesAll = allRides.filter(ride => {
+                const rideDateTime = parseDateTime(ride.date, ride.time);
+                return rideDateTime > NOW && !ride.completed && !ride.canceled;
+            });
+
+            let futureHtml = '';
+            if (futureRidesAll.length === 0) {
+                futureHtml = '<div class="empty-planning"><i class="fas fa-calendar-plus"></i> Geen toekomstige ritten</div>';
+            } else {
+                futureRidesAll.sort((a, b) => {
+                    const dateA = parseDateTime(a.date, a.time);
+                    const dateB = parseDateTime(b.date, b.time);
+                    return dateA - dateB;
+                });
+                futureHtml = futureRidesAll.map(ride => `
+                    <div class="planning-item">
+                        <div class="planning-time"><i class="fas fa-calendar-alt"></i> ${ride.date} om ${ride.time} uur</div>
+                        <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
+                        <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
+                        ${ride.driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.driver.name}</div>` : '<div class="planning-driver"><i class="fas fa-user-clock"></i> Nog geen chauffeur</div>'}
+                    </div>
+                `).join('');
+            }
+
+            return `
+                <div class="planning-container">
+                    <div class="flip-card ${isFlipped ? 'flipped' : ''}" id="flipCard">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="flip-header">
+                                    <h3><i class="fas fa-calendar-day"></i> ${formattedDate}</h3>
+                                    <button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Toekomst</button>
+                                </div>
+                                <div class="planning-list">
+                                    ${ridesHtml}
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="flip-header">
+                                    <h3><i class="fas fa-calendar-week"></i> Toekomstige ritten</h3>
+                                    <button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Terug</button>
+                                </div>
+                                <div class="planning-list">
+                                    ${futureHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function refreshAgenda() {
+            const contentArea = document.getElementById('contentArea');
+            if (currentTab === 'agenda') {
+                contentArea.innerHTML = `
+                    ${renderDashboardGrid()}
+                    ${renderCalendar()}
+                    ${renderPlanning()}
+                `;
             }
         }
 
-        // ==================== ORDER ACTIES (met Supabase sync) ====================
-        async function confirmOrder(orderId) {
-            const idx = rawNewOrders.findIndex(o => o.id === orderId);
-            if (idx !== -1) {
-                const confirmed = { ...rawNewOrders[idx], status: "confirmed", completed: false, canceled: false };
-                rawNewOrders.splice(idx, 1);
-                rawConfirmedOrders.push(confirmed);
-                await persistAll();
-                await loadAllData();
+        function selectDateByString(dateStr) {
+            const parts = dateStr.split('-');
+            selectedDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            isFlipped = false;
+            refreshAgenda();
+        }
+
+        function toggleFlip() {
+            isFlipped = !isFlipped;
+            refreshAgenda();
+        }
+
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            refreshAgenda();
+        }
+
+        function goToToday() {
+            currentMonth = new Date(NOW);
+            selectedDate = new Date(NOW);
+            isFlipped = false;
+            refreshAgenda();
+        }
+
+        // ============================================
+        // 10. FINANCIËLE BEREKENINGEN
+        // ============================================
+        function getDateRange() {
+            let startDate, endDate;
+            const today = new Date(NOW);
+
+            if (financePeriod === 'day') {
+                startDate = new Date(today);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(today);
+                endDate.setHours(23, 59, 59, 999);
+            } else if (financePeriod === 'week') {
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+                endDate.setHours(23, 59, 59, 999);
+            } else if (financePeriod === 'month') {
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                endDate.setHours(23, 59, 59, 999);
+            } else if (financePeriod === 'year') {
+                startDate = new Date(today.getFullYear(), 0, 1);
+                endDate = new Date(today.getFullYear(), 11, 31);
+                endDate.setHours(23, 59, 59, 999);
+            } else if (financePeriod === 'custom' && customStartDate && customEndDate) {
+                startDate = new Date(customStartDate);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(customEndDate);
+                endDate.setHours(23, 59, 59, 999);
+            }
+            return { startDate, endDate };
+        }
+
+        function getAllBookingsForFinance() {
+            return [...newOrders, ...ordersList, ...historyOrders];
+        }
+
+        function getBookingsInRange(startDate, endDate) {
+            return getAllBookingsForFinance().filter(booking => {
+                const bookingDate = parseDateTime(booking.datetime, "00:00");
+                return bookingDate >= startDate && bookingDate <= endDate;
+            });
+        }
+
+        function getPreviousPeriodData() {
+            const { startDate, endDate } = getDateRange();
+            const duration = endDate - startDate;
+            const prevStartDate = new Date(startDate - duration - 86400000);
+            const prevEndDate = new Date(startDate - 86400000);
+            const bookings = getBookingsInRange(prevStartDate, prevEndDate);
+            const total = bookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+            const cash = bookings.filter(b => b.payment === 'Cash').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const factuur = bookings.filter(b => b.payment === 'Factuur').reduce((sum, b) => sum + (b.amount || 0), 0);
+            return { total, cash, factuur, count: bookings.length };
+        }
+
+        function getFinanceStatistics() {
+            const { startDate, endDate } = getDateRange();
+            const bookings = getBookingsInRange(startDate, endDate);
+
+            const total = bookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+            const cash = bookings.filter(b => b.payment === 'Cash').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const factuur = bookings.filter(b => b.payment === 'Factuur').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const commission = total * 0.10;
+            const netRevenue = total - commission;
+
+            const byTemplate = { T1: 0, T2: 0, T3: 0, T4: 0, T5: 0 };
+            bookings.forEach(b => { if (byTemplate[b.template] !== undefined) byTemplate[b.template] += (b.amount || 0); });
+
+            const avgOrderValue = bookings.length > 0 ? total / bookings.length : 0;
+            const cashPercentage = total > 0 ? (cash / total) * 100 : 0;
+            const factuurPercentage = total > 0 ? (factuur / total) * 100 : 0;
+
+            return { total, cash, factuur, commission, netRevenue, byTemplate, avgOrderValue, cashPercentage, factuurPercentage, count: bookings.length };
+        }
+
+        function getChartData() {
+            const { startDate, endDate } = getDateRange();
+            const days = [];
+            const totals = [];
+            const cashData = [];
+            const factuurData = [];
+
+            let current = new Date(startDate);
+            while (current <= endDate) {
+                const dateStr = `${current.getDate().toString().padStart(2,'0')}-${(current.getMonth()+1).toString().padStart(2,'0')}-${current.getFullYear()}`;
+                const dayBookings = getAllBookingsForFinance().filter(b => b.datetime === dateStr);
+                const dayTotal = dayBookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+                const dayCash = dayBookings.filter(b => b.payment === 'Cash').reduce((sum, b) => sum + (b.amount || 0), 0);
+                const dayFactuur = dayBookings.filter(b => b.payment === 'Factuur').reduce((sum, b) => sum + (b.amount || 0), 0);
+
+                days.push(dateStr);
+                totals.push(dayTotal);
+                cashData.push(dayCash);
+                factuurData.push(dayFactuur);
+
+                current.setDate(current.getDate() + 1);
+            }
+
+            return { days, totals, cashData, factuurData };
+        }
+
+        // ============================================
+        // 11. ONDERAANNEMERS STATISTIEKEN
+        // ============================================
+        function getOnderaannemerStats() {
+            return onderaannemersList.map(oa => {
+                const oaDrivers = driversList.filter(d => d.onderaannemerId === oa.id);
+                const oaRides = allRides.filter(ride => {
+                    return ride.driver && oaDrivers.some(d => d.id === ride.driver.id);
+                });
+                const totalRevenue = oaRides.reduce((sum, r) => sum + (r.amount || 0), 0);
+                const rideCount = oaRides.length;
+                const cashRevenue = oaRides.filter(r => r.payment === 'Cash').reduce((sum, r) => sum + (r.amount || 0), 0);
+                const factuurRevenue = oaRides.filter(r => r.payment === 'Factuur').reduce((sum, r) => sum + (r.amount || 0), 0);
+                return { ...oa, driverCount: oaDrivers.length, totalRevenue, rideCount, cashRevenue, factuurRevenue };
+            });
+        }
+
+        // ============================================
+        // 12. FINANCIEEL RENDER FUNCTIES
+        // ============================================
+        function renderFinance() {
+            const stats = getFinanceStatistics();
+            const prevStats = getPreviousPeriodData();
+            const { days, totals, cashData, factuurData } = getChartData();
+            const { startDate, endDate } = getDateRange();
+            const onderaannemerStats = getOnderaannemerStats();
+
+            let allDriverRides = [];
+            driversList.forEach(driver => {
+                const driverRides = allRides.filter(ride => ride.driver && ride.driver.id === driver.id);
+                const totalRevenue = driverRides.reduce((sum, r) => sum + (r.amount || 0), 0);
+                const cashRevenue = driverRides.filter(r => r.payment === 'Cash').reduce((sum, r) => sum + (r.amount || 0), 0);
+                const factuurRevenue = driverRides.filter(r => r.payment === 'Factuur').reduce((sum, r) => sum + (r.amount || 0), 0);
+                allDriverRides.push({
+                    driverId: driver.id,
+                    driverName: driver.name,
+                    driverVehicle: driver.vehicle,
+                    driverPlate: driver.plate,
+                    onderaannemerId: driver.onderaannemerId,
+                    onderaannemerNaam: driver.onderaannemerNaam || 'Eigen chauffeur',
+                    rideCount: driverRides.length,
+                    totalRevenue: totalRevenue,
+                    cashRevenue: cashRevenue,
+                    factuurRevenue: factuurRevenue
+                });
+            });
+
+            const periodNames = { day: 'Vandaag', week: 'Deze Week', month: 'Deze Maand', year: 'Dit Jaar', custom: 'Aangepaste periode' };
+            const formatDate = (date) => date ? `${date.getDate().toString().padStart(2,'0')}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getFullYear()}` : '';
+
+            const totalChange = prevStats.total > 0 ? ((stats.total - prevStats.total) / prevStats.total * 100).toFixed(1) : 0;
+            const cashChange = prevStats.cash > 0 ? ((stats.cash - prevStats.cash) / prevStats.cash * 100).toFixed(1) : 0;
+            const countChange = prevStats.count > 0 ? ((stats.count - prevStats.count) / prevStats.count * 100).toFixed(1) : 0;
+
+            const html = `
+                <div class="finance-toolbar">
+                    <div class="period-buttons">
+                        <button class="period-btn ${financePeriod === 'day' ? 'active' : ''}" onclick="setFinancePeriod('day')">Dagelijks</button>
+                        <button class="period-btn ${financePeriod === 'week' ? 'active' : ''}" onclick="setFinancePeriod('week')">Wekelijks</button>
+                        <button class="period-btn ${financePeriod === 'month' ? 'active' : ''}" onclick="setFinancePeriod('month')">Maandelijks</button>
+                        <button class="period-btn ${financePeriod === 'year' ? 'active' : ''}" onclick="setFinancePeriod('year')">Jaarlijks</button>
+                        <button class="period-btn ${financePeriod === 'custom' ? 'active' : ''}" onclick="setFinancePeriod('custom')">Custom</button>
+                    </div>
+                    <div class="date-range-picker ${financePeriod !== 'custom' ? 'hidden' : ''}" id="customDateRange">
+                        <label>Van:</label><input type="date" id="startDate" value="${formatDate(startDate)}" onchange="updateCustomRange()">
+                        <label>Tot:</label><input type="date" id="endDate" value="${formatDate(endDate)}" onchange="updateCustomRange()">
+                    </div>
+                    <div class="export-buttons">
+                        <button class="export-btn export-csv" onclick="exportFinanceCSV()"><i class="fas fa-file-csv"></i> Financieel CSV</button>
+                        <button class="export-btn export-json" onclick="exportFinanceJSON()"><i class="fas fa-code"></i> Financieel JSON</button>
+                        <button class="export-btn export-pdf" onclick="exportFinancePDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card"><div class="icon">💰</div><div class="value">€ ${stats.total.toFixed(2)}</div><div class="label">Totale Omzet</div><div class="trend ${totalChange >= 0 ? 'trend-up' : 'trend-down'}">${totalChange >= 0 ? '↑' : '↓'} ${Math.abs(totalChange)}%</div></div>
+                    <div class="kpi-card"><div class="icon">💵</div><div class="value">€ ${stats.cash.toFixed(2)}</div><div class="label">Cash Betalingen</div><div class="trend ${cashChange >= 0 ? 'trend-up' : 'trend-down'}">${cashChange >= 0 ? '↑' : '↓'} ${Math.abs(cashChange)}%</div></div>
+                    <div class="kpi-card"><div class="icon">📄</div><div class="value">€ ${stats.factuur.toFixed(2)}</div><div class="label">Factuur Betalingen</div><div class="trend">${stats.factuurPercentage.toFixed(1)}%</div></div>
+                    <div class="kpi-card"><div class="icon">📊</div><div class="value">${stats.count}</div><div class="label">Aantal Ritten</div><div class="trend ${countChange >= 0 ? 'trend-up' : 'trend-down'}">${countChange >= 0 ? '↑' : '↓'} ${Math.abs(countChange)}%</div></div>
+                    <div class="kpi-card"><div class="icon">⭐</div><div class="value">€ ${stats.avgOrderValue.toFixed(2)}</div><div class="label">Gem. Ritwaarde</div></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card"><h4>📈 10% Commissie</h4><div class="value">€ ${stats.commission.toFixed(2)}</div><small>Platform kosten</small></div>
+                    <div class="stat-card"><h4>🏦 Netto Omzet</h4><div class="value">€ ${stats.netRevenue.toFixed(2)}</div><small>Na aftrek commissie</small></div>
+                    <div class="stat-card"><h4>📊 Cash vs Factuur</h4><div class="value">${stats.cashPercentage.toFixed(1)}% / ${stats.factuurPercentage.toFixed(1)}%</div><small>Verhouding</small></div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 16px;">📈 Omzet Trend - ${periodNames[financePeriod]}</h3>
+                    <canvas id="financeChart"></canvas>
+                </div>
+
+                <div class="comparison-card">
+                    <h3>📊 Vergelijking met vorige periode</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-item"><div class="label">Omzet</div><div class="value">€ ${stats.total.toFixed(2)}</div><div class="sub">vorige: € ${prevStats.total.toFixed(2)}</div><div class="${totalChange >= 0 ? 'trend-up' : 'trend-down'}">${totalChange >= 0 ? '+' : ''}${totalChange}%</div></div>
+                        <div class="comparison-item"><div class="label">Cash</div><div class="value">€ ${stats.cash.toFixed(2)}</div><div class="sub">vorige: € ${prevStats.cash.toFixed(2)}</div><div class="${cashChange >= 0 ? 'trend-up' : 'trend-down'}">${cashChange >= 0 ? '+' : ''}${cashChange}%</div></div>
+                        <div class="comparison-item"><div class="label">Aantal Ritten</div><div class="value">${stats.count}</div><div class="sub">vorige: ${prevStats.count}</div><div class="${countChange >= 0 ? 'trend-up' : 'trend-down'}">${countChange >= 0 ? '+' : ''}${countChange}%</div></div>
+                        <div class="comparison-item"><div class="label">Gem. Ritwaarde</div><div class="value">€ ${stats.avgOrderValue.toFixed(2)}</div><div class="sub">Markt: € 85,00</div></div>
+                    </div>
+                </div>
+
+                <div class="finance-summary">
+                    <h3>📋 Omzet per Template</h3>
+                    ${Object.entries(stats.byTemplate).map(([t, val]) => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0;"><span><strong>${t}</strong> ${t === 'T1' ? '(Fleet Taxi)' : t === 'T2' ? '(Fleet Limo)' : t === 'T3' ? '(Fleet Direct)' : t === 'T4' ? '(Fleet Business)' : '(Fleet Airport)'}</span><span>€ ${val.toFixed(2)} <span style="color:#64748b;">(${stats.total > 0 ? ((val / stats.total) * 100).toFixed(1) : 0}%)</span></span></div>`).join('')}
+                </div>
+
+                <div class="finance-summary" style="margin-top: 24px;">
+                    <h3>🚗 Chauffeurs & Onderaannemers Overzicht</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <div class="filter-group">
+                                <label><i class="fas fa-building"></i> Onderaannemer:</label>
+                                <input type="text" id="filterOnderaannemer" placeholder="Zoek op naam" onkeyup="filterOnderaannemerTable()">
+                            </div>
+                            <div class="filter-group">
+                                <label><i class="fas fa-user"></i> Chauffeur:</label>
+                                <input type="text" id="filterChauffeur" placeholder="Zoek op naam" onkeyup="filterOnderaannemerTable()">
+                            </div>
+                            <button class="btn-reset" onclick="resetOnderaannemerFilters()"><i class="fas fa-undo"></i> Reset filters</button>
+                            <button class="btn-filter" onclick="exportDriverTableCSV()"><i class="fas fa-download"></i> Export CSV</button>
+                        </div>
+                    </div>
+                    <div class="orders-table-wrapper" style="padding: 0; overflow-x: auto;">
+                        <table class="orders-table">
+                            <thead>
+                                <tr><th>Onderaannemer</th><th>Chauffeur</th><th>Voertuig</th><th>Aantal ritten</th><th>Totale omzet</th><th>Cash</th><th>Factuur</th></tr>
+                            </thead>
+                            <tbody id="driverTableBody">
+                                ${allDriverRides.map(driver => `
+                                    <tr>
+                                        <td class="onderaannemer-name">${driver.onderaannemerNaam || '-'}</td>
+                                        <td class="chauffeur-name"><strong>${driver.driverName}</strong><br><small>${driver.driverId}</small></td>
+                                        <td>${driver.driverVehicle}<br><small>${driver.driverPlate}</small></td>
+                                        <td>${driver.rideCount}</td>
+                                        <td style="font-weight: 600;">€ ${driver.totalRevenue.toFixed(2)}</span></td>
+                                        <td>€ ${driver.cashRevenue.toFixed(2)}</span></td>
+                                        <td>€ ${driver.factuurRevenue.toFixed(2)}</span></td>
+                                    </tr>
+                                `).join('')}
+                                ${allDriverRides.length === 0 ? '<tr><td colspan="7" class="no-results">Geen chauffeurs gevonden</span><table>' : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 0.7rem; color: #64748b; text-align: right;">
+                        <i class="fas fa-info-circle"></i> Totaal aantal chauffeurs: ${allDriverRides.length} | Totaal ritten: ${allDriverRides.reduce((sum, d) => sum + d.rideCount, 0)} | Totale omzet: € ${allDriverRides.reduce((sum, d) => sum + d.totalRevenue, 0).toFixed(2)}
+                    </div>
+                </div>
+
+                <div class="finance-summary" style="margin-top: 24px;">
+                    <h3>🏢 Onderaannemers Samenvatting</h3>
+                    ${onderaannemerStats.map(oa => `
+                        <div style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div><strong>🏪 ${oa.name}</strong><br><span style="font-size: 0.7rem; color: #64748b;">Contact: ${oa.contact} | ${oa.phone}</span></div>
+                                <div><span class="template-tag template-T1">${oa.driverCount} chauffeurs</span></div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;">
+                                <div><small>Omzet</small><br><strong>€ ${oa.totalRevenue.toFixed(2)}</strong></div>
+                                <div><small>Ritten</small><br><strong>${oa.rideCount}</strong></div>
+                                <div><small>Cash</small><br><strong>€ ${oa.cashRevenue.toFixed(2)}</strong></div>
+                                <div><small>Factuur</small><br><strong>€ ${oa.factuurRevenue.toFixed(2)}</strong></div>
+                            </div>
+                            ${oa.driverCount > 0 ? `<div style="margin-top: 8px; font-size: 0.7rem; color: #64748b;"><i class="fas fa-users"></i> Chauffeurs: ${oa.drivers.map(d => `${d.name} (${d.vehicle})`).join(', ')}</div>` : '<div style="margin-top: 8px; font-size: 0.7rem; color: #94a3b8;"><i class="fas fa-info-circle"></i> Nog geen chauffeurs toegevoegd</div>'}
+                        </div>
+                    `).join('')}
+                    ${onderaannemerStats.length === 0 ? '<div class="empty-planning">Geen onderaannemers gevonden</div>' : ''}
+                </div>
+            `;
+
+            document.getElementById('contentArea').innerHTML = html;
+
+            window.filterOnderaannemerTable = function() {
+                const searchOnderaannemer = document.getElementById('filterOnderaannemer')?.value.toLowerCase() || '';
+                const searchChauffeur = document.getElementById('filterChauffeur')?.value.toLowerCase() || '';
+                const rows = document.querySelectorAll('#driverTableBody tr');
+                rows.forEach(row => {
+                    const onderaannemerCell = row.querySelector('.onderaannemer-name')?.innerText.toLowerCase() || '';
+                    const chauffeurCell = row.querySelector('.chauffeur-name')?.innerText.toLowerCase() || '';
+                    let show = true;
+                    if (searchOnderaannemer && !onderaannemerCell.includes(searchOnderaannemer)) show = false;
+                    if (searchChauffeur && !chauffeurCell.includes(searchChauffeur)) show = false;
+                    row.style.display = show ? '' : 'none';
+                });
+            };
+
+            window.resetOnderaannemerFilters = function() {
+                const searchOnderaannemer = document.getElementById('filterOnderaannemer');
+                const searchChauffeur = document.getElementById('filterChauffeur');
+                if (searchOnderaannemer) searchOnderaannemer.value = '';
+                if (searchChauffeur) searchChauffeur.value = '';
+                const rows = document.querySelectorAll('#driverTableBody tr');
+                rows.forEach(row => row.style.display = '');
+            };
+
+            window.exportDriverTableCSV = function() {
+                const rows = document.querySelectorAll('#driverTableBody tr');
+                const data = [];
+                rows.forEach(row => {
+                    if (row.style.display !== 'none') {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length) {
+                            data.push({
+                                onderaannemer: cells[0]?.innerText || '',
+                                chauffeur: cells[1]?.innerText || '',
+                                voertuig: cells[2]?.innerText || '',
+                                ritten: cells[3]?.innerText || '',
+                                omzet: cells[4]?.innerText || '',
+                                cash: cells[5]?.innerText || '',
+                                factuur: cells[6]?.innerText || ''
+                            });
+                        }
+                    }
+                });
+                const headers = ['Onderaannemer', 'Chauffeur', 'Voertuig', 'Aantal Ritten', 'Totale Omzet', 'Cash', 'Factuur'];
+                const csvRows = [headers];
+                data.forEach(d => csvRows.push([d.onderaannemer, d.chauffeur, d.voertuig, d.ritten, d.omzet, d.cash, d.factuur]));
+                const csvContent = csvRows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `chauffeurs_overzicht_${new Date().toISOString().slice(0,10)}.csv`;
+                link.click();
+            };
+
+            setTimeout(() => {
+                const ctx = document.getElementById('financeChart')?.getContext('2d');
+                if (ctx) {
+                    if (financeChart) financeChart.destroy();
+                    financeChart = new Chart(ctx, {
+                        type: 'line',
+                        data: { labels: days, datasets: [
+                            { label: 'Totale Omzet', data: totals, borderColor: '#2dd4bf', backgroundColor: 'rgba(45, 212, 191, 0.1)', tension: 0.4, fill: true },
+                            { label: 'Cash', data: cashData, borderColor: '#10b981', backgroundColor: 'transparent', tension: 0.4 },
+                            { label: 'Factuur', data: factuurData, borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.4 }
+                        ] },
+                        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => `€ ${ctx.raw.toFixed(2)}` } } } }
+                    });
+                }
+            }, 100);
+        }
+
+        function setFinancePeriod(period) {
+            financePeriod = period;
+            const customRange = document.getElementById('customDateRange');
+            if (customRange) {
+                if (period === 'custom') customRange.classList.remove('hidden');
+                else customRange.classList.add('hidden');
+            }
+            renderFinance();
+        }
+
+        function updateCustomRange() {
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+            if (startInput && endInput) {
+                customStartDate = startInput.value;
+                customEndDate = endInput.value;
+                renderFinance();
+            }
+        }
+
+        function exportFinanceCSV() {
+            const { startDate, endDate } = getDateRange();
+            const bookings = getBookingsInRange(startDate, endDate);
+            const headers = ["ID", "Template", "Datum", "Tijd", "Klant", "Route", "Voertuig", "Bedrag", "Betaling", "Status"];
+            const rows = bookings.map(b => [b.id, b.template || '', b.datetime, b.time || '', b.name, `${b.pickup || ''} → ${b.destination || ''}`, b.vehicle, b.amount, b.payment, b.completed ? 'Uitgevoerd' : (b.canceled ? 'Geannuleerd' : 'Bevestigd')]);
+            const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+            const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fleet_finance_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`;
+            link.click();
+        }
+
+        function exportFinanceJSON() {
+            const { startDate, endDate } = getDateRange();
+            const stats = getFinanceStatistics();
+            const bookings = getBookingsInRange(startDate, endDate);
+            const onderaannemerStats = getOnderaannemerStats();
+            const exportData = { period: { start: startDate, end: endDate }, statistics: stats, bookings: bookings, onderaannemers: onderaannemerStats };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fleet_finance_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            link.click();
+        }
+
+        function exportFinancePDF() {
+            alert("PDF Export functionaliteit wordt geopend. U kunt nu afdrukken als PDF (Ctrl+P / Cmd+P)");
+            window.print();
+        }
+
+        // ============================================
+        // 13. NEW ORDERS RENDER FUNCTIES (MET FILTERBALK)
+        // ============================================
+        function renderNewOrders() {
+            const html = `
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Order ID</label><input type="text" id="filterOrderNew" placeholder="Zoek op ID"></div>
+                    <div class="filter-group"><label>Naam</label><input type="text" id="filterNameNew" placeholder="Klant"></div>
+                    <div class="filter-actions">
+                        <button class="btn-filter" onclick="applyFiltersNewOrders()">Zoek</button>
+                        <button class="btn-reset" onclick="resetFiltersNewOrders()">Reset</button>
+                    </div>
+                </div>
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead><tr><th>Order ID</th><th>Datum & Tijd</th><th>Naam</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Actie</th></tr></thead>
+                        <tbody id="ordersTableBodyNew"></tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+            renderNewOrdersTable(newOrders);
+            if (document.getElementById('orderCount')) document.getElementById('orderCount').innerText = newOrders.length;
+            document.getElementById('pageTitle').innerHTML = `New Orders <span class="order-count">${newOrders.length}</span>`;
+        }
+
+        function renderNewOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBodyNew');
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '</table><td colspan="7" class="no-results">Geen nieuwe orders</span></tr>';
+            } else {
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
+                        <td>${order.datetime} ${order.time}</span></td>
+                        <td>${order.name}</span></td>
+                        <td>${order.pickup} → ${order.destination}</span></td>
+                        <td>${order.vehicle}</span></td>
+                        <td>€${order.amount.toFixed(2)}</span></td>
+                        <td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function applyFiltersNewOrders() {
+            const orderFilter = document.getElementById("filterOrderNew")?.value.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterNameNew")?.value.toLowerCase() || "";
+            const filtered = newOrders.filter(order => {
+                return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
+                       (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
+            });
+            renderNewOrdersTable(filtered);
+        }
+
+        function resetFiltersNewOrders() {
+            const orderFilter = document.getElementById("filterOrderNew");
+            const nameFilter = document.getElementById("filterNameNew");
+            if (orderFilter) orderFilter.value = "";
+            if (nameFilter) nameFilter.value = "";
+            renderNewOrdersTable(newOrders);
+        }
+
+        // ============================================
+        // 14. ORDERS RENDER FUNCTIES (MET FILTERBALK)
+        // ============================================
+        function renderOrders() {
+            const html = `
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Order ID</label><input type="text" id="filterOrderOrders" placeholder="Zoek op ID"></div>
+                    <div class="filter-group"><label>Naam</label><input type="text" id="filterNameOrders" placeholder="Klant"></div>
+                    <div class="filter-actions">
+                        <button class="btn-filter" onclick="applyFiltersOrders()">Zoek</button>
+                        <button class="btn-reset" onclick="resetFiltersOrders()">Reset</button>
+                    </div>
+                </div>
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead><tr><th>Order ID</th><th>Datum & Tijd</th><th>Naam</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Actie</th></tr></thead>
+                        <tbody id="ordersTableBodyOrders"></tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+            renderOrdersTable(ordersList);
+            if (document.getElementById('orderCount')) document.getElementById('orderCount').innerText = ordersList.length;
+            document.getElementById('pageTitle').innerHTML = `Orders <span class="order-count">${ordersList.length}</span>`;
+        }
+
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBodyOrders');
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen bevestigde orders</span></tr>';
+            } else {
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
+                        <td>${order.datetime} ${order.time}</span></td>
+                        <td>${order.name}</span></td>
+                        <td>${order.pickup} → ${order.destination}</span></td>
+                        <td>${order.vehicle}</span></td>
+                        <td>€${order.amount.toFixed(2)}</span></td>
+                        <td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function applyFiltersOrders() {
+            const orderFilter = document.getElementById("filterOrderOrders")?.value.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterNameOrders")?.value.toLowerCase() || "";
+            const filtered = ordersList.filter(order => {
+                return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
+                       (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
+            });
+            renderOrdersTable(filtered);
+        }
+
+        function resetFiltersOrders() {
+            const orderFilter = document.getElementById("filterOrderOrders");
+            const nameFilter = document.getElementById("filterNameOrders");
+            if (orderFilter) orderFilter.value = "";
+            if (nameFilter) nameFilter.value = "";
+            renderOrdersTable(ordersList);
+        }
+
+        // ============================================
+        // 15. HISTORY RENDER FUNCTIES (MET FILTERBALK)
+        // ============================================
+        function renderHistory() {
+            const html = `
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Order ID</label><input type="text" id="filterOrderHistory" placeholder="Zoek op ID"></div>
+                    <div class="filter-group"><label>Naam</label><input type="text" id="filterNameHistory" placeholder="Klant"></div>
+                    <div class="filter-actions">
+                        <button class="btn-filter" onclick="applyFiltersHistory()">Zoek</button>
+                        <button class="btn-reset" onclick="resetFiltersHistory()">Reset</button>
+                    </div>
+                </div>
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead></tr><th>Order ID</th><th>Datum & Tijd</th><th>Naam</th><th>Route</th><th>Voertuig</th><th>Bedrag</th></tr></thead>
+                        <tbody id="ordersTableBodyHistory"></tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+            renderHistoryTable(historyOrders);
+            if (document.getElementById('orderCount')) document.getElementById('orderCount').innerText = historyOrders.length;
+            document.getElementById('pageTitle').innerHTML = `History <span class="order-count">${historyOrders.length}</span>`;
+            document.getElementById('downloadButtons').classList.remove('hidden');
+        }
+
+        function renderHistoryTable(orders) {
+            const tbody = document.getElementById('ordersTableBodyHistory');
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-results">Geen historische ritten</span></tr>';
+            } else {
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
+                        <td>${order.datetime} ${order.time}</span></td>
+                        <td>${order.name}</span></td>
+                        <td>${order.pickup} → ${order.destination}</span></td>
+                        <td>${order.vehicle}</span></td>
+                        <td>€${order.amount.toFixed(2)}</span></td>
+                    <tr>
+                `).join('');
+            }
+        }
+
+        function applyFiltersHistory() {
+            const orderFilter = document.getElementById("filterOrderHistory")?.value.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterNameHistory")?.value.toLowerCase() || "";
+            const filtered = historyOrders.filter(order => {
+                return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
+                       (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
+            });
+            renderHistoryTable(filtered);
+        }
+
+        function resetFiltersHistory() {
+            const orderFilter = document.getElementById("filterOrderHistory");
+            const nameFilter = document.getElementById("filterNameHistory");
+            if (orderFilter) orderFilter.value = "";
+            if (nameFilter) nameFilter.value = "";
+            renderHistoryTable(historyOrders);
+        }
+
+        // ============================================
+        // 16. OVERIGE RENDER FUNCTIES
+        // ============================================
+        function confirmOrder(orderId) {
+            const orderIndex = rawNewOrders.findIndex(order => order.id === orderId);
+            if (orderIndex !== -1) {
+                const confirmedOrder = { ...rawNewOrders[orderIndex], status: "confirmed", completed: false, canceled: false };
+                rawNewOrders.splice(orderIndex, 1);
+                rawConfirmedOrders.push(confirmedOrder);
+                updateAgendaData();
+                filterAndSortData();
                 if (currentTab === 'neworders') renderNewOrders();
                 if (currentTab === 'orders') renderOrders();
                 if (currentTab === 'history') renderHistory();
                 refreshAgenda();
-                alert(`Order ${orderId} bevestigd`);
+                alert(`Order ${orderId} is bevestigd.`);
                 closeModal();
             }
         }
 
-        async function confirmAssignDriver(orderId) {
-            if (!selectedDriverId) { alert("Selecteer een chauffeur"); return; }
+        function confirmAssignDriver(orderId) {
+            if (!selectedDriverId) { alert("Selecteer eerst een chauffeur."); return; }
             const order = ordersList.find(o => o.id === orderId);
             const driver = driversList.find(d => d.id === selectedDriverId);
             if (order && driver) {
-                order.assignedDriver = { id: driver.id, name: driver.name, phone: driver.phone, vehicle: driver.vehicle, plate: driver.plate };
+                order.assignedDriver = driver;
                 const rawOrder = rawConfirmedOrders.find(o => o.id === orderId);
-                if (rawOrder) rawOrder.assignedDriver = order.assignedDriver;
-                await persistAll();
-                await loadAllData();
+                if (rawOrder) rawOrder.assignedDriver = driver;
+                updateAgendaData();
                 if (currentTab === 'orders') renderOrders();
-                alert(`Chauffeur ${driver.name} toegewezen`);
+                alert(`Chauffeur ${driver.name} toegewezen.`);
                 closeModal();
             }
         }
 
-        // ==================== RENDER FUNCTIES (grotendeels identiek, maar async) ====================
-        async function renderNewOrders() {
-            const filterValue = document.getElementById('orderFilterInput')?.value.toLowerCase() || '';
-            let filtered = newOrders.filter(o => !filterValue || o.id.toLowerCase().includes(filterValue) || o.name.toLowerCase().includes(filterValue) || o.pickup.toLowerCase().includes(filterValue) || o.destination.toLowerCase().includes(filterValue));
+        function showNewOrderFiche(order) {
+            currentSelectedOrder = order;
+            const ficheBody = document.getElementById('ficheBody');
+            ficheBody.innerHTML = `<div class="fiche-section"><h4>Boekingsinformatie</h4><div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div><div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div></div><div class="fiche-section"><h4>Klantgegevens</h4><div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div><div class="fiche-row"><span class="fiche-label">Email:</span><span class="fiche-value">${order.email}</span></div><div class="fiche-row"><span class="fiche-label">Telefoon:</span><span class="fiche-value">${order.phone}</span></div></div><div class="fiche-total"><div class="amount">€ ${order.amount.toFixed(2)}</div></div><div class="fiche-actions"><button class="fiche-btn confirm" onclick="confirmOrder('${order.id}')">Bevestig</button><button class="fiche-btn close" onclick="closeModal()">Sluiten</button></div>`;
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function showOrderFiche(order) {
+            currentSelectedOrder = order;
+            selectedDriverId = null;
+            const ficheBody = document.getElementById('ficheBody');
+            let driverSection = '';
+            if (order.assignedDriver) {
+                driverSection = `<div class="fiche-section"><h4>Toegewezen Chauffeur</h4><div class="assigned-driver"><strong>${order.assignedDriver.name}</strong><br>${order.assignedDriver.phone}<br>${order.assignedDriver.vehicle}</div></div>`;
+            } else {
+                const driverOptions = driversList.map(d => `<option value="${d.id}">${d.name} - ${d.vehicle}</option>`).join('');
+                driverSection = `<div class="fiche-section"><h4>Toewijzen aan Chauffeur</h4><select id="driverSelect" onchange="selectedDriverId = this.value"><option value="">-- Selecteer --</option>${driverOptions}</select><button class="fiche-btn assign" onclick="confirmAssignDriver('${order.id}')">Toewijzen</button></div>`;
+            }
+            ficheBody.innerHTML = `<div class="fiche-section"><h4>Boekingsinformatie</h4><div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div><div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div></div><div class="fiche-section"><h4>Klantgegevens</h4><div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div></div>${driverSection}<div class="fiche-total"><div class="amount">€ ${order.amount.toFixed(2)}</div></div><div class="fiche-actions"><button class="fiche-btn close" onclick="closeModal()">Sluiten</button></div>`;
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; currentSelectedOrder = null; selectedDriverId = null; }
+
+        function renderDrivers() {
+            document.getElementById('contentArea').innerHTML = `<div class="people-card"><h3>Chauffeurs</h3><div class="people-grid">${driversList.map(d => `<div class="person-item"><div class="person-name">${d.id} - ${d.name}</div><div class="person-detail"><i class="fas fa-phone"></i> ${d.phone}</div><div class="person-detail"><i class="fas fa-car"></i> ${d.vehicle} - ${d.plate}</div>${d.onderaannemerNaam ? `<div class="person-detail"><i class="fas fa-building"></i> Werkt voor: ${d.onderaannemerNaam}</div>` : ''}</div>`).join('')}</div></div>`;
+        }
+
+        function renderOnderaannemers() {
+            document.getElementById('contentArea').innerHTML = `<div class="people-card"><div style="display:flex;justify-content:space-between;margin-bottom:16px;"><h3>Onderaannemers</h3><button class="add-btn" onclick="addOnderaannemer()">Toevoegen</button></div><div class="people-grid">${onderaannemersList.map(oa => `<div class="person-item"><div class="person-name">${oa.name}</div><div class="person-detail">Contact: ${oa.contact}</div><div class="person-detail">${oa.phone}</div><div class="person-detail">${oa.email}</div><div class="person-detail">Diensten: ${oa.services}</div><div class="item-actions"><button class="secondary-btn" onclick="addDriverToSubcontractor(${oa.id})">Chauffeur toevoegen</button><button class="action-btn" onclick="editOnderaannemer(${oa.id})">Bewerk</button><button class="delete-btn" onclick="deleteOnderaannemer(${oa.id})">Verwijder</button></div></div>`).join('')}</div></div>`;
+        }
+
+        // ============================================
+        // 17. WIKI AGENT MET SUPABASE SLEUTELS
+        // ============================================
+        function renderWiki() {
             document.getElementById('contentArea').innerHTML = `
-                <div class="filter-bar"><div class="filter-group"><label><i class="fas fa-search"></i> Zoek:</label><input type="text" id="orderFilterInput" placeholder="ID, klant, route..." onkeyup="renderNewOrders()" class="filter-input"></div><div class="filter-actions"><button class="btn-reset" onclick="document.getElementById('orderFilterInput').value=''; renderNewOrders()">Reset</button></div></div>
-                <div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Route</th><th>Bedrag</th><th>Actie</th></tr></thead><tbody>${filtered.map(o => `<tr><td>${o.id}</td><td>${o.datetime} ${o.time}</td><td>${o.name}</td><td>${o.pickup} → ${o.destination}</td><td>€${o.amount}</td><td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(o).replace(/'/g, "&#39;")})'>Bekijk</button></td></tr>`).join('')}${filtered.length===0?'<tr><td colspan="6" class="no-results">Geen nieuwe orders</td></tr>':''}</tbody></table></div>`;
-            document.getElementById('pageTitle').innerHTML = `New Orders <span class="order-count">${newOrders.length}</span>`;
+                <div class="wiki-container">
+                    <div class="wiki-header">
+                        <i class="fas fa-robot"></i>
+                        <h2>Wiki Agent - Volledige Dashboard Documentatie</h2>
+                    </div>
+
+                    <!-- SUPABASE CONFIGURATIE - ZICHTBARE SLEUTELS -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-database"></i> 🗄️ Supabase Configuratie</h3>
+                        <div class="wiki-tip" style="background: #e0f2fe; border-left-color: #0369a1;">
+                            <i class="fas fa-key"></i> <strong>Supabase sleutels voor uw Admin Paneel:</strong><br>
+                            🔗 <strong>URL:</strong> <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 6px;">https://kwsuqzbqzsmgkjaslwkz.supabase.co</code><br>
+                            🔑 <strong>Anon Key:</strong> <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 6px;">sb_publishable_5hdl73a9-jNd9n3lnsYVyQ_dMYgiSLA</code>
+                        </div>
+                        <p><strong>Status:</strong> ${supabaseConnected ? '🟢 Supabase is verbonden' : '🔴 Supabase is niet verbonden'}</p>
+                        <p><strong>Tabellen:</strong> bookings, drivers, onderaannemers, vehicles, commissions</p>
+                        <p><strong>Dataflow:</strong> T1-T5 → Supabase → Admin Paneel (real-time)</p>
+                    </div>
+
+                    <!-- Dashboard Overzicht -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-chalkboard-user"></i> 📊 Dashboard Overzicht</h3>
+                        <p>Fleet Connect is een uitgebreid admin paneel voor het beheren van taxi boekingen van <strong>5 verschillende boekingswebsites (T1-T5)</strong>. Het systeem is volledig geïntegreerd met Supabase voor dataopslag en real-time synchronisatie.</p>
+                        <br>
+                        <table class="wiki-table">
+                            <thead><tr><th>Tab</th><th>Functie</th><th>Belangrijkste features</th></tr></thead>
+                            <tbody>
+                                <tr>}<strong>New Orders</strong></span><td>Nieuwe, nog niet goedgekeurde boekingen</span><td>✅ Filter op ID/naam ✅ Boekingsfiche bekijken ✅ Order bevestigen</span></tr>
+                                <td><strong>Orders</strong></span><td>Goedgekeurde toekomstige ritten</span><td>✅ Filter op ID/naam ✅ Boekingsfiche ✅ Chauffeur toewijzen</span></tr>
+                                <tr><strong>History</strong></span><td>Archief van uitgevoerde ritten</span><td>✅ Filteren ✅ Export naar CSV/JSON</span></tr>
+                                <tr><strong>Agenda</strong></span><td>Kalender & dagplanning</span><td>✅ 4 dashboard blokken ✅ Kalender met markeringen ✅ Flipcard planning</span></tr>
+                                <tr><strong>Drivers</strong></span><td>Chauffeurs beheer</span><td>✅ Overzicht chauffeurs ✅ Koppeling met onderaannemers</span></tr>
+                                <tr><strong>Onderaannemers</strong></span><td>Externe partners beheer</span><td>✅ Toevoegen/bewerken/verwijderen ✅ Chauffeurs toevoegen met prefix ID</span></tr>
+                                <tr><strong>Financieel</strong></span><td>Omzet & rapportages</span><td>✅ Dag/week/maand/jaar/custom ✅ Grafieken ✅ Vergelijking vorige periode ✅ Export CSV/JSON/PDF</span></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Datum & Tijd Logica -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-clock"></i> ⏰ Datum & Tijd Logica (CRUCIAL)</h3>
+                        <p>Het systeem gebruikt een slimme datum/tijd logica om ritten automatisch te sorteren:</p>
+                        <table class="wiki-table">
+                            <thead><tr><th>Sectie</th><th>Wat bevat het?</th><th>Voorwaarde</th></tr></thead>
+                            <tbody>
+                                <tr><strong>New Orders</strong></span><td>Nieuwe, nog niet goedgekeurde boekingen</span><td>Alleen ritten met DATUM + TIJD ≥ NU</span></tr>
+                                <tr><strong>Orders</strong></span><td>Goedgekeurde ritten die nog moeten plaatsvinden</span><td>Alleen ritten met DATUM + TIJD ≥ NU</span></tr>
+                                <tr><strong>History</strong></span><td>Archief van uitgevoerde of verlopen ritten</span><td>Alleen ritten met DATUM + TIJD < NU</span></tr>
+                                <td><strong>Agenda Dagplanning</strong></span><td>Toont ritten van de geselecteerde dag</span><td>Ongeacht of tijd gepasseerd is</span></tr>
+                            </tbody>
+                        </table>
+                        <div class="wiki-tip">
+                            <i class="fas fa-lightbulb"></i> <strong>Voorbeeld:</strong> Huidige tijd = 26 april 2026, 09:18<br>
+                            - Rit 26 april 06:00 → 06:00 < 09:18 → <strong>HISTORY</strong><br>
+                            - Rit 26 april 11:00 → 11:00 > 09:18 → <strong>ORDERS</strong><br>
+                            - Rit 27 april 06:00 → 27 april > 26 april → <strong>ORDERS</strong>
+                        </div>
+                    </div>
+
+                    <!-- New Orders Uitleg -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-clipboard-list"></i> 📋 New Orders - Werking</h3>
+                        <p>In <strong>New Orders</strong> verschijnen alle nieuwe boekingen die via de 5 boekingswebsites (T1-T5) binnenkomen. Elke boeking heeft een uniek boekingsnummer met een specifiek prefix:</p>
+                        <table class="wiki-table">
+                            <thead></tr><th>Template</th><th>Prefix</th><th>Website</th></tr></thead>
+                            <tbody>
+                                <tr>}T1</span><td><strong>FX</strong></span><td>Fleet Taxi (standaard)</span></tr>
+                                <tr>}T2</span><td><strong>LM</strong></span><td>Fleet Limo (luxe)</span></tr>
+                                <tr>}T3</span><td><strong>FD</strong></span><td>Fleet Direct (budget)</span></tr>
+                                <tr>}T4</span><td><strong>BS</strong></span><td>Fleet Business (zakelijk)</span></tr>
+                                <tr>}T5</span><td><strong>AP</strong></span><td>Fleet Airport (luchthaven)</span></tr>
+                            </tbody>
+                        </table>
+                        <p><strong>Acties in New Orders:</strong></p>
+                        <ul>
+                            <li>🔍 <strong>Filteren:</strong> Zoek op Order ID of klantnaam</li>
+                            <li>📄 <strong>Bekijk Fiche:</strong> Toont de volledige boekingsdetails</li>
+                            <li>✅ <strong>Bevestig:</strong> Verplaatst de order naar Orders (goedgekeurd)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Orders Uitleg -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-box"></i> 📦 Orders - Werking</h3>
+                        <p>In <strong>Orders</strong> staan alle goedgekeurde ritten die nog moeten plaatsvinden (datum+tijd ≥ nu).</p>
+                        <p><strong>Acties in Orders:</strong></p>
+                        <ul>
+                            <li>🔍 <strong>Filteren:</strong> Zoek op Order ID of klantnaam</li>
+                            <li>📄 <strong>Bekijk Fiche:</strong> Toont de volledige boekingsdetails + chauffeur toewijzing</li>
+                            <li>👨‍✈️ <strong>Chauffeur toewijzen:</strong> Selecteer een chauffeur uit de dropdown en bevestig</li>
+                        </ul>
+                        <div class="wiki-tip">
+                            <i class="fas fa-info-circle"></i> <strong>Tip:</strong> Zodra een rit is uitgevoerd (datum+tijd gepasseerd), verdwijnt deze automatisch uit Orders en verschijnt in History.
+                        </div>
+                    </div>
+
+                    <!-- Agenda Uitleg -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-calendar-alt"></i> 📅 Agenda - Werking</h3>
+                        <p>De agenda biedt een visueel overzicht van alle ritten op een kalender.</p>
+                        <p><strong>4 Dashboard blokken:</strong></p>
+                        <ul>
+                            <li>💰 <strong>Dagelijkse Omzet:</strong> Totale omzet van vandaag (tik voor 10% commissie)</li>
+                            <li>💵 <strong>Cash vs Factuur:</strong> Overzicht van cash en factuur betalingen</li>
+                            <li>📊 <strong>Uitgevoerd vs Geannuleerd:</strong> Aantal ritten per status</li>
+                            <li>⏰ <strong>Toekomstige ritten vandaag:</strong> Nog te rijden ritten (neemt af naarmate dag vordert)</li>
+                        </ul>
+                        <p><strong>Kalender functionaliteit:</strong></p>
+                        <ul>
+                            <li>📅 Dagen met ritten hebben een <strong>blauwe stip</strong> markering</li>
+                            <li>🟢 Vandaag heeft een <strong>groene rand</strong></li>
+                            <li>🔵 Geselecteerde dag heeft een <strong>blauwe achtergrond</strong></li>
+                            <li>🔄 <strong>Flipcard:</strong> Klik op "Toekomst" om alle toekomstige ritten te zien</li>
+                        </ul>
+                    </div>
+
+                    <!-- Drivers & Onderaannemers -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-id-card"></i> 👥 Drivers & Onderaannemers</h3>
+                        <p><strong>Drivers tab:</strong> Toont alle chauffeurs met hun gegevens (naam, telefoon, voertuig, nummerplaat). Chauffeurs die aan een onderaannemer gekoppeld zijn tonen "Werkt voor: [onderaannemer]".</p>
+                        <p><strong>Onderaannemers tab:</strong> Beheer externe partners.</p>
+                        <ul>
+                            <li>➕ <strong>Toevoegen:</strong> Nieuwe onderaannemer toevoegen</li>
+                            <li>✏️ <strong>Bewerken:</strong> Details van onderaannemer aanpassen</li>
+                            <li>🗑️ <strong>Verwijderen:</strong> Onderaannemer verwijderen (chauffeurs worden ook verwijderd)</li>
+                            <li>👨‍✈️ <strong>Chauffeur toevoegen:</strong> Voeg een chauffeur toe aan de onderaannemer met automatisch gegenereerd ID (prefix + 2 cijfers)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Financieel Dashboard -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-chart-line"></i> 💰 Financieel Dashboard</h3>
+                        <p>Het financiële dashboard biedt hoogwaardige rekentools voor omzetanalyse.</p>
+                        <p><strong>Functionaliteiten:</strong></p>
+                        <ul>
+                            <li>📅 <strong>Periodes:</strong> Dagelijks, Wekelijks, Maandelijks, Jaarlijks, Custom range</li>
+                            <li>📈 <strong>Grafiek:</strong> Omzet trend met uitsplitsing Cash/Factuur</li>
+                            <li>📊 <strong>Vergelijking:</strong> Automatische vergelijking met vorige periode</li>
+                            <li>💰 <strong>Commissie:</strong> Automatische 10% commissie berekening</li>
+                            <li>📋 <strong>Per template overzicht:</strong> Omzet per website (T1-T5)</li>
+                            <li>🚗 <strong>Chauffeurs tabel:</strong> Filterbare tabel met chauffeurs prestaties</li>
+                            <li>📤 <strong>Export:</strong> CSV, JSON en PDF export</li>
+                        </ul>
+                    </div>
+
+                    <!-- Auto-Refresh & Export -->
+                    <div class="wiki-section">
+                        <h3><i class="fas fa-sync-alt"></i> 🔄 Auto-Refresh & Export</h3>
+                        <p><strong>Auto-refresh:</strong> Het systeem ververs automatisch alle data om de 60 seconden. U hoeft niets handmatig te doen. Ritten die gepasseerd zijn verdwijnen uit Orders en verschijnen in History.</p>
+                        <p><strong>Export mogelijkheden:</strong></p>
+                        <ul>
+                            <li>📊 <strong>History tab:</strong> Export naar CSV of JSON</li>
+                            <li>💰 <strong>Financieel tab:</strong> Export naar CSV, JSON of PDF (print)</li>
+                            <li>🚗 <strong>Chauffeurs tabel:</strong> Export naar CSV</li>
+                        </ul>
+                    </div>
+
+                    <!-- Pro Tips -->
+                    <div class="wiki-tip" style="margin-top: 24px;">
+                        <i class="fas fa-star"></i> <strong>Pro Tips:</strong>
+                        <ul style="margin-top: 8px;">
+                            <li>💡 Gebruik de filterbalk in New Orders en Orders om snel orders te vinden</li>
+                            <li>💡 Klik op de flipcard in Agenda om toekomstige ritten te bekijken</li>
+                            <li>💡 Exporteer financiële data naar PDF voor rapportages</li>
+                            <li>💡 Chauffeurs krijgen automatisch een uniek ID bij toevoegen aan onderaannemer</li>
+                            <li>💡 Ritten van vandaag die al gepasseerd zijn gaan automatisch naar History</li>
+                        </ul>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 0.7rem; color: #64748b;">
+                        <p>Fleet Connect Admin Paneel - Versie 2.0</p>
+                        <p>Operated by Fleetconnect | Design by Ryzen Outsourcing</p>
+                        <p>© 2026 - Alle rechten voorbehouden</p>
+                    </div>
+                </div>
+            `;
         }
 
-        async function renderOrders() {
-            const filterValue = document.getElementById('orderFilterInput2')?.value.toLowerCase() || '';
-            let filtered = ordersList.filter(o => !filterValue || o.id.toLowerCase().includes(filterValue) || o.name.toLowerCase().includes(filterValue) || o.pickup.toLowerCase().includes(filterValue) || o.destination.toLowerCase().includes(filterValue));
-            document.getElementById('contentArea').innerHTML = `
-                <div class="filter-bar"><div class="filter-group"><label><i class="fas fa-search"></i> Zoek:</label><input type="text" id="orderFilterInput2" placeholder="ID, klant, route..." onkeyup="renderOrders()" class="filter-input"></div><div class="filter-actions"><button class="btn-reset" onclick="document.getElementById('orderFilterInput2').value=''; renderOrders()">Reset</button></div></div>
-                <div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Actie</th></tr></thead><tbody>${filtered.map(o => `<tr><td><strong>${o.id}</strong><br><span class="template-tag template-${o.template}">${o.template}</span></td><td>${o.datetime} ${o.time}</td><td>${o.name}</td><td>${o.pickup} → ${o.destination}</td><td>${o.vehicle}</td><td>€${o.amount}</td><td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(o).replace(/'/g, "&#39;")})'>Bekijk</button></td></tr>`).join('')}</tbody></table></div>`;
-            document.getElementById('pageTitle').innerHTML = `Orders <span class="order-count">${ordersList.length}</span>`;
+        // ============================================
+        // 18. ONDERAANNEMER FUNCTIES
+        // ============================================
+        function addDriverToSubcontractor(onderaannemerId) {
+            const onderaannemer = onderaannemersList.find(o => o.id === onderaannemerId);
+            if (!onderaannemer) return;
+            const name = prompt("Chauffeur naam:");
+            if (!name) return;
+            const phone = prompt("Telefoon:") || "Onbekend";
+            const vehicle = prompt("Voertuig:") || "Onbekend";
+            const plate = prompt("Nummerplaat:") || "Onbekend";
+            const prefix = onderaannemer.name.substring(0, 3).toUpperCase();
+            const nextNum = driversList.filter(d => d.id.startsWith(prefix)).length + 1;
+            const newId = `${prefix}-${nextNum.toString().padStart(2, '0')}`;
+            const newDriver = { id: newId, name: name, phone: phone, email: "", license: "B", vehicle: vehicle, plate: plate, onderaannemerId: onderaannemer.id, onderaannemerNaam: onderaannemer.name };
+            driversList.push(newDriver);
+            onderaannemer.drivers.push(newDriver);
+            alert(`Chauffeur ${name} toegevoegd met ID ${newId}`);
+            renderOnderaannemers();
+            renderDrivers();
         }
 
-        async function renderHistory() {
-            document.getElementById('contentArea').innerHTML = `<div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Route</th><th>Bedrag</th></tr></thead><tbody>${historyOrders.map(o => `<tr><td><strong>${o.id}</strong><br><span class="template-tag template-${o.template}">${o.template}</span></td><td>${o.datetime} ${o.time}</td><td>${o.name}</td><td>${o.pickup} → ${o.destination}</td><td>€${o.amount}</td></tr>`).join('')}</tbody></table></div>`;
-            document.getElementById('pageTitle').innerHTML = `History <span class="order-count">${historyOrders.length}</span>`;
+        function addOnderaannemer() {
+            const name = prompt("Naam:");
+            if (!name) return;
+            const contact = prompt("Contactpersoon:") || "Onbekend";
+            const phone = prompt("Telefoon:") || "Onbekend";
+            const email = prompt("Email:") || "Onbekend";
+            const services = prompt("Diensten:") || "Onbekend";
+            const newId = onderaannemersList.length + 1;
+            onderaannemersList.push({ id: newId, name: name, contact: contact, phone: phone, email: email, services: services, drivers: [] });
+            renderOnderaannemers();
         }
 
-        function downloadCSV() { const headers = ["ID","Template","Datum","Tijd","Klant","Email","Telefoon","Pickup","Destination","Voertuig","Extras","Bedrag","Betaling","Status"]; const rows = historyOrders.map(o => [o.id, o.template, o.datetime, o.time, o.name, o.email, o.phone, o.pickup, o.destination, o.vehicle, o.extras, o.amount, o.payment, o.completed?"Uitgevoerd":(o.canceled?"Geannuleerd":"Bevestigd")]); const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n"); const blob = new Blob(["\uFEFF"+csv], {type:"text/csv"}); const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`fleet_history_${new Date().toISOString().slice(0,19)}.csv`; a.click(); }
-        function downloadJSON() { const blob = new Blob([JSON.stringify(historyOrders,null,2)], {type:"application/json"}); const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`fleet_history_${new Date().toISOString().slice(0,19)}.json`; a.click(); }
+        function editOnderaannemer(id) {
+            const oa = onderaannemersList.find(o => o.id === id);
+            if (!oa) return;
+            const newName = prompt("Nieuwe naam:", oa.name);
+            if (newName) oa.name = newName;
+            const newContact = prompt("Nieuwe contactpersoon:", oa.contact);
+            if (newContact) oa.contact = newContact;
+            const newPhone = prompt("Nieuw telefoon:", oa.phone);
+            if (newPhone) oa.phone = newPhone;
+            const newEmail = prompt("Nieuw email:", oa.email);
+            if (newEmail) oa.email = newEmail;
+            const newServices = prompt("Nieuwe diensten:", oa.services);
+            if (newServices) oa.services = newServices;
+            renderOnderaannemers();
+        }
 
-        // ==================== INIT ====================
+        function deleteOnderaannemer(id) {
+            if (confirm("Verwijder deze onderaannemer?")) {
+                const oa = onderaannemersList.find(o => o.id === id);
+                if (oa && oa.drivers) {
+                    driversList = driversList.filter(d => d.onderaannemerId !== id);
+                }
+                onderaannemersList = onderaannemersList.filter(o => o.id !== id);
+                renderOnderaannemers();
+                renderDrivers();
+            }
+        }
+
+        // ============================================
+        // 19. SWITCH TAB & DOWNLOAD FUNCTIES
+        // ============================================
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.getAttribute('data-tab') === tabName) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+            const downloadButtons = document.getElementById('downloadButtons');
+            if (tabName === 'history') downloadButtons.classList.remove('hidden');
+            else downloadButtons.classList.add('hidden');
+
+            if (tabName === 'neworders') renderNewOrders();
+            else if (tabName === 'orders') renderOrders();
+            else if (tabName === 'history') renderHistory();
+            else if (tabName === 'agenda') refreshAgenda();
+            else if (tabName === 'drivers') renderDrivers();
+            else if (tabName === 'onderaannemers') renderOnderaannemers();
+            else if (tabName === 'financieel') renderFinance();
+            else if (tabName === 'wiki') renderWiki();
+        }
+
+        function downloadCSV() {
+            const data = historyOrders;
+            const headers = ["ID", "Datum", "Tijd", "Klant", "Route", "Voertuig", "Bedrag", "Betaling"];
+            const rows = data.map(o => [o.id, o.datetime, o.time, o.name, `${o.pickup || ''} → ${o.destination || ''}`, o.vehicle, o.amount, o.payment]);
+            const csvContent = [headers, ...rows].map(row => row.join(";")).join("\n");
+            const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fleet_connect_history_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function downloadJSON() {
+            const blob = new Blob([JSON.stringify(historyOrders, null, 2)], { type: "application/json" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fleet_connect_history_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+        }
+
+        // ============================================
+        // 20. INITIALISATIE
+        // ============================================
         async function init() {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            await loadAllData();
-            await loadFromSupabase();
-            const now = getCurrentNOW();
-            selectedDate = new Date(now);
-            currentMonth = new Date(now);
+            await initSupabase();
+            await laadPendingOrders();
+            filterAndSortData();
+            updateAgendaData();
             refreshAgenda();
-            setInterval(loadFromSupabase, 60000);
+
+            setInterval(async function() {
+                await laadPendingOrders();
+                updateAgendaData();
+                filterAndSortData();
+                if (currentTab === 'agenda') refreshAgenda();
+                else if (currentTab === 'orders') renderOrders();
+                else if (currentTab === 'history') renderHistory();
+                else if (currentTab === 'neworders') renderNewOrders();
+                else if (currentTab === 'financieel') renderFinance();
+            }, 60000);
         }
+
         init();
     </script>
 </body>
