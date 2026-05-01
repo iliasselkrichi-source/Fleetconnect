@@ -3,469 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Fleet Connect - Admin Paneel (Supabase)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Taxi Ritplanner + Admin Paneel</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* --- alle bestaande CSS blijft ongewijzigd --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; height: 100vh; display: flex; }
-        .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; overflow-y: auto; }
-        .logo { padding: 24px 20px; font-size: 1.3rem; font-weight: 700; border-bottom: 1px solid #1e293b; }
-        .logo i { color: #2dd4bf; margin-right: 10px; }
-        .logo small { font-size: 0.7rem; display: block; color: #64748b; margin-top: 4px; }
-        .nav-menu { padding: 20px 16px; }
-        .nav-section { margin-bottom: 20px; }
-        .nav-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; padding: 8px 12px; margin-top: 8px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 12px; font-weight: 500; font-size: 0.9rem; color: #cbd5e1; cursor: pointer; transition: all 0.2s; }
-        .nav-item:hover { background: #1e293b; }
-        .nav-item.active { background: #2dd4bf20; color: #2dd4bf; }
-        .nav-item i { width: 22px; }
-        .main { flex: 1; display: flex; flex-direction: column; overflow: auto; }
-        .header { background: white; padding: 20px 32px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        .header h1 { font-size: 1.5rem; font-weight: 600; }
-        .download-buttons { display: flex; gap: 10px; }
-        .download-btn { background: #0f172a; color: white; border: none; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .content { padding: 32px; }
-        .filter-bar { background: white; padding: 8px 16px; border-radius: 48px; margin-bottom: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid #e2e8f0; }
-        .filter-group { display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 4px 12px; border-radius: 32px; border: 1px solid #e2e8f0; }
-        .filter-group label { font-size: 0.7rem; font-weight: 600; color: #475569; }
-        .filter-group input { border: none; background: transparent; padding: 6px 0; font-family: 'Inter', sans-serif; font-size: 0.8rem; width: 120px; outline: none; }
-        .filter-actions { display: flex; gap: 6px; margin-left: auto; }
-        .filter-actions button { padding: 6px 14px; border-radius: 32px; border: none; cursor: pointer; font-weight: 500; font-size: 0.75rem; }
-        .btn-filter { background: #0f172a; color: white; }
-        .btn-reset { background: #e2e8f0; color: #1e293b; }
-        .orders-table-wrapper { overflow-x: auto; background: white; border-radius: 16px; padding: 20px; }
-        .orders-table { width: 100%; border-collapse: collapse; }
-        .orders-table th { text-align: left; padding: 12px 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.75rem; font-weight: 600; color: #64748b; }
-        .orders-table td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
-        .action-btn { background: #2dd4bf; color: #0f172a; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.75rem; }
-        .delete-btn { background: #ef4444; color: white; margin-left: 8px; }
-        .add-btn { background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.75rem; }
-        .secondary-btn { background: #f59e0b; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.7rem; margin-top: 8px; }
-        .reset-data-btn { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 40px; font-weight: 600; font-size: 0.7rem; margin-top: 20px; cursor: pointer; width: 100%; }
-        .order-count { background: #2dd4bf20; padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 600; color: #0f172a; }
-        .hidden { display: none; }
-        .template-tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
-        .template-T1 { background: #dbeafe; color: #1e40af; }
-        .template-T2 { background: #fef3c7; color: #92400e; }
-        .template-T3 { background: #e0e7ff; color: #3730a3; }
-        .template-T4 { background: #d1fae5; color: #065f46; }
-        .template-T5 { background: #e0f2fe; color: #0369a1; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; border-radius: 20px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; }
-        .fiche-header { background: #0f172a; color: white; padding: 20px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .fiche-header h3 { font-size: 1.2rem; }
-        .close-modal { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .fiche-body { padding: 24px; }
-        .fiche-section { margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; }
-        .fiche-section h4 { color: #2dd4bf; margin-bottom: 12px; font-size: 0.9rem; }
-        .fiche-row { display: flex; padding: 6px 0; font-size: 0.85rem; }
-        .fiche-label { width: 130px; font-weight: 600; color: #475569; }
-        .fiche-value { flex: 1; color: #1e293b; }
-        .fiche-total { background: #f0fdf4; padding: 12px; border-radius: 12px; margin-top: 16px; text-align: center; }
-        .fiche-total .amount { font-size: 1.5rem; font-weight: 700; color: #2dd4bf; }
-        .fiche-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
-        .fiche-btn { padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
-        .fiche-btn.print { background: #e2e8f0; color: #1e293b; }
-        .fiche-btn.json { background: #3b82f6; color: white; }
-        .fiche-btn.confirm { background: #10b981; color: white; }
-        .fiche-btn.assign { background: #f59e0b; color: white; margin-left: 8px; }
-        .fiche-btn.close { background: #ef4444; color: white; }
-        select, .assign-select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; margin-top: 8px; }
-        .assigned-driver { background: #d1fae5; padding: 10px; border-radius: 8px; margin-top: 8px; text-align: center; color: #065f46; font-weight: 500; }
-        .driver-select-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
-        .driver-select-row select { flex: 1; margin-top: 0; }
-        .people-card { background: white; border-radius: 16px; padding: 20px; }
-        .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 16px; }
-        .person-item { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; position: relative; }
-        .person-name { font-weight: 600; font-size: 1rem; margin-bottom: 8px; color: #0f172a; }
-        .person-detail { font-size: 0.8rem; color: #475569; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-        .person-detail i { width: 20px; color: #2dd4bf; }
-        .item-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .stat-card h4 { font-size: 0.75rem; text-transform: uppercase; color: #64748b; margin-bottom: 8px; }
-        .stat-card .value { font-size: 1.8rem; font-weight: 700; }
-        .period-buttons { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .period-btn { padding: 8px 20px; border-radius: 40px; border: none; cursor: pointer; font-weight: 500; background: #e2e8f0; transition: all 0.2s; }
-        .period-btn.active { background: #2dd4bf; color: #0f172a; }
-        .finance-summary { background: #f8fafc; border-radius: 16px; padding: 20px; margin-top: 20px; }
-        .calendar-container { background: white; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-        .calendar-header h2 { font-size: 1.3rem; font-weight: 600; }
-        .calendar-nav { display: flex; gap: 12px; }
-        .calendar-nav button { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; }
-        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; padding: 12px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 8px; }
-        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; position: relative; }
-        .calendar-day:hover { background: #e2e8f0; }
-        .calendar-day.selected { background: #2dd4bf; color: #0f172a; font-weight: 600; }
-        .calendar-day.other-month { color: #94a3b8; }
-        .calendar-day.today { border: 2px solid #2dd4bf; }
-        .calendar-day.has-rides { background: #dbeafe; }
-        .ride-dot { width: 6px; height: 6px; background: #2dd4bf; border-radius: 50%; margin-top: 2px; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
-        .info-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; }
-        .mini-flip-container { perspective: 600px; height: 140px; }
-        .mini-flip-card { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; }
-        .mini-flip-card.flipped { transform: rotateY(180deg); }
-        .mini-flip-front, .mini-flip-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; }
-        .mini-flip-front { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; transform: rotateY(0deg); }
-        .mini-flip-back { background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%); color: #0f172a; transform: rotateY(180deg); }
-        .mini-flip-front .value, .mini-flip-back .value { font-size: 1.8rem; font-weight: 700; margin: 8px 0; }
-        .flip-hint { font-size: 0.6rem; margin-top: 8px; opacity: 0.6; }
-        .stat-card-simple { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 16px; padding: 16px; height: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .planning-container { perspective: 1000px; margin-top: 20px; }
-        .flip-card { background-color: transparent; width: 100%; height: 400px; position: relative; }
-        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; overflow-y: auto; }
-        .flip-card-front { background: white; transform: rotateY(0deg); }
-        .flip-card-back { background: #f8fafc; transform: rotateY(180deg); }
-        .flip-header { background: #0f172a; color: white; padding: 15px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .flip-btn { background: #2dd4bf; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
-        .planning-list { padding: 16px; }
-        .planning-item { background: #f1f5f9; border-radius: 12px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #2dd4bf; }
-        .planning-time { font-weight: 700; }
-        .empty-planning { text-align: center; padding: 40px; color: #94a3b8; }
-        .finance-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
-        .date-range-picker { display: flex; gap: 12px; align-items: center; background: white; padding: 8px 16px; border-radius: 48px; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
-        .chart-container { background: white; border-radius: 16px; padding: 20px; margin-top: 24px; }
-        canvas { max-height: 300px; width: 100% !important; }
-        .export-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
-        .wiki-container { background: white; border-radius: 16px; padding: 24px; }
-        .loading { text-align: center; padding: 40px; color: #64748b; }
-        .no-results { text-align: center; padding: 20px; color: #94a3b8; }
-        @media (max-width: 768px) { .sidebar { width: 220px; } .content { padding: 16px; } }
+        *{margin:0;padding:0;box-sizing:border-box}body{background:#e2e8f0;font-family:system-ui,'Segoe UI',sans-serif;padding:24px}
+        
+        /* Tab navigatie */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: white;
+            border-radius: 60px;
+            padding: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-width: 400px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .tab-btn.active {
+            background: #0066cc;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Bestaande stijlen (ongewijzigd) */
+        .grid-container{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:1fr 1.6fr;gap:28px}.flip-card-left,.flip-card-right{background:0 0;width:100%;perspective:1500px}.flip-card-left-inner,.flip-card-right-inner{position:relative;width:100%;transition:transform .6s;transform-style:preserve-3d;border-radius:32px}.flip-card-left.flipped .flip-card-left-inner{transform:rotateY(180deg)}.flip-card-right.flipped .flip-card-right-inner{transform:rotateY(180deg)}.flip-card-front,.flip-card-back,.map-front,.vehicle-back{position:relative;width:100%;backface-visibility:hidden;background:#fff;border-radius:32px;padding:32px 28px;box-shadow:0 12px 28px rgba(0,0,0,.08)}.flip-card-front{transform:rotateY(0)}.flip-card-back{transform:rotateY(180deg);position:absolute;top:0;left:0}.map-front,.vehicle-back{position:absolute;background:#f8fafc;overflow-y:auto;display:flex;flex-direction:column}.map-front{transform:rotateY(0)}.vehicle-back{transform:rotateY(180deg);background:#fff;padding:28px}#map{width:100%;height:520px}.info-inside-map{background:#fff;margin:20px 24px 24px;padding:18px 20px;border-radius:28px;display:flex;gap:24px;flex-wrap:wrap}.info-card{flex:1;text-align:center;background:#f8fafc;border-radius:24px;padding:16px 12px}.info-card .label{font-size:.85rem;text-transform:uppercase;color:#5b6e8c}.info-card .value{font-size:2.2rem;font-weight:800;color:#0a2540;margin-top:6px}.vehicle-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:28px}.vehicle-card{background:#f1f5f9;border-radius:24px;padding:14px;text-align:center;cursor:pointer;transition:.2s;border:2px solid transparent}.vehicle-card.selected{border-color:#0066cc;background:#e0f2fe}.vehicle-emoji{font-size:2.2rem}.vehicle-name{font-weight:700;font-size:1rem;margin-top:6px}.vehicle-price{font-size:.8rem;color:#475569}.extra-fields{background:#f8fafc;border-radius:24px;padding:18px 20px;margin:20px 0}.extra-fields h3{font-size:1.1rem;margin-bottom:16px}.extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}.extra-field label{font-size:.8rem;font-weight:600;display:block;margin-bottom:6px}.extra-field input{padding:10px 14px;border-radius:28px;border:1px solid #cbd5e1;width:100%;font-size:.9rem}.checkbox-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}.checkbox-grid label{display:flex;align-items:center;gap:10px;font-size:.9rem;background:#fff;padding:10px 12px;border-radius:32px;border:1px solid #e2e8f0;cursor:pointer}textarea{width:100%;padding:10px 14px;border-radius:24px;border:1px solid #cbd5e1;resize:vertical;font-size:.9rem}.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;justify-content:center;align-items:center}.overlay.active{display:flex}.overlay-content{max-width:1500px;width:90%;background:#fff;border-radius:40px;padding:32px 36px;box-shadow:0 30px 60px rgba(0,0,0,.4);position:relative;max-height:85vh;overflow-y:auto}.close-overlay{position:sticky;top:0;float:right;font-size:36px;cursor:pointer;background:0 0;border:none;font-weight:700;color:#475569;margin-bottom:10px}.close-overlay:hover{color:#b91c1c}.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin:24px 0 20px;clear:both}.summary-section{background:#f8fafc;border-radius:28px;padding:20px 22px}.summary-section h3{font-size:1.2rem;margin-bottom:16px;color:#0f172a;border-left:4px solid #0066cc;padding-left:14px}.summary-line{margin:10px 0;font-size:.95rem;line-height:1.4}.payment-method{margin:20px 0 24px;display:flex;gap:32px;flex-wrap:wrap;align-items:center;background:#f1f5f9;padding:16px 24px;border-radius:40px}.payment-method span{font-weight:600;font-size:1rem}.payment-method label{display:inline-flex;align-items:center;gap:10px;font-weight:400;cursor:pointer;font-size:1rem}.overlay-actions{display:flex;gap:20px;margin-top:24px;justify-content:flex-end}.btn-confirm{background:#0066cc}.btn-cancel{background:#64748b}.btn-confirm,.btn-cancel{padding:14px 32px;font-size:1rem;border-radius:48px;border:none;color:#fff;font-weight:700;cursor:pointer}.payment-link-btn{background:#2c3e50;margin-left:10px}.hint{font-size:.75rem;color:#6c7a8e;margin-top:8px}@media (max-width:900px){.summary-grid{grid-template-columns:1fr}.overlay-content{padding:24px}}h1{font-size:1.9rem;margin-bottom:8px;color:#0f172a}h2{font-size:1.7rem;margin-bottom:20px}.sub{color:#475569;border-left:4px solid #0066cc;padding-left:16px;margin-bottom:28px;font-size:.95rem}.field{margin-bottom:24px}label{font-weight:600;margin-bottom:8px;display:block;font-size:.85rem}.required-star{color:#e53e3e}input,.datetime-local,select,textarea{width:100%;padding:12px 16px;border:1px solid #cbd5e1;border-radius:28px;font-size:.95rem}.suggest-wrapper{position:relative}.suggestions{position:absolute;background:#fff;border:1px solid #cbd5e1;border-top:none;max-height:220px;overflow-y:auto;width:100%;z-index:1000;border-radius:0 0 24px 24px;display:none}.suggestion-item{padding:10px 16px;cursor:pointer;font-size:.9rem}.suggestion-item:hover{background:#f1f5f9}.roundtrip-box{background:#f8fafc;border-radius:32px;padding:14px 20px;margin:16px 0 20px;display:flex;align-items:center;gap:16px}button{background:#0066cc;color:#fff;border:none;padding:14px 24px;border-radius:48px;font-weight:700;cursor:pointer;margin-top:12px;font-size:1rem}button:disabled{background:#94a3b8}.error{background:#fee2e2;color:#b91c1c;padding:12px;border-radius:28px;margin:16px 0 0;display:none;font-size:.85rem}.urgent-whatsapp{background:#dcfce7;border-left:5px solid #25d366;border-radius:28px;padding:14px 20px;margin-top:16px;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap}.urgent-whatsapp.show{display:flex}.whatsapp-btn{background:#25d366;color:#fff;text-decoration:none;padding:8px 20px;border-radius:48px;font-weight:700;font-size:.9rem}.footnote{text-align:center;font-size:.7rem;color:#6c7a8e;margin-top:18px}.back-button{background:#64748b;margin-bottom:24px}.full-width{width:100%}
+        
+        /* Admin paneel stijlen */
+        .admin-container {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            box-shadow: 0 12px 28px rgba(0,0,0,.08);
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .admin-table th, .admin-table td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        .admin-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        .admin-table tr.pending { background: #fff3cd; }
+        .admin-table tr.confirmed { background: #d4edda; }
+        .admin-table tr.cancelled { background: #f8d7da; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #ffc107; color: #000; }
+        .status-confirmed { background: #28a745; color: #fff; }
+        .status-cancelled { background: #dc3545; color: #fff; }
+        .status-completed { background: #6c757d; color: #fff; }
+        .admin-actions button {
+            padding: 4px 8px;
+            margin: 0 2px;
+            font-size: 0.7rem;
+        }
+        .refresh-btn {
+            margin-bottom: 16px;
+            background: #475569;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        .admin-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 12px 20px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0066cc;
+        }
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: #475569;
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo"><i class="fas fa-truck"></i> Fleet Connect<br><small>Supabase Cloud</small></div>
-        <div class="nav-menu">
-            <div class="nav-section"><div class="nav-section-title">📋 BOEKINGEN</div>
-                <div class="nav-item" data-tab="neworders" onclick="switchTab('neworders')"><i class="fas fa-clipboard-list"></i> New Orders</div>
-                <div class="nav-item" data-tab="orders" onclick="switchTab('orders')"><i class="fas fa-box"></i> Orders</div>
-                <div class="nav-item" data-tab="history" onclick="switchTab('history')"><i class="fas fa-history"></i> History</div>
-                <div class="nav-item active" data-tab="agenda" onclick="switchTab('agenda')"><i class="fas fa-calendar-alt"></i> Agenda</div>
+
+<!-- Tab navigatie -->
+<div class="tabs">
+    <button class="tab-btn active" data-tab="booking">🚖 Boeking</button>
+    <button class="tab-btn" data-tab="admin">📊 Admin Paneel</button>
+</div>
+
+<!-- Tab 1: Boekingsomgeving (volledig origineel) -->
+<div id="tab-booking" class="tab-content active">
+    <div class="grid-container">
+        <div class="flip-card-left" id="flipCardLeft"><div class="flip-card-left-inner">
+            <div class="flip-card-front">
+                <h1>🚖 Ritplanner</h1><div class="sub">België – €1/km | geen verleden / &lt; 1u → WhatsApp</div>
+                <div class="field"><label>📍 Ophaaladres <span class="required-star">*</span></label><div class="suggest-wrapper" id="pickupWrap"><input type="text" id="pickupInput" placeholder="bv. Gent" autocomplete="off"><div id="pickupSuggest" class="suggestions"></div></div></div>
+                <div class="field"><label>🏁 Afzetadres <span class="required-star">*</span></label><div class="suggest-wrapper" id="dropoffWrap"><input type="text" id="dropoffInput" placeholder="bv. Brussel" autocomplete="off"><div id="dropoffSuggest" class="suggestions"></div></div></div>
+                <div class="roundtrip-box"><input type="checkbox" id="roundtripCheckbox"><label for="roundtripCheckbox">🔄 Heen en terug rit</label><span style="font-size:.8rem;">(x2)</span></div>
+                <div class="field"><label>✈️ Vluchtnummer (optioneel)</label><input type="text" id="flightNumber" placeholder="bv. BA398"></div>
+                <div class="field"><label>📅 Datum & tijd</label><input type="datetime-local" id="datetime"></div>
+                <button id="calcAndFlipBtn" class="full-width">📊 Bereken uw rit</button>
+                <div id="errorMsg" class="error"></div>
+                <div id="urgentWhatsApp" class="urgent-whatsapp"><span>⚠️ Vertrekt binnen het uur – WhatsApp</span><a href="https://wa.me/32470123456?text=Ik%20wil%20een%20dringende%20taxi%20boeken" target="_blank" class="whatsapp-btn">📱 WhatsApp nu</a></div>
+                <div class="footnote">* Verplicht · Na berekening → uw gegevens</div>
             </div>
-            <div class="nav-section"><div class="nav-section-title">👥 BEHEER</div>
-                <div class="nav-item" data-tab="drivers" onclick="switchTab('drivers')"><i class="fas fa-id-card"></i> Drivers</div>
-                <div class="nav-item" data-tab="onderaannemers" onclick="switchTab('onderaannemers')"><i class="fas fa-handshake"></i> Onderaannemers</div>
+            <div class="flip-card-back">
+                <h1>📋 Uw gegevens</h1><div class="sub">Vul uw contactgegevens in</div>
+                <div class="field"><label>Naam <span class="required-star">*</span></label><input type="text" id="firstName" placeholder="Voornaam"></div>
+                <div class="field"><label>Achternaam <span class="required-star">*</span></label><input type="text" id="lastName" placeholder="Achternaam"></div>
+                <div class="field"><label>GSM <span class="required-star">*</span></label><input type="tel" id="phone" placeholder="+32 4xx xx xx xx"></div>
+                <div class="field"><label>E-mail <span class="required-star">*</span></label><input type="email" id="email" placeholder="info@voorbeeld.be"></div>
+                <div class="field"><label>BTW (optioneel)</label><input type="text" id="vat" placeholder="BE 0123.456.789"></div>
+                <button id="reserveBtn" class="full-width">✅ Reserveer rit</button>
+                <button id="backToPlannerBtn" class="back-button full-width">◀ Terug naar ritplanner</button>
+                <div id="backErrorMsg" class="error"></div>
             </div>
-            <div class="nav-section"><div class="nav-section-title">💰 FINANCIËN</div>
-                <div class="nav-item" data-tab="financieel" onclick="switchTab('financieel')"><i class="fas fa-chart-line"></i> Financieel</div>
+        </div></div>
+
+        <div class="flip-card-right" id="flipCardRight"><div class="flip-card-right-inner">
+            <div class="map-front"><div id="map"></div><div class="info-inside-map"><div class="info-card"><div class="label">📏 Afstand</div><div class="value" id="distVal">—</div><small>km</small></div><div class="info-card"><div class="label">⏱️ Reistijd</div><div class="value" id="timeVal">—</div><small>min</small></div><div class="info-card"><div class="label">💰 Prijs</div><div class="value" id="priceVal">—</div><small>€</small></div></div></div>
+            <div class="vehicle-back">
+                <h2>🚘 Kies uw voertuig</h2><div class="vehicle-grid" id="vehicleGrid"><div class="vehicle-card" data-vehicle="Standaard" data-extraprice="0"><div class="vehicle-emoji">🚗</div><div class="vehicle-name">Standaard</div><div class="vehicle-price">geen meerprijs</div></div><div class="vehicle-card" data-vehicle="Break" data-extraprice="5"><div class="vehicle-emoji">🚙</div><div class="vehicle-name">Break</div><div class="vehicle-price">+ €5</div></div><div class="vehicle-card" data-vehicle="Exclusieve" data-extraprice="15"><div class="vehicle-emoji">🚘</div><div class="vehicle-name">Exclusieve</div><div class="vehicle-price">+ €15</div></div><div class="vehicle-card" data-vehicle="Mini Van" data-extraprice="10"><div class="vehicle-emoji">🚐</div><div class="vehicle-name">Mini Van</div><div class="vehicle-price">+ €10</div></div></div>
+                <div class="extra-fields"><h3>➕ Extra opties</h3><div class="extra-grid"><div class="extra-field"><label>👥 Aantal passagiers</label><input type="number" id="passengers" min="1" value="1"></div><div class="extra-field"><label>🧳 Bagagestuks</label><input type="number" id="luggage" min="0" value="0"></div></div>
+                <div class="checkbox-grid"><label><input type="checkbox" id="meetGreet"> 🤝 Meet & Greet</label><label><input type="checkbox" id="kissRide"> 💋 Kiss & Ride</label><label><input type="checkbox" id="waterBottle"> 💧 Waterfles</label><label><input type="checkbox" id="wifi"> 📶 WiFi</label></div>
+                <div class="extra-field"><label>📝 Speciale wensen</label><textarea id="specialWishes" rows="2" placeholder="bv. kinderzitje"></textarea></div></div>
+                <button id="confirmVehicleBtn" class="full-width" disabled>Bevestig voertuig en opties</button>
+                <button id="backToMapBtn" class="full-width" style="background:#475569;">◀ Terug naar kaart</button><div id="vehicleError" class="error"></div>
             </div>
-            <div class="nav-section"><div class="nav-section-title">ℹ️ INFORMATIE</div>
-                <div class="nav-item" data-tab="wiki" onclick="switchTab('wiki')"><i class="fas fa-robot"></i> Wiki Agent</div>
-            </div>
-            <div class="nav-section">
-                <button class="reset-data-btn" onclick="resetToDemoData()"><i class="fas fa-undo-alt"></i> Reset naar demo (Supabase)</button>
-            </div>
+        </div></div>
+    </div>
+</div>
+
+<!-- Tab 2: Admin Paneel - Ontvangt data uit Supabase -->
+<div id="tab-admin" class="tab-content">
+    <div class="admin-container">
+        <h1>📊 Besturingspaneel</h1>
+        <div class="sub">Nieuwe boekingen worden automatisch weergegeven</div>
+        
+        <div class="admin-stats" id="adminStats">
+            <div class="stat-card"><div class="number" id="totalOrders">0</div><div class="label">Totaal</div></div>
+            <div class="stat-card"><div class="number" id="pendingOrders">0</div><div class="label">In afwachting</div></div>
+            <div class="stat-card"><div class="number" id="todayOrders">0</div><div class="label">Vandaag</div></div>
+        </div>
+        
+        <button id="refreshOrdersBtn" class="refresh-btn">🔄 Ververs</button>
+        
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Datum/Tijd</th>
+                        <th>Naam</th>
+                        <th>Contact</th>
+                        <th>Ophalen</th>
+                        <th>Bestemming</th>
+                        <th>Voertuig</th>
+                        <th>Bedrag</th>
+                        <th>Status</th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr><td colspan="10" style="text-align:center;">Laden van orders...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
-    <div class="main">
-        <div class="header">
-            <h1 id="pageTitle">Agenda</h1>
-            <div class="download-buttons hidden" id="downloadButtons">
-                <button class="download-btn" onclick="downloadCSV()"><i class="fas fa-file-csv"></i> CSV</button>
-                <button class="download-btn" onclick="downloadJSON()"><i class="fas fa-code"></i> JSON</button>
-            </div>
-        </div>
-        <div class="content" id="contentArea"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Gegevens laden uit Supabase...</div></div>
+</div>
+
+<div id="summaryOverlay" class="overlay"><div class="overlay-content"><button class="close-overlay" id="closeOverlayBtn">&times;</button><h2 style="margin-top:0;clear:both">📋 Samenvatting reservatie</h2><div id="overlaySummary" class="summary-grid"></div>
+    <div class="payment-method"><span>💰 Betaalmethode:</span><label><input type="radio" name="payment" value="Cash" checked> 💵 Cash</label><label><input type="radio" name="payment" value="Kaart" id="paymentCard"> 💳 Kaart</label><label><input type="radio" name="payment" value="App" id="paymentApp"> 📱 App</label>
+        <span id="paymentLinkPlaceholder" style="margin-left:auto"></span>
     </div>
+    <div class="overlay-actions"><button id="cancelOverlayBtn" class="btn-cancel">Annuleer</button><button id="confirmBookingBtn" class="btn-confirm">✅ Bevestig boeking</button></div>
+    <div class="hint">📌 Bij betaling met Kaart of App wordt een betaallink getoond (demo).</div>
+</div></div>
 
-    <div id="bookingModal" class="modal"><div class="modal-content"><div class="fiche-header"><h3><i class="fas fa-file-invoice"></i> Boekingsfiche</h3><button class="close-modal" onclick="closeModal()">&times;</button></div><div class="fiche-body" id="ficheBody"></div></div></div>
-
-    <script>
-        // ==================== SUPABASE CONFIG ====================
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    (function(){
+        // ========== SUPABASE CONFIGURATIE - INGEVULD MET ECHTE SLEUTELS ==========
         const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5hdl73a9-jNd9n3lnsYVyQ_dMYgiSLA';
-        let supabase = null;
-        let useSupabase = true;  // valt terug naar localStorage bij fouten
+        // =========================================================================
 
-        // ==================== GLOBALE DATA (in-memory cache) ====================
-        let rawNewOrders = [];      // status = 'pending'
-        let rawConfirmedOrders = []; // status = 'confirmed'
-        let driversList = [];
-        let onderaannemersList = [];
-        let allRides = [];
-        let selectedDate = null, currentMonth = null, isFlipped = false;
-        let flipStates = { omzet: false, cash: false, orders: false };
-        let newOrders = [], ordersList = [], historyOrders = [];
-        let currentTab = 'agenda';
-        let currentSelectedOrder = null, selectedDriverId = null;
-        let financePeriod = 'month', customStartDate = null, customEndDate = null, financeChart = null;
-
-        // ==================== HULPFUNCTIES ====================
-        function getCurrentNOW() { return new Date(); }
-        function parseDateTime(dateStr, timeStr) {
-            const parts = dateStr.split('-');
-            const timeParts = timeStr ? timeStr.split(':') : ['00','00'];
-            return new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]), parseInt(timeParts[0]), parseInt(timeParts[1]));
-        }
-        function isOrderInFuture(order) {
-            return parseDateTime(order.datetime, order.time) > getCurrentNOW();
-        }
-        function updateAgendaData() {
-            allRides = rawConfirmedOrders.map(order => ({
-                id: order.id, date: order.datetime, time: order.time, name: order.name,
-                pickup: order.pickup, destination: order.destination, vehicle: order.vehicle,
-                driver: order.assignedDriver, amount: order.amount, template: order.template,
-                completed: order.completed || false, canceled: order.canceled || false, payment: order.payment
-            }));
-        }
-        function filterAndSortData() {
-            const now = getCurrentNOW();
-            newOrders = rawNewOrders.filter(o => isOrderInFuture(o));
-            ordersList = [];
-            historyOrders = [];
-            rawConfirmedOrders.forEach(order => {
-                if (isOrderInFuture(order)) ordersList.push({...order});
-                else historyOrders.push({...order});
-            });
-            ordersList.sort((a,b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
-            historyOrders.sort((a,b) => parseDateTime(b.datetime, b.time) - parseDateTime(a.datetime, a.time));
-        }
-
-        // ==================== SUPABASE CRUD ====================
-        async function loadAllFromSupabase() {
-            if (!supabase) return false;
+        // ========== ADMIN PANEEL FUNCTIES ==========
+        let allOrders = [];
+        
+        async function loadAdminOrders() {
             try {
-                // Laad alle boekingen
-                const { data: bookings, error: bErr } = await supabase.from('bookings').select('*');
-                if (bErr) throw bErr;
-                const { data: drivers, error: dErr } = await supabase.from('drivers').select('*');
-                if (dErr) throw dErr;
-                const { data: subs, error: sErr } = await supabase.from('subcontractors').select('*');
-                if (sErr) throw sErr;
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings?select=*&order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                allOrders = data;
+                renderOrdersTable();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Fout bij laden orders:', error);
+                document.getElementById('ordersTableBody').innerHTML = `<tr><td colspan="10" style="text-align:center;">❌ Fout bij laden: ${error.message}<br><br>Controleer Supabase URL en Anon Key</td></tr>`;
+            }
+        }
+        
+        function renderOrdersTable() {
+            const tbody = document.getElementById('ordersTableBody');
+            if (!allOrders.length) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">📭 Geen boekingen gevonden</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            allOrders.forEach(order => {
+                const row = tbody.insertRow();
+                row.className = order.status;
+                
+                row.insertCell(0).innerHTML = `<strong>${order.id}</strong>`;
+                row.insertCell(1).innerHTML = `${order.datetime || ''}<br><small>${order.time || ''}</small>`;
+                row.insertCell(2).innerHTML = order.name || '-';
+                row.insertCell(3).innerHTML = `${order.phone || ''}<br><small>${order.email || ''}</small>`;
+                row.insertCell(4).innerHTML = order.pickup || '-';
+                row.insertCell(5).innerHTML = order.destination || '-';
+                row.insertCell(6).innerHTML = order.vehicle || '-';
+                row.insertCell(7).innerHTML = `€ ${parseFloat(order.amount).toFixed(2)}`;
+                row.insertCell(8).innerHTML = `<span class="status-badge status-${order.status}">${order.status}</span>`;
+                
+                // Acties knoppen
+                const actionsCell = row.insertCell(9);
+                actionsCell.className = 'admin-actions';
+                actionsCell.innerHTML = `
+                    <button onclick="updateOrderStatus('${order.id}', 'confirmed')" class="btn-confirm" style="padding:4px 8px; font-size:0.7rem;">✅ Bevestig</button>
+                    <button onclick="updateOrderStatus('${order.id}', 'cancelled')" class="btn-cancel" style="padding:4px 8px; font-size:0.7rem;">❌ Annuleer</button>
+                `;
+            });
+        }
+        
+        function updateStats() {
+            const total = allOrders.length;
+            const pending = allOrders.filter(o => o.status === 'pending').length;
+            const today = allOrders.filter(o => o.datetime === new Date().toISOString().split('T')[0]).length;
+            
+            document.getElementById('totalOrders').innerText = total;
+            document.getElementById('pendingOrders').innerText = pending;
+            document.getElementById('todayOrders').innerText = today;
+        }
+        
+        window.updateOrderStatus = async function(id, newStatus) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                alert(`✅ Order ${id} is ${newStatus === 'confirmed' ? 'bevestigd' : 'geannuleerd'}`);
+                loadAdminOrders(); // Herlaad de lijst
+                
+            } catch (error) {
+                console.error('Fout bij updaten:', error);
+                alert(`❌ Fout bij updaten: ${error.message}`);
+            }
+        };
+        
+        // ========== NIEUWE sendToSupabase FUNCTIE (vervangen) ==========
+        async function sendToSupabase(record, paymentMethod) {
+            console.log('📦 Verzenden naar Supabase:', record);
 
-                rawNewOrders = bookings.filter(b => b.status === 'pending');
-                rawConfirmedOrders = bookings.filter(b => b.status === 'confirmed');
-                driversList = drivers || [];
-                onderaannemersList = (subs || []).map(s => ({ ...s, drivers: driversList.filter(d => d.onderaannemer_id === s.id) }));
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify(record)
+                });
+
+                if (!response.ok) {
+                    // Probeer foutmelding te lezen als tekst
+                    const errorText = await response.text();
+                    console.error('❌ Supabase fout response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText || 'Geen verdere details'}`);
+                }
+
+                // Controleer of er een body is voordat we json() proberen
+                const contentType = response.headers.get('content-type');
+                let data = null;
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                    console.log('✅ Supabase response:', data);
+                } else {
+                    console.log('✅ Supabase insert geslaagd (geen JSON body)');
+                }
+
+                alert(`✅ Boeking succesvol opgeslagen!\n\nID: ${record.id}\nStatus: pending`);
+
+                // Ververs admin paneel als actief
+                if (document.getElementById('tab-admin')?.classList.contains('active')) {
+                    loadAdminOrders();
+                }
                 return true;
-            } catch(e) {
-                console.warn('Supabase load error, falling back to localStorage', e);
+
+            } catch (error) {
+                console.error('❌ Supabase fout:', error);
+                alert(`❌ Fout bij opslaan: ${error.message}\n\nControleer:\n- Supabase URL en Anon Key\n- Tabel 'bookings' bestaat\n- Kolom 'id' is van type TEXT\n- RLS policies staan INSERT toe`);
                 return false;
             }
         }
+        // ========== EINDE VERVANGEN FUNCTIE ==========
 
-        async function saveBookingToSupabase(booking, isNew = false) {
-            if (!supabase) return false;
-            try {
-                if (isNew) {
-                    const { error } = await supabase.from('bookings').insert([booking]);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabase.from('bookings').update(booking).eq('id', booking.id);
-                    if (error) throw error;
-                }
-                return true;
-            } catch(e) { console.error('Supabase save error', e); return false; }
+        // ========== ORIGINELE BOEKINGS FUNCTIES (volledig behouden) ==========
+        let map,pickupCoord=null,dropoffCoord=null,routeLayer=null,pickupMarker=null,dropoffMarker=null,currentRouteData=null,currentRoundTrip=false,currentFlight="",currentDateTime="",selectedVehicle=null,selectedVehicleExtra=0;
+
+        function generateBookingId() {
+            const now=new Date();
+            const yyyy=now.getFullYear();
+            const mm=String(now.getMonth()+1).padStart(2,'0');
+            const dd=String(now.getDate()).padStart(2,'0');
+            const today=`${yyyy}${mm}${dd}`;
+            let counter=parseInt(localStorage.getItem('bookingCounter') || '0');
+            counter++;
+            localStorage.setItem('bookingCounter',counter);
+            const formatted=String(counter).padStart(3,'0');
+            return `FX-${today}-${formatted}`;
         }
 
-        async function deleteBookingFromSupabase(bookingId) {
-            if (!supabase) return false;
-            try {
-                const { error } = await supabase.from('bookings').delete().eq('id', bookingId);
-                if (error) throw error;
-                return true;
-            } catch(e) { return false; }
+        function getExtrasString(){
+            const extras=[];
+            if(document.getElementById('meetGreet').checked) extras.push("Meet & Greet");
+            if(document.getElementById('kissRide').checked) extras.push("Kiss & Ride");
+            if(document.getElementById('waterBottle').checked) extras.push("Waterfles");
+            if(document.getElementById('wifi').checked) extras.push("WiFi");
+            return extras.join(", ") || "Geen";
         }
 
-        async function saveDriverToSupabase(driver, isNew = false) {
-            if (!supabase) return false;
-            try {
-                if (isNew) await supabase.from('drivers').insert([driver]);
-                else await supabase.from('drivers').update(driver).eq('id', driver.id);
-                return true;
-            } catch(e) { return false; }
-        }
-
-        async function saveSubcontractorToSupabase(sub, isNew = false) {
-            if (!supabase) return false;
-            try {
-                if (isNew) await supabase.from('subcontractors').insert([sub]);
-                else await supabase.from('subcontractors').update(sub).eq('id', sub.id);
-                return true;
-            } catch(e) { return false; }
-        }
-
-        async function deleteSubcontractorFromSupabase(id) {
-            if (!supabase) return false;
-            try {
-                await supabase.from('subcontractors').delete().eq('id', id);
-                return true;
-            } catch(e) { return false; }
-        }
-
-        // ==================== PERSISTENTIE (Supabase eerst, fallback localStorage) ====================
-        async function persistAll() {
-            if (useSupabase && supabase) {
-                // Voor elk gewijzigd item moeten we updates doen, maar we doen nu een bulk sync
-                // Eenvoudig: alle huidige data naar Supabase sturen (upsert)
-                for (let b of [...rawNewOrders, ...rawConfirmedOrders]) await saveBookingToSupabase(b);
-                for (let d of driversList) await saveDriverToSupabase(d);
-                for (let s of onderaannemersList) await saveSubcontractorToSupabase(s);
-            } else {
-                // Fallback naar localStorage
-                localStorage.setItem('fleet_rawNewOrders', JSON.stringify(rawNewOrders));
-                localStorage.setItem('fleet_rawConfirmedOrders', JSON.stringify(rawConfirmedOrders));
-                localStorage.setItem('fleet_driversList', JSON.stringify(driversList));
-                localStorage.setItem('fleet_onderaannemersList', JSON.stringify(onderaannemersList));
+        function buildSupabaseRecord(paymentMethod, finalAmount){
+            const nameRaw=document.getElementById('firstName').value.trim();
+            const lastNameRaw=document.getElementById('lastName').value.trim();
+            const fullName=`${nameRaw} ${lastNameRaw}`;
+            const emailRaw=document.getElementById('email').value.trim();
+            const phoneRaw=document.getElementById('phone').value.trim();
+            const pickupRaw=document.getElementById('pickupInput').value;
+            const destRaw=document.getElementById('dropoffInput').value;
+            const vehicleRaw=selectedVehicle;
+            const extrasRaw=getExtrasString();
+            const dtRaw=document.getElementById('datetime').value;
+            let datePart="", timePart="";
+            if(dtRaw){
+                const parts=dtRaw.split('T');
+                datePart=parts[0].split('-').reverse().join('-');
+                timePart=parts[1]?.substring(0,5) || "";
             }
+            return {
+                id: generateBookingId(),
+                template: "T1",
+                datetime: datePart,
+                time: timePart,
+                name: fullName,
+                email: emailRaw,
+                phone: phoneRaw,
+                pickup: pickupRaw,
+                destination: destRaw,
+                vehicle: vehicleRaw,
+                extras: extrasRaw,
+                amount: parseFloat(finalAmount),
+                payment: paymentMethod,
+                status: "pending"
+            };
         }
 
-        async function loadAllData() {
-            if (supabase) {
-                const ok = await loadAllFromSupabase();
-                if (!ok) {
-                    useSupabase = false;
-                    loadFromLocalStorageFallback();
-                }
-            } else {
-                loadFromLocalStorageFallback();
-            }
-            // Zorg dat onderaannemer.drivers up-to-date is
-            onderaannemersList.forEach(oa => {
-                oa.drivers = driversList.filter(d => d.onderaannemer_id === oa.id);
+        // Rest van de originele functies (ongewijzigd)
+        async function fetchAddresses(q,wid){if(q.length<3){clearSuggestions(wid);return}const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=0&countrycodes=be&accept-language=nl`;try{const r=await fetch(url,{headers:{'User-Agent':'TaxiPlanner/22.0'}});if(!r.ok)throw new Error();const d=await r.json();if(!d.length){showNoResults(wid);return}showSuggestions(d.map(p=>({text:p.display_name,lat:parseFloat(p.lat),lon:parseFloat(p.lon)})),wid)}catch{showErrorSuggestion(wid,'Netwerkfout')}}
+        function showSuggestions(s,wid){const w=document.getElementById(wid),sd=w.querySelector('.suggestions');sd.innerHTML='';s.forEach(sug=>{const div=document.createElement('div');div.className='suggestion-item';div.textContent=sug.text.length>80?sug.text.slice(0,80)+'…':sug.text;div.onclick=()=>{w.querySelector('input').value=sug.text;setCoord(sug.lat,sug.lon,wid);sd.style.display='none'};sd.appendChild(div)});sd.style.display='block'}
+        function setCoord(lat,lon,wid){if(wid==='pickupWrap')pickupCoord={lat,lon};else dropoffCoord={lat,lon}}
+        function clearSuggestions(wid){const el=document.getElementById(wid)?.querySelector('.suggestions');if(el)el.style.display='none'}
+        function showNoResults(wid){showTempMsg(wid,'Geen adres in België')}
+        function showErrorSuggestion(wid,msg){showTempMsg(wid,msg)}
+        function showTempMsg(wid,msg){const w=document.getElementById(wid),sd=w.querySelector('.suggestions');sd.innerHTML=`<div class="suggestion-item" style="color:#b91c1c;">❌ ${msg}</div>`;sd.style.display='block';setTimeout(()=>{if(sd.style.display==='block')sd.style.display='none'},2500)}
+        async function calcRoute(lat1,lon1,lat2,lon2){const oUrl=`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;try{const r=await fetch(oUrl);if(r.status===429)throw new Error();const d=await r.json();if(d.code==='Ok'&&d.routes.length){const rt=d.routes[0];return{distanceKm:(rt.distance/1000).toFixed(1),durationMin:Math.round(rt.duration/60),geometry:rt.geometry}}}catch(e){}const ghUrl=`https://graphhopper.com/api/1/route?point=${lat1},${lon1}&point=${lat2},${lon2}&vehicle=car&locale=nl&points_encoded=false&key=`;try{const r=await fetch(ghUrl);const d=await r.json();if(d.paths&&d.paths.length){const p=d.paths[0];const distKm=(p.distance/1000).toFixed(1),timeMin=Math.round(p.time/60000),coords=p.points.coordinates.map(c=>[c[1],c[0]]);return{distanceKm:distKm,durationMin:timeMin,geometry:{type:"LineString",coordinates:coords}}}}catch(e){}return null}
+        function isPast(ds){if(!ds)return false;return new Date(ds)<new Date()}
+        function isWithinNextHour(ds){if(!ds)return false;const diff=new Date(ds)-new Date();return diff>0&&diff<3600000}
+        function showErrorMsg(msg,isBack=false){const el=isBack?document.getElementById('backErrorMsg'):document.getElementById('errorMsg');el.innerText=msg;el.style.display='block';setTimeout(()=>el.style.display='none',5000)}
+        async function updateMapAndInfo(rd){if(!rd)return;if(pickupMarker)map.removeLayer(pickupMarker);if(dropoffMarker)map.removeLayer(dropoffMarker);pickupMarker=L.marker([pickupCoord.lat,pickupCoord.lon]).addTo(map).bindPopup('📍 Ophalen');dropoffMarker=L.marker([dropoffCoord.lat,dropoffCoord.lon]).addTo(map).bindPopup('🏁 Afzetten');map.fitBounds([[pickupCoord.lat,pickupCoord.lon],[dropoffCoord.lat,dropoffCoord.lon]],{padding:[50,50]});if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.geoJSON(rd.geometry,{color:'#0066cc',weight:5}).addTo(map);let d=parseFloat(rd.distanceKm),t=rd.durationMin;if(currentRoundTrip){d*=2;t*=2}const p=d*1.0;document.getElementById('distVal').innerText=d.toFixed(1);document.getElementById('timeVal').innerText=t;document.getElementById('priceVal').innerText=p.toFixed(2)}
+        async function onCalcAndFlip(){const pi=document.getElementById('pickupInput'),di=document.getElementById('dropoffInput');if(!pi.value.trim()){showErrorMsg('Ophaaladres verplicht.');return}if(!di.value.trim()){showErrorMsg('Afzetadres verplicht.');return}if(!pickupCoord||!dropoffCoord){showErrorMsg('Selecteer adressen uit suggesties.');return}const dt=document.getElementById('datetime').value;if(!dt){showErrorMsg('Kies datum/tijd.');return}if(isPast(dt)){showErrorMsg('❌ Geen ritten in verleden.');return}const urgent=isWithinNextHour(dt),urgentDiv=document.getElementById('urgentWhatsApp');urgent?urgentDiv.classList.add('show'):urgentDiv.classList.remove('show');const btn=document.getElementById('calcAndFlipBtn');btn.disabled=true;btn.textContent='📡 Route berekenen...';const rd=await calcRoute(pickupCoord.lat,pickupCoord.lon,dropoffCoord.lat,dropoffCoord.lon);if(!rd){showErrorMsg('Route mislukt.');btn.disabled=false;btn.textContent='📊 Bereken uw rit';return}currentRouteData=rd;currentRoundTrip=document.getElementById('roundtripCheckbox').checked;currentFlight=document.getElementById('flightNumber').value;currentDateTime=dt;await updateMapAndInfo(rd);document.getElementById('flipCardLeft').classList.add('flipped');btn.disabled=false;btn.textContent='📊 Bereken uw rit';document.getElementById('errorMsg').style.display='none'}
+        function onReserve(){const fn=document.getElementById('firstName').value.trim(),ln=document.getElementById('lastName').value.trim(),ph=document.getElementById('phone').value.trim(),em=document.getElementById('email').value.trim();if(!fn||!ln||!ph||!em){showErrorMsg('Vul alle verplichte velden in.',true);return}if(!currentRouteData){showErrorMsg('Geen ritgegevens.',true);return}selectedVehicle=null;document.querySelectorAll('.vehicle-card').forEach(c=>c.classList.remove('selected'));document.getElementById('confirmVehicleBtn').disabled=true;document.getElementById('vehicleError').style.display='none';document.getElementById('flipCardRight').classList.add('flipped')}
+        function initVehicleSelection(){document.querySelectorAll('.vehicle-card').forEach(card=>{card.addEventListener('click',()=>{document.querySelectorAll('.vehicle-card').forEach(c=>c.classList.remove('selected'));card.classList.add('selected');selectedVehicle=card.getAttribute('data-vehicle');selectedVehicleExtra=parseInt(card.getAttribute('data-extraprice'))||0;document.getElementById('confirmVehicleBtn').disabled=false})})}
+        function buildSummaryHTML(){const fn=document.getElementById('firstName').value.trim(),ln=document.getElementById('lastName').value.trim(),ph=document.getElementById('phone').value.trim(),em=document.getElementById('email').value.trim(),vat=document.getElementById('vat').value.trim(),pu=document.getElementById('pickupInput').value,doff=document.getElementById('dropoffInput').value,pax=document.getElementById('passengers').value,lag=document.getElementById('luggage').value,mg=document.getElementById('meetGreet').checked?'Ja':'Nee',kr=document.getElementById('kissRide').checked?'Ja':'Nee',wb=document.getElementById('waterBottle').checked?'Ja':'Nee',wf=document.getElementById('wifi').checked?'Ja':'Nee',sw=document.getElementById('specialWishes').value.trim()||"Geen";let d=parseFloat(currentRouteData.distanceKm),t=currentRouteData.durationMin;if(currentRoundTrip){d*=2;t*=2}const base=d*1.0,total=base+selectedVehicleExtra,urg=isWithinNextHour(currentDateTime)?" (spoed)":"",rt=currentRoundTrip?"Heen en terug":"Enkele rit";return`<div class="summary-section"><h3>🚖 Rit</h3><div class="summary-line"><strong>📍</strong> ${pu}</div><div class="summary-line"><strong>🏁</strong> ${doff}</div><div class="summary-line"><strong>🔄</strong> ${rt}</div><div class="summary-line"><strong>📅</strong> ${currentDateTime}${urg}</div><div class="summary-line"><strong>✈️</strong> ${currentFlight||"geen"}</div></div><div class="summary-section"><h3>👤 Klant</h3><div class="summary-line"><strong>Naam:</strong> ${fn} ${ln}</div><div class="summary-line"><strong>GSM:</strong> ${ph}</div><div class="summary-line"><strong>E-mail:</strong> ${em}</div><div class="summary-line"><strong>BTW:</strong> ${vat||"geen"}</div></div><div class="summary-section"><h3>🚘 Voertuig</h3><div class="summary-line"><strong>Type:</strong> ${selectedVehicle} (+€${selectedVehicleExtra})</div><div class="summary-line"><strong>👥</strong> ${pax} | <strong>🧳</strong> ${lag}</div><div class="summary-line"><strong>🤝</strong> ${mg} | <strong>💋</strong> ${kr} | <strong>💧</strong> ${wb} | <strong>📶</strong> ${wf}</div><div class="summary-line"><strong>📝</strong> ${sw}</div></div><div class="summary-section"><h3>💰 Prijs</h3><div class="summary-line"><strong>Afstand:</strong> ${d.toFixed(1)} km</div><div class="summary-line"><strong>Reistijd:</strong> ${t} min</div><div class="summary-line"><strong>Basis (€1/km):</strong> € ${base.toFixed(2)}</div><div class="summary-line"><strong>Meerprijs:</strong> € ${selectedVehicleExtra.toFixed(2)}</div><div class="summary-line"><strong>Totaal:</strong> € ${total.toFixed(2)}</div></div>`}
+        function showOverlay(){document.getElementById('overlaySummary').innerHTML=buildSummaryHTML();document.getElementById('summaryOverlay').classList.add('active');preparePaymentLink()}
+        function hideOverlay(){document.getElementById('summaryOverlay').classList.remove('active')}
+        function preparePaymentLink(){const payment=document.querySelector('input[name="payment"]:checked').value;const container=document.getElementById('paymentLinkPlaceholder');if(payment==='Kaart'||payment==='App'){container.innerHTML=`<button id="demoPaymentBtn" class="payment-link-btn">🔗 Betaallink (${payment})</button>`;const btn=document.getElementById('demoPaymentBtn');if(btn)btn.onclick=()=>alert(`💳 Demo betaallink voor ${payment}.`)}else container.innerHTML=''}
+        async function finalizeBooking(){const pm=document.querySelector('input[name="payment"]:checked').value;let totalAmount=0;const totalLine=document.querySelector('#overlaySummary .summary-section:last-child .summary-line:last-child')?.innerText;if(totalLine){const match=totalLine.match(/€\s*([\d.]+)/);if(match)totalAmount=parseFloat(match[1])}const supabaseRecord=buildSupabaseRecord(pm,totalAmount);if(pm==='Kaart'||pm==='App'){if(confirm(`U heeft gekozen voor betaling met ${pm}. Wilt u doorgaan naar de betaalomgeving?`)){const success=await sendToSupabase(supabaseRecord,pm);if(success){alert(`🔜 U wordt doorgestuurd naar de betaallink voor ${pm}.\n(Demo - later echte integratie)`);resetAll();hideOverlay()}}return}const success=await sendToSupabase(supabaseRecord,pm);if(success){alert(`✅ BOEKING BEVESTIGD (CASH)!\n\nID: ${supabaseRecord.id}\nTotaal: € ${totalAmount}\n\nU ontvangt een bevestiging per e-mail.`);resetAll();hideOverlay()}}
+        function resetAll(){document.getElementById('flipCardLeft').classList.remove('flipped');document.getElementById('flipCardRight').classList.remove('flipped');if(routeLayer)map.removeLayer(routeLayer);if(pickupMarker)map.removeLayer(pickupMarker);if(dropoffMarker)map.removeLayer(dropoffMarker);currentRouteData=null;pickupCoord=null;dropoffCoord=null;document.getElementById('distVal').innerText='—';document.getElementById('timeVal').innerText='—';document.getElementById('priceVal').innerText='—';document.getElementById('pickupInput').value='';document.getElementById('dropoffInput').value='';document.getElementById('firstName').value='';document.getElementById('lastName').value='';document.getElementById('phone').value='';document.getElementById('email').value='';document.getElementById('vat').value='';document.getElementById('flightNumber').value='';document.getElementById('roundtripCheckbox').checked=false;document.getElementById('passengers').value='1';document.getElementById('luggage').value='0';document.getElementById('meetGreet').checked=false;document.getElementById('kissRide').checked=false;document.getElementById('waterBottle').checked=false;document.getElementById('wifi').checked=false;document.getElementById('specialWishes').value='';currentRoundTrip=false;selectedVehicle=null}
+        function onConfirmVehicle(){if(!selectedVehicle){const err=document.getElementById('vehicleError');err.innerText='Selecteer een voertuig.';err.style.display='block';setTimeout(()=>err.style.display='none',3000);return}showOverlay()}
+        function backToPlanner(){document.getElementById('flipCardLeft').classList.remove('flipped')}
+        function backToMap(){document.getElementById('flipCardRight').classList.remove('flipped')}
+        function initAutocomplete(){const pInp=document.getElementById('pickupInput'),dInp=document.getElementById('dropoffInput');let pTO,dTO;pInp.addEventListener('input',()=>{clearTimeout(pTO);pTO=setTimeout(()=>fetchAddresses(pInp.value,'pickupWrap'),300)});dInp.addEventListener('input',()=>{clearTimeout(dTO);dTO=setTimeout(()=>fetchAddresses(dInp.value,'dropoffWrap'),300)});document.addEventListener('click',(e)=>{if(!e.target.closest('.suggest-wrapper')){clearSuggestions('pickupWrap');clearSuggestions('dropoffWrap')}})}
+        function initMap(){map=L.map('map').setView([50.85,4.35],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map)}
+        
+        // Tab navigatie
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active class op buttons
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update active content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                    
+                    // Als admin tab wordt geopend, laad orders
+                    if (tabId === 'admin') {
+                        loadAdminOrders();
+                    }
+                });
             });
-            filterAndSortData();
-            updateAgendaData();
         }
-
-        function loadFromLocalStorageFallback() {
-            const storedNew = localStorage.getItem('fleet_rawNewOrders');
-            const storedConfirmed = localStorage.getItem('fleet_rawConfirmedOrders');
-            const storedDrivers = localStorage.getItem('fleet_driversList');
-            const storedSubs = localStorage.getItem('fleet_onderaannemersList');
-            rawNewOrders = storedNew ? JSON.parse(storedNew) : getDefaultNewOrders();
-            rawConfirmedOrders = storedConfirmed ? JSON.parse(storedConfirmed) : getDefaultConfirmedOrders();
-            driversList = storedDrivers ? JSON.parse(storedDrivers) : getDefaultDrivers();
-            onderaannemersList = storedSubs ? JSON.parse(storedSubs) : getDefaultSubcontractors();
-        }
-
-        // Default data (zelfde als voorheen)
-        function getDefaultNewOrders() { return [{ id: "FX-20260426-001", template: "T1", datetime: "26-04-2026", time: "14:00", name: "Jan de Vries", email: "jan@example.com", phone: "+31 6 12345678", pickup: "Amsterdam CS", destination: "Utrecht Centraal", vehicle: "Sedan", extras: "WiFi", amount: 85.00, payment: "Factuur", status: "pending", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null }]; }
-        function getDefaultConfirmedOrders() { return [ /* originele 12 orders */ 
-            { id: "FX-20260420-001", template: "T1", datetime: "20-04-2026", time: "10:00", name: "Vroege Klant", email: "vroeg@example.com", phone: "+31 6 1111111", pickup: "Amsterdam", destination: "Utrecht", vehicle: "Sedan", payment: "Cash", amount: 65.00, status: "confirmed", extras: "Geen", assignedDriver: { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", vehicle: "Sedan", plate: "AB-123-CD" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FX-20260421-002", template: "T1", datetime: "21-04-2026", time: "14:30", name: "Middag Klant", email: "middag@example.com", phone: "+31 6 2222222", pickup: "Rotterdam", destination: "Den Haag", vehicle: "Executive", payment: "Factuur", amount: 120.00, status: "confirmed", extras: "WiFi", assignedDriver: { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", vehicle: "S-Class", plate: "XY-456-ZT" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FX-20260422-003", template: "T1", datetime: "22-04-2026", time: "09:00", name: "Ochtend Klant", email: "ochtend@example.com", phone: "+31 6 3333333", pickup: "Utrecht", destination: "Amsterdam", vehicle: "Economy", payment: "Cash", amount: 55.00, status: "confirmed", extras: "Geen", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
-            { id: "LM-20260423-004", template: "T2", datetime: "23-04-2026", time: "19:00", name: "Avond Klant", email: "avond@example.com", phone: "+31 6 4444444", pickup: "Schiphol", destination: "Amsterdam", vehicle: "S-Class", payment: "Factuur", amount: 350.00, status: "confirmed", extras: "Champagne", assignedDriver: { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", vehicle: "Van", plate: "NL-789-TR" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FD-20260424-005", template: "T3", datetime: "24-04-2026", time: "11:30", name: "Budget Klant", email: "budget@example.com", phone: "+31 6 5555555", pickup: "Leiden", destination: "Den Haag", vehicle: "Economy", payment: "Cash", amount: 35.00, status: "confirmed", extras: "Geen", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
-            { id: "BS-20260425-006", template: "T4", datetime: "25-04-2026", time: "13:00", name: "Zakelijke Klant", email: "zakelijk@company.nl", phone: "+31 20 6666666", pickup: "Amsterdam", destination: "Rotterdam", vehicle: "Business Sedan", payment: "Factuur", amount: 210.00, status: "confirmed", extras: "WiFi, Koffie", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
-            { id: "AP-20260425-007", template: "T5", datetime: "25-04-2026", time: "07:00", name: "Vliegveld Klant", email: "vlieg@example.com", phone: "+31 6 7777777", pickup: "Rotterdam", destination: "Schiphol", vehicle: "Airport Van", payment: "Cash", amount: 85.00, status: "confirmed", extras: "Bagage", assignedDriver: { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", vehicle: "Business Sedan", plate: "AM-001-BC" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FX-20260426-008", template: "T1", datetime: "26-04-2026", time: "06:00", name: "Vroege Rit", email: "vroeg@example.com", phone: "+31 6 8888888", pickup: "Amsterdam", destination: "Utrecht", vehicle: "Sedan", payment: "Cash", amount: 75.00, status: "confirmed", extras: "Geen", assignedDriver: { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", vehicle: "Sedan", plate: "AB-123-CD" }, canceled: false, completed: false, onderaannemerId: null },
-            { id: "LM-20260426-009", template: "T2", datetime: "26-04-2026", time: "11:00", name: "Limo Rit", email: "limo@example.com", phone: "+31 6 9999999", pickup: "Schiphol", destination: "Amsterdam", vehicle: "S-Class", payment: "Factuur", amount: 320.00, status: "confirmed", extras: "Champagne", assignedDriver: { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", vehicle: "S-Class", plate: "XY-456-ZT" }, canceled: false, completed: false, onderaannemerId: null },
-            { id: "BS-20260426-010", template: "T4", datetime: "26-04-2026", time: "15:00", name: "Zakelijke Rit", email: "zakelijk@company.nl", phone: "+31 20 1234567", pickup: "Utrecht", destination: "Amsterdam", vehicle: "Business Sedan", payment: "Factuur", amount: 185.00, status: "confirmed", extras: "WiFi", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null },
-            { id: "AP-20260427-011", template: "T5", datetime: "27-04-2026", time: "08:00", name: "Morgen Vlieg", email: "morgen@example.com", phone: "+31 6 1112223", pickup: "Amsterdam", destination: "Schiphol", vehicle: "Airport Van", payment: "Cash", amount: 65.00, status: "confirmed", extras: "Bagage", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null },
-            { id: "FX-20260428-012", template: "T1", datetime: "28-04-2026", time: "13:00", name: "Volgende Week", email: "week@example.com", phone: "+31 6 4445556", pickup: "Den Haag", destination: "Rotterdam", vehicle: "Executive", payment: "Factuur", amount: 95.00, status: "confirmed", extras: "WiFi", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null }
-        ]; }
-        function getDefaultDrivers() { return [ { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", email: "mark@fleet.nl", license: "B", vehicle: "Sedan", plate: "AB-123-CD", onderaannemer_id: 1, onderaannemer_naam: "Transport Solutions" }, { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", email: "lisa@fleet.nl", license: "B, C", vehicle: "S-Class", plate: "XY-456-ZT", onderaannemer_id: 1, onderaannemer_naam: "Transport Solutions" }, { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", email: "thomas@fleet.nl", license: "C", vehicle: "Van", plate: "NL-789-TR", onderaannemer_id: 2, onderaannemer_naam: "City Logistics" }, { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", email: "ahmed@fleet.nl", license: "B", vehicle: "Business Sedan", plate: "AM-001-BC", onderaannemer_id: null, onderaannemer_naam: null } ]; }
-        function getDefaultSubcontractors() { return [ { id: 1, name: "Transport Solutions", contact: "Jan Jansen", phone: "+31 10 1234567", email: "info@transport.nl", services: "Koerier, Pakket", drivers: [] }, { id: 2, name: "City Logistics", contact: "Peter de Boer", phone: "+31 20 7654321", email: "info@citylogistics.nl", services: "Stadsdistributie", drivers: [] } ]; }
-
-        async function resetToDemoData() {
-            if (confirm("Reset alle data naar demo? Dit overschrijft ook Supabase.")) {
-                rawNewOrders = getDefaultNewOrders();
-                rawConfirmedOrders = getDefaultConfirmedOrders();
-                driversList = getDefaultDrivers();
-                onderaannemersList = getDefaultSubcontractors();
-                onderaannemersList.forEach(oa => oa.drivers = driversList.filter(d => d.onderaannemer_id === oa.id));
-                await persistAll();
-                await loadAllData();
-                if (currentTab === 'agenda') refreshAgenda();
-                else if (currentTab === 'neworders') renderNewOrders();
-                else if (currentTab === 'orders') renderOrders();
-                else if (currentTab === 'history') renderHistory();
-                else if (currentTab === 'drivers') renderDrivers();
-                else if (currentTab === 'onderaannemers') renderOnderaannemers();
-                else if (currentTab === 'financieel') renderFinance();
-                alert("Data gereset!");
-            }
-        }
-
-        // ==================== ORDER ACTIES (met Supabase sync) ====================
-        async function confirmOrder(orderId) {
-            const idx = rawNewOrders.findIndex(o => o.id === orderId);
-            if (idx !== -1) {
-                const confirmed = { ...rawNewOrders[idx], status: "confirmed", completed: false, canceled: false };
-                rawNewOrders.splice(idx, 1);
-                rawConfirmedOrders.push(confirmed);
-                await persistAll();
-                await loadAllData();
-                if (currentTab === 'neworders') renderNewOrders();
-                if (currentTab === 'orders') renderOrders();
-                if (currentTab === 'history') renderHistory();
-                refreshAgenda();
-                alert(`Order ${orderId} bevestigd`);
-                closeModal();
-            }
-        }
-
-        async function confirmAssignDriver(orderId) {
-            if (!selectedDriverId) { alert("Selecteer een chauffeur"); return; }
-            const order = ordersList.find(o => o.id === orderId);
-            const driver = driversList.find(d => d.id === selectedDriverId);
-            if (order && driver) {
-                order.assignedDriver = { id: driver.id, name: driver.name, phone: driver.phone, vehicle: driver.vehicle, plate: driver.plate };
-                const rawOrder = rawConfirmedOrders.find(o => o.id === orderId);
-                if (rawOrder) rawOrder.assignedDriver = order.assignedDriver;
-                await persistAll();
-                await loadAllData();
-                if (currentTab === 'orders') renderOrders();
-                alert(`Chauffeur ${driver.name} toegewezen`);
-                closeModal();
-            }
-        }
-
-        // ==================== RENDER FUNCTIES (grotendeels identiek, maar async) ====================
-        async function renderNewOrders() {
-            const filterValue = document.getElementById('orderFilterInput')?.value.toLowerCase() || '';
-            let filtered = newOrders.filter(o => !filterValue || o.id.toLowerCase().includes(filterValue) || o.name.toLowerCase().includes(filterValue) || o.pickup.toLowerCase().includes(filterValue) || o.destination.toLowerCase().includes(filterValue));
-            document.getElementById('contentArea').innerHTML = `
-                <div class="filter-bar"><div class="filter-group"><label><i class="fas fa-search"></i> Zoek:</label><input type="text" id="orderFilterInput" placeholder="ID, klant, route..." onkeyup="renderNewOrders()" class="filter-input"></div><div class="filter-actions"><button class="btn-reset" onclick="document.getElementById('orderFilterInput').value=''; renderNewOrders()">Reset</button></div></div>
-                <div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Route</th><th>Bedrag</th><th>Actie</th></tr></thead><tbody>${filtered.map(o => `<tr><td>${o.id}</td><td>${o.datetime} ${o.time}</td><td>${o.name}</td><td>${o.pickup} → ${o.destination}</td><td>€${o.amount}</td><td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(o).replace(/'/g, "&#39;")})'>Bekijk</button></td></tr>`).join('')}${filtered.length===0?'<tr><td colspan="6" class="no-results">Geen nieuwe orders</td></tr>':''}</tbody></table></div>`;
-            document.getElementById('pageTitle').innerHTML = `New Orders <span class="order-count">${newOrders.length}</span>`;
-        }
-
-        async function renderOrders() {
-            const filterValue = document.getElementById('orderFilterInput2')?.value.toLowerCase() || '';
-            let filtered = ordersList.filter(o => !filterValue || o.id.toLowerCase().includes(filterValue) || o.name.toLowerCase().includes(filterValue) || o.pickup.toLowerCase().includes(filterValue) || o.destination.toLowerCase().includes(filterValue));
-            document.getElementById('contentArea').innerHTML = `
-                <div class="filter-bar"><div class="filter-group"><label><i class="fas fa-search"></i> Zoek:</label><input type="text" id="orderFilterInput2" placeholder="ID, klant, route..." onkeyup="renderOrders()" class="filter-input"></div><div class="filter-actions"><button class="btn-reset" onclick="document.getElementById('orderFilterInput2').value=''; renderOrders()">Reset</button></div></div>
-                <div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Actie</th></tr></thead><tbody>${filtered.map(o => `<tr><td><strong>${o.id}</strong><br><span class="template-tag template-${o.template}">${o.template}</span></td><td>${o.datetime} ${o.time}</td><td>${o.name}</td><td>${o.pickup} → ${o.destination}</td><td>${o.vehicle}</td><td>€${o.amount}</td><td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(o).replace(/'/g, "&#39;")})'>Bekijk</button></td></tr>`).join('')}</tbody></table></div>`;
-            document.getElementById('pageTitle').innerHTML = `Orders <span class="order-count">${ordersList.length}</span>`;
-        }
-
-        async function renderHistory() {
-            document.getElementById('contentArea').innerHTML = `<div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Route</th><th>Bedrag</th></tr></thead><tbody>${historyOrders.map(o => `<tr><td><strong>${o.id}</strong><br><span class="template-tag template-${o.template}">${o.template}</span></td><td>${o.datetime} ${o.time}</td><td>${o.name}</td><td>${o.pickup} → ${o.destination}</td><td>€${o.amount}</td></tr>`).join('')}</tbody></table></div>`;
-            document.getElementById('pageTitle').innerHTML = `History <span class="order-count">${historyOrders.length}</span>`;
-        }
-
-        function downloadCSV() { /* zelfde als eerder */ const headers = ["ID","Template","Datum","Tijd","Klant","Email","Telefoon","Pickup","Destination","Voertuig","Extras","Bedrag","Betaling","Status"]; const rows = historyOrders.map(o => [o.id, o.template, o.datetime, o.time, o.name, o.email, o.phone, o.pickup, o.destination, o.vehicle, o.extras, o.amount, o.payment, o.completed?"Uitgevoerd":(o.canceled?"Geannuleerd":"Bevestigd")]); const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n"); const blob = new Blob(["\uFEFF"+csv], {type:"text/csv"}); const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`fleet_history_${new Date().toISOString().slice(0,19)}.csv`; a.click(); }
-        function downloadJSON() { const blob = new Blob([JSON.stringify(historyOrders,null,2)], {type:"application/json"}); const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`fleet_history_${new Date().toISOString().slice(0,19)}.json`; a.click(); }
-
-        // De rest van de functies (renderDrivers, renderOnderaannemers, renderWiki, addDriverToSubcontractor, addOnderaannemer, editOnderaannemer, deleteOnderaannemer, renderFinance, etc.) blijven vrijwel identiek, maar roepen na wijziging persistAll() en loadAllData() aan.
-        // Vanwege de lengte zijn deze hier niet herhaald, maar ze werken hetzelfde als in de vorige versie, alleen met async persist.
-        // In de praktijk zouden we alle functies moeten overschrijven met async/await en after each mutation: await persistAll(); await loadAllData(); renderCurrentTab();
-        // Omwille van de leesbaarheid is de code ingekort. De volledige werkende code is te lang voor dit antwoord, maar het principe staat hierboven.
-
-        // ==================== INIT ====================
-        async function init() {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            await loadAllData();
-            const now = getCurrentNOW();
-            selectedDate = new Date(now);
-            currentMonth = new Date(now);
-            refreshAgenda();
-        }
-        init();
-    </script>
+        
+        document.getElementById('roundtripCheckbox').addEventListener('change',()=>{if(currentRouteData){currentRoundTrip=document.getElementById('roundtripCheckbox').checked;let d=parseFloat(currentRouteData.distanceKm),t=currentRouteData.durationMin;if(currentRoundTrip){d*=2;t*=2}const p=d*1.0;document.getElementById('distVal').innerText=d.toFixed(1);document.getElementById('timeVal').innerText=t;document.getElementById('priceVal').innerText=p.toFixed(2)}});
+        
+        document.getElementById('refreshOrdersBtn').addEventListener('click', loadAdminOrders);
+        
+        initTabs();
+        initMap();
+        initAutocomplete();
+        initVehicleSelection();
+        
+        const defaultDT=new Date();
+        defaultDT.setHours(defaultDT.getHours()+1);
+        document.getElementById('datetime').value=defaultDT.toISOString().slice(0,16);
+        
+        document.getElementById('calcAndFlipBtn').addEventListener('click',onCalcAndFlip);
+        document.getElementById('reserveBtn').addEventListener('click',onReserve);
+        document.getElementById('backToPlannerBtn').addEventListener('click',backToPlanner);
+        document.getElementById('confirmVehicleBtn').addEventListener('click',onConfirmVehicle);
+        document.getElementById('backToMapBtn').addEventListener('click',backToMap);
+        document.getElementById('closeOverlayBtn').addEventListener('click',hideOverlay);
+        document.getElementById('cancelOverlayBtn').addEventListener('click',hideOverlay);
+        document.getElementById('confirmBookingBtn').addEventListener('click',finalizeBooking);
+        document.querySelectorAll('input[name="payment"]').forEach(radio=>radio.addEventListener('change',preparePaymentLink));
+    })();
+</script>
 </body>
 </html>
