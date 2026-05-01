@@ -236,6 +236,27 @@
             }
         }
 
+        async function loadFromSupabase() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                rawNewOrders = data.filter(b => b.status === 'pending');
+                rawConfirmedOrders = data.filter(b => b.status === 'confirmed');
+
+                filterAndSortData();
+                updateAgendaData();
+            } catch (error) {
+                console.error('Supabase load error:', error);
+            }
+        }
+
         // ==================== GLOBALE DATA (in-memory cache) ====================
         let rawNewOrders = [];      // status = 'pending'
         let rawConfirmedOrders = []; // status = 'confirmed'
@@ -398,22 +419,9 @@
             onderaannemersList = storedSubs ? JSON.parse(storedSubs) : getDefaultSubcontractors();
         }
 
-        // Default data (zelfde als voorheen)
-        function getDefaultNewOrders() { return [{ id: "FX-20260426-001", template: "T1", datetime: "26-04-2026", time: "14:00", name: "Jan de Vries", email: "jan@example.com", phone: "+31 6 12345678", pickup: "Amsterdam CS", destination: "Utrecht Centraal", vehicle: "Sedan", extras: "WiFi", amount: 85.00, payment: "Factuur", status: "pending", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null }]; }
-        function getDefaultConfirmedOrders() { return [ /* originele 12 orders */ 
-            { id: "FX-20260420-001", template: "T1", datetime: "20-04-2026", time: "10:00", name: "Vroege Klant", email: "vroeg@example.com", phone: "+31 6 1111111", pickup: "Amsterdam", destination: "Utrecht", vehicle: "Sedan", payment: "Cash", amount: 65.00, status: "confirmed", extras: "Geen", assignedDriver: { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", vehicle: "Sedan", plate: "AB-123-CD" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FX-20260421-002", template: "T1", datetime: "21-04-2026", time: "14:30", name: "Middag Klant", email: "middag@example.com", phone: "+31 6 2222222", pickup: "Rotterdam", destination: "Den Haag", vehicle: "Executive", payment: "Factuur", amount: 120.00, status: "confirmed", extras: "WiFi", assignedDriver: { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", vehicle: "S-Class", plate: "XY-456-ZT" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FX-20260422-003", template: "T1", datetime: "22-04-2026", time: "09:00", name: "Ochtend Klant", email: "ochtend@example.com", phone: "+31 6 3333333", pickup: "Utrecht", destination: "Amsterdam", vehicle: "Economy", payment: "Cash", amount: 55.00, status: "confirmed", extras: "Geen", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
-            { id: "LM-20260423-004", template: "T2", datetime: "23-04-2026", time: "19:00", name: "Avond Klant", email: "avond@example.com", phone: "+31 6 4444444", pickup: "Schiphol", destination: "Amsterdam", vehicle: "S-Class", payment: "Factuur", amount: 350.00, status: "confirmed", extras: "Champagne", assignedDriver: { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", vehicle: "Van", plate: "NL-789-TR" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FD-20260424-005", template: "T3", datetime: "24-04-2026", time: "11:30", name: "Budget Klant", email: "budget@example.com", phone: "+31 6 5555555", pickup: "Leiden", destination: "Den Haag", vehicle: "Economy", payment: "Cash", amount: 35.00, status: "confirmed", extras: "Geen", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
-            { id: "BS-20260425-006", template: "T4", datetime: "25-04-2026", time: "13:00", name: "Zakelijke Klant", email: "zakelijk@company.nl", phone: "+31 20 6666666", pickup: "Amsterdam", destination: "Rotterdam", vehicle: "Business Sedan", payment: "Factuur", amount: 210.00, status: "confirmed", extras: "WiFi, Koffie", assignedDriver: null, canceled: false, completed: true, onderaannemerId: null },
-            { id: "AP-20260425-007", template: "T5", datetime: "25-04-2026", time: "07:00", name: "Vliegveld Klant", email: "vlieg@example.com", phone: "+31 6 7777777", pickup: "Rotterdam", destination: "Schiphol", vehicle: "Airport Van", payment: "Cash", amount: 85.00, status: "confirmed", extras: "Bagage", assignedDriver: { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", vehicle: "Business Sedan", plate: "AM-001-BC" }, canceled: false, completed: true, onderaannemerId: null },
-            { id: "FX-20260426-008", template: "T1", datetime: "26-04-2026", time: "06:00", name: "Vroege Rit", email: "vroeg@example.com", phone: "+31 6 8888888", pickup: "Amsterdam", destination: "Utrecht", vehicle: "Sedan", payment: "Cash", amount: 75.00, status: "confirmed", extras: "Geen", assignedDriver: { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", vehicle: "Sedan", plate: "AB-123-CD" }, canceled: false, completed: false, onderaannemerId: null },
-            { id: "LM-20260426-009", template: "T2", datetime: "26-04-2026", time: "11:00", name: "Limo Rit", email: "limo@example.com", phone: "+31 6 9999999", pickup: "Schiphol", destination: "Amsterdam", vehicle: "S-Class", payment: "Factuur", amount: 320.00, status: "confirmed", extras: "Champagne", assignedDriver: { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", vehicle: "S-Class", plate: "XY-456-ZT" }, canceled: false, completed: false, onderaannemerId: null },
-            { id: "BS-20260426-010", template: "T4", datetime: "26-04-2026", time: "15:00", name: "Zakelijke Rit", email: "zakelijk@company.nl", phone: "+31 20 1234567", pickup: "Utrecht", destination: "Amsterdam", vehicle: "Business Sedan", payment: "Factuur", amount: 185.00, status: "confirmed", extras: "WiFi", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null },
-            { id: "AP-20260427-011", template: "T5", datetime: "27-04-2026", time: "08:00", name: "Morgen Vlieg", email: "morgen@example.com", phone: "+31 6 1112223", pickup: "Amsterdam", destination: "Schiphol", vehicle: "Airport Van", payment: "Cash", amount: 65.00, status: "confirmed", extras: "Bagage", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null },
-            { id: "FX-20260428-012", template: "T1", datetime: "28-04-2026", time: "13:00", name: "Volgende Week", email: "week@example.com", phone: "+31 6 4445556", pickup: "Den Haag", destination: "Rotterdam", vehicle: "Executive", payment: "Factuur", amount: 95.00, status: "confirmed", extras: "WiFi", assignedDriver: null, canceled: false, completed: false, onderaannemerId: null }
-        ]; }
+        // Default data (vervangen door lege arrays voor Supabase integratie)
+        function getDefaultNewOrders() { return []; }
+        function getDefaultConfirmedOrders() { return []; }
         function getDefaultDrivers() { return [ { id: "DRV-01", name: "Mark de Vries", phone: "+31 6 12345678", email: "mark@fleet.nl", license: "B", vehicle: "Sedan", plate: "AB-123-CD", onderaannemer_id: 1, onderaannemer_naam: "Transport Solutions" }, { id: "DRV-02", name: "Lisa van Dijk", phone: "+31 6 23456789", email: "lisa@fleet.nl", license: "B, C", vehicle: "S-Class", plate: "XY-456-ZT", onderaannemer_id: 1, onderaannemer_naam: "Transport Solutions" }, { id: "DRV-03", name: "Thomas Bakker", phone: "+31 6 34567890", email: "thomas@fleet.nl", license: "C", vehicle: "Van", plate: "NL-789-TR", onderaannemer_id: 2, onderaannemer_naam: "City Logistics" }, { id: "DRV-04", name: "Ahmed Yilmaz", phone: "+31 6 45678901", email: "ahmed@fleet.nl", license: "B", vehicle: "Business Sedan", plate: "AM-001-BC", onderaannemer_id: null, onderaannemer_naam: null } ]; }
         function getDefaultSubcontractors() { return [ { id: 1, name: "Transport Solutions", contact: "Jan Jansen", phone: "+31 10 1234567", email: "info@transport.nl", services: "Koerier, Pakket", drivers: [] }, { id: 2, name: "City Logistics", contact: "Peter de Boer", phone: "+31 20 7654321", email: "info@citylogistics.nl", services: "Stadsdistributie", drivers: [] } ]; }
 
@@ -502,10 +510,12 @@
         async function init() {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await loadAllData();
+            await loadFromSupabase();
             const now = getCurrentNOW();
             selectedDate = new Date(now);
             currentMonth = new Date(now);
             refreshAgenda();
+            setInterval(loadFromSupabase, 60000);
         }
         init();
     </script>
