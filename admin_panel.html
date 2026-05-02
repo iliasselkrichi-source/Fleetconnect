@@ -401,16 +401,12 @@
         // ============================================
         function toDateKey(dateStr) {
             if (!dateStr) return '';
-            const clean = dateStr.split(' ')[0]; // verwijder eventueel een tijddeel
-            const parts = clean.split('-');
-            if (parts.length === 3) {
-                if (parts[0].length === 4) {
-                    // al yyyy-mm-dd
-                    return clean;
-                } else {
-                    // dd-mm-yyyy → yyyy-mm-dd
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                }
+            const clean = dateStr.split(' ')[0];
+            let parts = clean.split('-');
+            if (parts.length === 3 && parts[0].length === 4) {
+                // Inkomend is YYYY-DD-MM (dag en maand verwisseld)
+                // Zet om naar DD-MM-YYYY
+                return `${parts[1]}-${parts[2]}-${parts[0]}`;
             }
             return clean;
         }
@@ -864,7 +860,7 @@
                 // *** Extra stap: spring naar de ritdatum in de agenda ***
                 const order = allBookings.find(b => b.id === orderId);
                 if (order && order.datetime) {
-                    const [year, month, day] = order.datetime.split('T')[0].split('-');
+                    const [year, day, month] = order.datetime.split('T')[0].split('-');
                     // Zet de geselecteerde dag
                     selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                     // Zet de juiste maand in de kalenderweergave
