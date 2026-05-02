@@ -9,8 +9,9 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f4f6fa;
-            font-family: system-ui, sans-serif;
+            background: #f1f5f9;
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
         }
         .login-box {
             background: white;
@@ -18,58 +19,104 @@
             border-radius: 32px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 360px;
+            text-align: center;
         }
-        h1 { font-size: 28px; margin-bottom: 8px; }
+        h1 { font-size: 28px; margin-bottom: 8px; color: #0f172a; }
+        h1 i { color: #2dd4bf; }
+        p { color: #64748b; margin-bottom: 24px; }
         input {
             width: 100%;
-            padding: 14px;
+            padding: 14px 20px;
             margin: 12px 0;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: 60px;
             font-size: 15px;
             box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2dd4bf;
         }
         button {
             width: 100%;
             padding: 14px;
-            background: #1f2b48;
+            background: #0f172a;
             color: white;
             border: none;
             border-radius: 60px;
             font-weight: bold;
             cursor: pointer;
+            font-size: 16px;
+            margin-top: 12px;
+            transition: background 0.2s;
         }
-        .error { color: red; margin-top: 12px; text-align: center; }
-        .loading { opacity: 0.6; pointer-events: none; }
+        button:hover {
+            background: #2dd4bf;
+            color: #0f172a;
+        }
+        .error { 
+            color: #ef4444; 
+            margin-top: 16px; 
+            text-align: center; 
+            font-size: 14px;
+        }
+        .loading { 
+            opacity: 0.6; 
+            pointer-events: none; 
+        }
+        .info {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
 <div class="login-box">
-    <h1>🔐 Fleetconnect Admin</h1>
-    <p>Log in om orders te beheren</p>
-    <input type="text" id="username" placeholder="Gebruikersnaam" autocomplete="off">
+    <h1><i class="fas fa-truck"></i> Fleetconnect Admin</h1>
+    <p>Log in om het dashboard te openen</p>
+    <input type="text" id="username" placeholder="Gebruikersnaam of e-mail" autocomplete="off">
     <input type="password" id="password" placeholder="Wachtwoord">
     <button onclick="login()">Inloggen</button>
     <div id="errorMsg" class="error"></div>
+    <div class="info">Gebruik je Supabase Auth account om in te loggen</div>
 </div>
 
 <script>
+    // ============================================
+    // JOUW SUPABASE CONFIGURATIE
+    // ============================================
     const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Check of gebruiker al ingelogd is
+    async function checkSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            window.location.href = 'admin_panel.html';
+        }
+    }
+    
     async function login() {
-        const username = document.getElementById('username').value;
+        const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('errorMsg');
         const btn = document.querySelector('button');
         
         errorDiv.innerText = '';
+        
+        if (!username || !password) {
+            errorDiv.innerText = 'Vul gebruikersnaam en wachtwoord in';
+            return;
+        }
+        
         btn.classList.add('loading');
         btn.innerText = 'Bezig met inloggen...';
         
-        // Gebruik de username als email (voeg @domein toe indien nodig)
+        // Gebruik de username als email indien nodig
         let email = username;
         if (!email.includes('@')) {
             email = `${username}@fleetconnect.local`;
@@ -87,11 +134,21 @@
             errorDiv.innerText = 'Ongeldige gebruikersnaam of wachtwoord';
             console.error(error);
         } else {
-            // Inloggen succesvol
+            // Sessie opslaan en doorverwijzen
             localStorage.setItem('supabase_session', JSON.stringify(data.session));
             window.location.href = 'admin_panel.html';
         }
     }
+    
+    // Enter toets ondersteuning
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') login();
+    });
+    document.getElementById('username').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') login();
+    });
+    
+    checkSession();
 </script>
 </body>
 </html>
