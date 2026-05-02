@@ -843,7 +843,8 @@
             if (success) {
                 alert(`Order ${orderId} is bevestigd.`);
                 closeModal();
-                refreshCurrentTab();
+                refreshCurrentTab();      // Huidige tab verversen (bijv. New Orders)
+                refreshAgenda();          // Agenda geforceerd verversen (zodat rit zichtbaar wordt)
             }
         }
 
