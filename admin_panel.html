@@ -366,7 +366,9 @@
         }
 
         function isOrderInFuture(order) {
-            const orderDateTime = parseDateTime(order.datetime, order.time);
+            // Zet datetime van DB (yyyy-mm-dd) om naar dd-mm-yyyy
+            const dateStr = toDateKey(order.datetime);
+            const orderDateTime = parseDateTime(dateStr, order.time);
             return orderDateTime > NOW;
         }
 
@@ -374,26 +376,30 @@
         // DATA SORTEREN
         // ============================================
         function filterAndSortData() {
-            // New Orders: status = 'pending' OF nog niet bevestigd
+            // New Orders: status = 'pending' of 'new'
             newOrders = allBookings.filter(booking => 
                 booking.status === 'pending' || booking.status === 'new'
             );
-            
-            // Orders: status = 'confirmed' OF 'active'
+
+            // Orders: alleen 'confirmed' of 'active' die nog in de toekomst liggen
             ordersList = allBookings.filter(booking => 
-                booking.status === 'confirmed' || booking.status === 'active'
+                (booking.status === 'confirmed' || booking.status === 'active') &&
+                isOrderInFuture(booking)
             );
-            
-            // History: status = 'completed' OF 'cancelled'
+
+            // History:
+            // - 'completed' of 'cancelled' (zoals eerder)
+            // - plus 'confirmed' of 'active' die NIET meer in de toekomst liggen (dus verleden)
             historyOrders = allBookings.filter(booking => 
                 booking.status === 'completed' || 
-                booking.status === 'cancelled'
+                booking.status === 'cancelled' ||
+                ((booking.status === 'confirmed' || booking.status === 'active') && !isOrderInFuture(booking))
             );
-            
-            // Sorteren
-            ordersList.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
-            historyOrders.sort((a, b) => parseDateTime(b.datetime, b.time) - parseDateTime(a.datetime, a.time));
-            newOrders.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
+
+            // Sorteren blijft gelijk
+            ordersList.sort((a, b) => parseDateTime(toDateKey(a.datetime), a.time) - parseDateTime(toDateKey(b.datetime), b.time));
+            historyOrders.sort((a, b) => parseDateTime(toDateKey(b.datetime), b.time) - parseDateTime(toDateKey(a.datetime), a.time));
+            newOrders.sort((a, b) => parseDateTime(toDateKey(a.datetime), a.time) - parseDateTime(toDateKey(b.datetime), b.time));
         }
 
         // ============================================
