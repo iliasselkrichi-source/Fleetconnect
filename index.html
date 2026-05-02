@@ -98,6 +98,7 @@
             const phoneRaw=document.getElementById('phone').value.trim();
             const pickupRaw=document.getElementById('pickupInput').value;
             const destRaw=document.getElementById('dropoffInput').value;
+            const flightNumberRaw=document.getElementById('flightNumber').value.trim();
             const vehicleRaw=selectedVehicle;
             const extrasRaw=getExtrasString();
             const dtRaw=document.getElementById('datetime').value;
@@ -117,6 +118,7 @@
                 phone: phoneRaw,
                 pickup: pickupRaw,
                 destination: destRaw,
+                flight_number: flightNumberRaw,
                 vehicle: vehicleRaw,
                 extras: extrasRaw,
                 amount: parseFloat(finalAmount),
@@ -145,7 +147,7 @@
                 }
                 console.log('✅ Boeking opgeslagen (HTTP', response.status, ')');
                 // VRIENDELIJKE POP-UP IN PLAATS VAN TECHNISCHE MELDING
-                alert(`🎉 Bedankt voor uw reservatie, ${record.name}! 🎉\n\n📋 Uw reserveringsnummer: ${record.id}\n✉️ Een bevestiging werd verstuurd naar ${record.email}\n\n✅ We zien u graag binnen!`);
+                alert(`🎉 Bedankt voor uw reservatie, ${record.name}! 🎉\n\n📋 Uw reserveringsnummer: ${record.id}\n✈️ Vluchtnummer: ${record.flight_number || "geen"}\n✉️ Een bevestiging werd verstuurd naar ${record.email}\n\n✅ We zien u graag binnen!`);
                 return true;
             } catch (error) {
                 console.error('❌ Supabase fout:', error);
