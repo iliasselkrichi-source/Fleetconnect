@@ -70,17 +70,34 @@
             font-size: 12px;
             color: #94a3b8;
         }
+        .demo-box {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: left;
+            color: #475569;
+        }
+        .demo-box strong {
+            color: #0f172a;
+        }
     </style>
 </head>
 <body>
 <div class="login-box">
     <h1><i class="fas fa-truck"></i> Fleetconnect Admin</h1>
     <p>Log in om het dashboard te openen</p>
-    <input type="text" id="username" placeholder="Gebruikersnaam of e-mail" autocomplete="off">
+    <input type="email" id="email" placeholder="E-mailadres" autocomplete="off">
     <input type="password" id="password" placeholder="Wachtwoord">
     <button onclick="login()">Inloggen</button>
     <div id="errorMsg" class="error"></div>
     <div class="info">Gebruik je Supabase Auth account om in te loggen</div>
+    <div class="demo-box">
+        <strong>📋 Test gegevens:</strong><br>
+        E-mail: ryzen@fleetconnect.com<br>
+        Wachtwoord: iliassiliass
+    </div>
 </div>
 
 <script>
@@ -101,26 +118,23 @@
     }
     
     async function login() {
-        const username = document.getElementById('username').value.trim();
+        // DIRECT het email veld gebruiken - geen conversie meer!
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('errorMsg');
         const btn = document.querySelector('button');
         
         errorDiv.innerText = '';
         
-        if (!username || !password) {
-            errorDiv.innerText = 'Vul gebruikersnaam en wachtwoord in';
+        if (!email || !password) {
+            errorDiv.innerText = 'Vul e-mail en wachtwoord in';
             return;
         }
         
         btn.classList.add('loading');
         btn.innerText = 'Bezig met inloggen...';
         
-        // Gebruik de username als email indien nodig
-        let email = username;
-        if (!email.includes('@')) {
-            email = `${username}@fleetconnect.local`;
-        }
+        console.log('Inloggen met:', email);
         
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
@@ -131,10 +145,10 @@
         btn.innerText = 'Inloggen';
         
         if (error) {
-            errorDiv.innerText = 'Ongeldige gebruikersnaam of wachtwoord';
-            console.error(error);
+            console.error('Login error:', error);
+            errorDiv.innerText = 'Ongeldig e-mailadres of wachtwoord';
         } else {
-            // Sessie opslaan en doorverwijzen
+            console.log('Login succesvol!', data.user);
             localStorage.setItem('supabase_session', JSON.stringify(data.session));
             window.location.href = 'admin_panel.html';
         }
@@ -144,7 +158,7 @@
     document.getElementById('password').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') login();
     });
-    document.getElementById('username').addEventListener('keypress', function(e) {
+    document.getElementById('email').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') login();
     });
     
