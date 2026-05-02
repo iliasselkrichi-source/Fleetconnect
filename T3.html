@@ -68,7 +68,7 @@
 
         let map,pickupCoord=null,dropoffCoord=null,routeLayer=null,pickupMarker=null,dropoffMarker=null,currentRouteData=null,currentRoundTrip=false,currentFlight="",currentDateTime="",selectedVehicle=null,selectedVehicleExtra=0;
 
-        // Prefix: FD-T2-LM- (aangepast met FD)
+        // Prefix: FD- (alleen FD)
         function generateBookingId() {
             const now=new Date();
             const yyyy=now.getFullYear();
@@ -79,7 +79,7 @@
             counter++;
             localStorage.setItem('bookingCounter',counter);
             const formatted=String(counter).padStart(3,'0');
-            return `FD-T2-LM-${today}-${formatted}`;
+            return `FD-${today}-${formatted}`;
         }
 
         function getExtrasString(){
