@@ -22,7 +22,6 @@
             text-align: center;
         }
         h1 { font-size: 28px; margin-bottom: 8px; color: #0f172a; }
-        h1 i { color: #2dd4bf; }
         p { color: #64748b; margin-bottom: 24px; }
         input {
             width: 100%;
@@ -32,11 +31,6 @@
             border-radius: 60px;
             font-size: 15px;
             box-sizing: border-box;
-            font-family: inherit;
-        }
-        input:focus {
-            outline: none;
-            border-color: #2dd4bf;
         }
         button {
             width: 100%;
@@ -69,7 +63,10 @@
 </div>
 
 <script>
-    const supabase = supabaseJs.createClient(
+    // Supabase client aanmaken - zoals in de officiële documentatie
+    // De library maakt een globale 'supabase' variabele beschikbaar.
+    // Dit is de UMD-methode zoals beschreven op supabase.com/docs
+    const supabase = supabase.createClient(
         'https://kwsuqzbqzsmgkjaslwkz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE'
     );
@@ -81,6 +78,7 @@
         
         message.innerHTML = '';
         
+        // Inloggen met Supabase Auth
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         
         if (error) {
