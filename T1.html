@@ -3,6 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fleetconnect | Orders</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -43,6 +44,16 @@
         }
         .menu-item:hover:not(.active) {
             background: #e5e7eb;
+        }
+        .logout-item {
+            margin-top: auto;
+            margin-bottom: 32px;
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+        .logout-item:hover {
+            background: #fecaca;
         }
         .main {
             flex: 1;
@@ -170,6 +181,14 @@
             width: 100%;
         }
         .confirm-btn:hover { background: #059669; }
+        .user-info {
+            padding: 16px;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+            border-top: 1px solid #e9edf2;
+            margin-top: 16px;
+        }
         @media (max-width: 720px) {
             .sidebar { width: 160px; }
             .menu-item { font-size: 13px; }
@@ -182,6 +201,8 @@
 <div class="sidebar">
     <div class="menu-item active" data-tab="pending">📋 NEW ORDERS</div>
     <div class="menu-item" data-tab="confirmed">✅ CONFIRMED ORDERS</div>
+    <div class="menu-item logout-item" id="logoutBtn">🚪 UITLOGGEN</div>
+    <div class="user-info" id="userEmailDisplay"></div>
 </div>
 
 <div class="main">
@@ -209,10 +230,55 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
     // =============================================
     
+    // Initialize Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     let currentTab = 'pending';
     let currentBookingId = null;
     let currentBookingStatus = null;
-
+    let currentUser = null;
+    
+    // ========== AUTHENTICATIE CHECK ==========
+    async function checkAuthentication() {
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error || !session) {
+                console.error('Geen geldige sessie:', error);
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            // Sessie is geldig, haal user info op
+            currentUser = session.user;
+            document.getElementById('userEmailDisplay').innerHTML = `👤 ${currentUser.email}<br><span style="font-size:10px">Ingelogd</span>`;
+            
+            // Refresh session periodically (elke 60 minuten)
+            setTimeout(() => {
+                supabase.auth.refreshSession();
+            }, 60 * 60 * 1000);
+            
+            return true;
+        } catch (err) {
+            console.error('Auth check mislukt:', err);
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+    
+    // ========== UITLOGGEN ==========
+    async function logout() {
+        try {
+            await supabase.auth.signOut();
+            localStorage.removeItem('supabase_session');
+            window.location.href = 'login.html';
+        } catch (err) {
+            console.error('Uitloggen mislukt:', err);
+            alert('Fout bij uitloggen: ' + err.message);
+        }
+    }
+    
+    // ========== BESTAANDE FUNCTIES (aangepast met error handling voor auth) ==========
     async function updateBookingStatus(id, newStatus) {
         const url = `${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`;
         const response = await fetch(url, {
@@ -224,7 +290,10 @@
             },
             body: JSON.stringify({ status: newStatus })
         });
-        if (!response.ok) throw new Error('Update mislukt');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Update mislukt: ${response.status} ${errorText}`);
+        }
         return true;
     }
 
@@ -236,15 +305,15 @@
         
         const modalContent = document.getElementById('modal-fiche-content');
         modalContent.innerHTML = `
-            <div class="fiche-field"><span class="fiche-label">Prefix:</span><span class="fiche-value">${booking.id}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Datum / Tijd:</span><span class="fiche-value">${booking.datetime} — ${booking.time}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Naam:</span><span class="fiche-value">${booking.name}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Contact:</span><span class="fiche-value">${booking.email} — ${booking.phone}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Traject:</span><span class="fiche-value">${booking.pickup} → ${booking.destination}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Voertuig:</span><span class="fiche-value">${booking.vehicle}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Extras:</span><span class="fiche-value">${booking.extras || 'Geen'}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Bedrag / Betaling:</span><span class="fiche-value">€${parseFloat(booking.amount).toFixed(2)} — ${booking.payment}</span></div>
-            <div class="fiche-field"><span class="fiche-label">Status:</span><span class="fiche-value">${booking.status}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Prefix:</span><span class="fiche-value">${escapeHtml(booking.id)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Datum / Tijd:</span><span class="fiche-value">${escapeHtml(booking.datetime)} — ${escapeHtml(booking.time)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Naam:</span><span class="fiche-value">${escapeHtml(booking.name)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Contact:</span><span class="fiche-value">${escapeHtml(booking.email)} — ${escapeHtml(booking.phone)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Traject:</span><span class="fiche-value">${escapeHtml(booking.pickup)} → ${escapeHtml(booking.destination)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Voertuig:</span><span class="fiche-value">${escapeHtml(booking.vehicle)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Extras:</span><span class="fiche-value">${escapeHtml(booking.extras || 'Geen')}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Bedrag / Betaling:</span><span class="fiche-value">€${parseFloat(booking.amount).toFixed(2)} — ${escapeHtml(booking.payment)}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Status:</span><span class="fiche-value">${escapeHtml(booking.status)}</span></div>
         `;
         
         const actionBtnDiv = document.getElementById('modal-action-btn');
@@ -266,6 +335,19 @@
         
         document.getElementById('ficheModal').style.display = 'flex';
     }
+    
+    // Helper functie om XSS te voorkomen
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
 
     function renderTable(orders, tabType) {
         let html = `
@@ -280,11 +362,11 @@
             for (const o of orders) {
                 html += `
                     <tr>
-                        <td><strong>${o.id}</strong></td>
-                        <td>${o.datetime}</td>
-                        <td>${o.time}</td>
-                        <td>${o.name}</td>
-                        <td>${o.pickup} → ${o.destination}</td>
+                        <td><strong>${escapeHtml(o.id)}</strong></td>
+                        <td>${escapeHtml(o.datetime)}</td>
+                        <td>${escapeHtml(o.time)}</td>
+                        <td>${escapeHtml(o.name)}</td>
+                        <td>${escapeHtml(o.pickup)} → ${escapeHtml(o.destination)}</td>
                         <td class="fiche-icon" onclick='showFiche(${JSON.stringify(o).replace(/'/g, "&#39;")}, "${tabType}")'>📄</td>
                     </tr>
                 `;
@@ -299,14 +381,14 @@
             html += `<tr class="empty-row"><td colspan="6">⏳ — vrije regel —</td></tr>`;
         }
         
-        html += `</tbody>
-        </table>`;
+        html += `</tbody></table>`;
         return html;
     }
 
     async function loadPendingOrders() {
         const url = `${SUPABASE_URL}/rest/v1/bookings?status=eq.pending&order=created_at.desc`;
         const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const orders = await res.json();
         return orders;
     }
@@ -314,38 +396,55 @@
     async function loadConfirmedOrders() {
         const url = `${SUPABASE_URL}/rest/v1/bookings?status=eq.confirmed&order=created_at.desc`;
         const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const orders = await res.json();
         return orders;
     }
     
     async function loadCurrentTab() {
-        const wrapper = document.getElementById('table-wrapper');
-        const title = document.getElementById('page-title');
-        if (currentTab === 'pending') {
-            title.innerText = '📋 New Orders (Pending)';
-            const orders = await loadPendingOrders();
-            wrapper.innerHTML = renderTable(orders, 'pending');
-        } else {
-            title.innerText = '✅ Confirmed Orders';
-            const orders = await loadConfirmedOrders();
-            wrapper.innerHTML = renderTable(orders, 'confirmed');
+        try {
+            const wrapper = document.getElementById('table-wrapper');
+            const title = document.getElementById('page-title');
+            if (currentTab === 'pending') {
+                title.innerText = '📋 New Orders (Pending)';
+                const orders = await loadPendingOrders();
+                wrapper.innerHTML = renderTable(orders, 'pending');
+            } else {
+                title.innerText = '✅ Confirmed Orders';
+                const orders = await loadConfirmedOrders();
+                wrapper.innerHTML = renderTable(orders, 'confirmed');
+            }
+        } catch (err) {
+            console.error('Fout bij laden data:', err);
+            document.getElementById('table-wrapper').innerHTML = '<div style="padding:40px;text-align:center;color:red;">❌ Fout bij laden data. Check je internetverbinding.</div>';
         }
     }
 
+    // ========== EVENT LISTENERS ==========
     document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-            item.classList.add('active');
-            currentTab = item.getAttribute('data-tab');
-            loadCurrentTab();
-        });
+        if (item.id !== 'logoutBtn') {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                item.classList.add('active');
+                currentTab = item.getAttribute('data-tab');
+                loadCurrentTab();
+            });
+        }
     });
+    
+    document.getElementById('logoutBtn').addEventListener('click', logout);
     
     document.querySelector('.close').onclick = () => document.getElementById('ficheModal').style.display = 'none';
     window.onclick = (e) => { if (e.target === document.getElementById('ficheModal')) document.getElementById('ficheModal').style.display = 'none'; };
     
-    loadCurrentTab();
-    setInterval(loadCurrentTab, 10000);
+    // ========== INIT ==========
+    (async function init() {
+        const isAuthenticated = await checkAuthentication();
+        if (isAuthenticated) {
+            await loadCurrentTab();
+            setInterval(loadCurrentTab, 10000);
+        }
+    })();
 </script>
 </body>
 </html>
