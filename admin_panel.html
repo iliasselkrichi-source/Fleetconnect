@@ -399,8 +399,21 @@
         // ============================================
         // AGENDA FUNCTIES
         // ============================================
+        function normalizeDate(dateStr) {
+            if (!dateStr) return '';
+            // Verwijder eventueel een tijddeel (bv. "2026-04-05 12:05" → "2026-04-05")
+            const cleanDate = dateStr.split(' ')[0];
+            const parts = cleanDate.split('-');
+            if (parts.length === 3 && parts[0].length === 4) {
+                // yyyy-mm-dd → dd-mm-yyyy
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return cleanDate; // is al dd-mm-yyyy of onbekend
+        }
+
         function getRidesByDate(dateStr) {
-            return allBookings.filter(booking => booking.datetime === dateStr);
+            const target = normalizeDate(dateStr);
+            return allBookings.filter(booking => normalizeDate(booking.datetime) === target);
         }
 
         function getTodayStats() {
@@ -847,7 +860,8 @@
                 // *** Extra stap: spring naar de ritdatum in de agenda ***
                 const order = allBookings.find(b => b.id === orderId);
                 if (order && order.datetime) {
-                    const [day, month, year] = order.datetime.split('-');
+                    const normalized = normalizeDate(order.datetime);
+                    const [day, month, year] = normalized.split('-');
                     // Zet de geselecteerde dag
                     selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                     // Zet de juiste maand in de kalenderweergave
