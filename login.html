@@ -57,34 +57,35 @@
     <p>Log in om het dashboard te openen</p>
     <input type="email" id="email" placeholder="E-mailadres">
     <input type="password" id="password" placeholder="Wachtwoord">
-    <button onclick="login()">Inloggen</button>
+    <button onclick="handleLogin()">Inloggen</button>
     <div id="errorMsg" class="error"></div>
 </div>
 
 <script>
-    // ZELFDE STYLE ALS JOUW admin_panel.html
+    // EXACT DEZELFDE STIJL ALS JOUW admin_panel.html
     const { createClient } = supabaseJs;
     
-    const supabase = createClient(
+    const supabaseClient = createClient(
         'https://kwsuqzbqzsmgkjaslwkz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE'
     );
 
-    async function login() {
+    async function handleLogin() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('errorMsg');
         
         errorDiv.innerText = '';
         
-        const { data, error } = await supabase.auth.signInWithPassword({ 
-            email: email, 
-            password: password 
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
         });
-        
+
         if (error) {
-            errorDiv.innerText = error.message;
+            errorDiv.innerText = "Fout bij inloggen: " + error.message;
         } else {
+            console.log("Sessie aangemaakt", data);
             window.location.href = 'admin_panel.html';
         }
     }
