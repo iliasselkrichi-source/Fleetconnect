@@ -3,6 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fleetconnect | Orders</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -204,11 +205,19 @@
 </div>
 
 <script>
-    // ========== LOGIN CHECK - TOEGEVOEGD ==========
-    if (!localStorage.getItem('admin_logged_in')) {
-        window.location.href = 'login.html';
-    }
-    // =============================================
+    // ========== SUPABASE AUTH CHECK ==========
+    const supabase = window.supabase.createClient(
+        'https://kwsuqzbqzsmgkjaslwkz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE'
+    );
+    
+    (async function checkAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+        }
+    })();
+    // ==========================================
     
     // ========== SUPABASE CONFIGURATIE ==========
     const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
@@ -296,13 +305,13 @@
                 `;
             }
         } else {
-            html += `<tr class="empty-row"><td colspan="6">⚠️ Geen ${tabType === 'pending' ? 'pending' : 'confirmed'} orders</td></tr>`;
+            html += `<tr class="empty-row"><td colspan="6">⚠️ Geen ${tabType === 'pending' ? 'pending' : 'confirmed'} orders</tr>`;
         }
         
         const currentCount = orders ? orders.length : 0;
         const emptyNeeded = Math.max(0, 5 - currentCount);
         for (let i = 0; i < emptyNeeded; i++) {
-            html += `<tr class="empty-row"><td colspan="6">⏳ — vrije regel —</td></tr>`;
+            html += `<tr class="empty-row"><td colspan="6">⏳ — vrije regel —</tr>`;
         }
         
         html += `</tbody>
