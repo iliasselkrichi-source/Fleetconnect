@@ -843,8 +843,20 @@
             if (success) {
                 alert(`Order ${orderId} is bevestigd.`);
                 closeModal();
+
+                // *** Extra stap: spring naar de ritdatum in de agenda ***
+                const order = allBookings.find(b => b.id === orderId);
+                if (order && order.datetime) {
+                    const [day, month, year] = order.datetime.split('-');
+                    // Zet de geselecteerde dag
+                    selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    // Zet de juiste maand in de kalenderweergave
+                    currentMonth = new Date(parseInt(year), parseInt(month) - 1, 1);
+                }
+                // *** Einde extra stap ***
+
                 refreshCurrentTab();      // Huidige tab verversen (bijv. New Orders)
-                refreshAgenda();          // Agenda geforceerd verversen (zodat rit zichtbaar wordt)
+                refreshAgenda();          // Agenda geforceerd verversen (rit wordt nu zichtbaar)
             }
         }
 
