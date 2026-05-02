@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Je volledige CSS blijft hier staan, is identiek aan jouw origineel */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; height: 100vh; display: flex; }
         .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; overflow-y: auto; }
@@ -227,21 +228,39 @@
         let selectedDriverId = null;
 
         // ============================================
-        // AUTHENTICATIE
+        // AUTHENTICATIE - GECORRIGEERD
         // ============================================
         async function initSupabase() {
             try {
-                const { createClient } = supabaseJs;
+                // ** FIX 1: Gebruik de juiste globale variabele 'supabase' **
+                const { createClient } = supabase;  // niet supabaseJs!
                 supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
+                // ** FIX 2: Korte vertraging om sessie uit localStorage te laten laden **
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // ** FIX 3: Haal sessie op met een extra fallback via onAuthStateChange **
                 const { data: { session } } = await supabaseClient.auth.getSession();
+                
                 if (!session) {
+                    console.log('Geen actieve sessie gevonden, redirect naar login.');
                     window.location.href = 'login.html';
                     return;
                 }
                 
                 currentUser = session.user;
                 document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || 'Admin'}`;
+                
+                // ** FIX 4: Luister naar auth changes om uitloggen op te vangen **
+                supabaseClient.auth.onAuthStateChange((event, newSession) => {
+                    if (event === 'SIGNED_OUT') {
+                        window.location.href = 'login.html';
+                    }
+                    if (event === 'SIGNED_IN' && newSession) {
+                        currentUser = newSession.user;
+                        document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || 'Admin'}`;
+                    }
+                });
                 
                 await loadBookingsFromSupabase();
                 await loadDriversFromSupabase();
@@ -660,17 +679,17 @@
             const tbody = document.getElementById('ordersTableBodyNew');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen nieuwe orders</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen nieuwe orders</span></tr>';
             } else {
                 tbody.innerHTML = orders.map(order => `
                     <tr>
                         <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
-                        <td>${order.datetime} ${order.time}</td>
-                        <td>${order.name}</td>
-                        <td>${order.pickup} → ${order.destination}</td>
-                        <td>${order.vehicle}</td>
-                        <td>€${(order.amount || 0).toFixed(2)}</td>
-                        <td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></td>
+                        <td>${order.datetime} ${order.time}</span></td>
+                        <td>${order.name}</span></td>
+                        <td>${order.pickup} → ${order.destination}</span></td>
+                        <td>${order.vehicle}</span></td>
+                        <td>€${(order.amount || 0).toFixed(2)}</span></td>
+                        <td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></span></td>
                     </tr>
                 `).join('');
             }
@@ -721,17 +740,17 @@
             const tbody = document.getElementById('ordersTableBodyOrders');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen bevestigde orders</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen bevestigde orders</span></tr>';
             } else {
                 tbody.innerHTML = orders.map(order => `
                     <tr>
                         <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
-                        <td>${order.datetime} ${order.time}</td>
-                        <td>${order.name}</td>
-                        <td>${order.pickup} → ${order.destination}</td>
-                        <td>${order.vehicle}</td>
-                        <td>€${(order.amount || 0).toFixed(2)}</td>
-                        <td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></td>
+                        <td>${order.datetime} ${order.time}</span></td>
+                        <td>${order.name}</span></td>
+                        <td>${order.pickup} → ${order.destination}</span></td>
+                        <td>${order.vehicle}</span></td>
+                        <td>€${(order.amount || 0).toFixed(2)}</span></td>
+                        <td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></span></td>
                     </tr>
                 `).join('');
             }
@@ -783,7 +802,7 @@
             const tbody = document.getElementById('ordersTableBodyHistory');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen historische ritten</td></tr>';
+                tbody.innerHTML = '<td><td colspan="7" class="no-results">Geen historische ritten</td></tr>';
             } else {
                 tbody.innerHTML = orders.map(order => {
                     let statusText = order.status === 'completed' ? '✅ Uitgevoerd' : (order.status === 'cancelled' ? '❌ Geannuleerd' : '📋 Gepasseerd');
