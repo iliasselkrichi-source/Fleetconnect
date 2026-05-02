@@ -49,95 +49,47 @@
             cursor: pointer;
             font-size: 16px;
             margin-top: 12px;
-            transition: background 0.2s;
         }
         button:hover {
             background: #2dd4bf;
             color: #0f172a;
         }
-        .error { 
-            color: #ef4444; 
-            margin-top: 16px; 
-            text-align: center; 
-            font-size: 14px;
-        }
-        .loading { 
-            opacity: 0.6; 
-            pointer-events: none; 
-        }
-        .info {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #94a3b8;
-        }
+        .error { color: #ef4444; margin-top: 16px; font-size: 14px; }
+        .success { color: #10b981; margin-top: 16px; font-size: 14px; }
     </style>
 </head>
 <body>
 <div class="login-box">
-    <h1><i class="fas fa-truck"></i> Fleetconnect Admin</h1>
+    <h1>Fleetconnect Admin</h1>
     <p>Log in om het dashboard te openen</p>
-    <input type="email" id="email" placeholder="E-mailadres" autocomplete="off">
+    <input type="email" id="email" placeholder="E-mailadres">
     <input type="password" id="password" placeholder="Wachtwoord">
     <button onclick="login()">Inloggen</button>
-    <div id="errorMsg" class="error"></div>
-    <div class="info">Gebruik je Supabase Auth account om in te loggen</div>
+    <div id="message"></div>
 </div>
 
 <script>
-    const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
-    
-    // ✅ DIT IS DE BELANGRIJKE AANPASSING: supabaseJs ipv window.supabase
-    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = supabaseJs.createClient(
+        'https://kwsuqzbqzsmgkjaslwkz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE'
+    );
 
-    async function checkSession() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            window.location.href = 'admin_panel.html';
-        }
-    }
-    
     async function login() {
-        const email = document.getElementById('email').value.trim();
+        const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('errorMsg');
-        const btn = document.querySelector('button');
+        const message = document.getElementById('message');
         
-        errorDiv.innerText = '';
+        message.innerHTML = '';
         
-        if (!email || !password) {
-            errorDiv.innerText = 'Vul e-mail en wachtwoord in';
-            return;
-        }
-        
-        btn.classList.add('loading');
-        btn.innerText = 'Bezig met inloggen...';
-        
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        btn.classList.remove('loading');
-        btn.innerText = 'Inloggen';
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         
         if (error) {
-            errorDiv.innerText = 'Ongeldig e-mailadres of wachtwoord: ' + error.message;
-            console.error(error);
+            message.innerHTML = '<span class="error">' + error.message + '</span>';
         } else {
-            localStorage.setItem('supabase_session', JSON.stringify(data.session));
+            message.innerHTML = '<span class="success">✅ Succes! Doorverwijzen...</span>';
             window.location.href = 'admin_panel.html';
         }
     }
-    
-    document.getElementById('password').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') login();
-    });
-    document.getElementById('email').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') login();
-    });
-    
-    checkSession();
 </script>
 </body>
 </html>
