@@ -740,7 +740,7 @@
             const tbody = document.getElementById('ordersTableBodyOrders');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen bevestigde orders</span></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen bevestigde orders</span></td>';
             } else {
                 tbody.innerHTML = orders.map(order => `
                     <tr>
@@ -802,7 +802,7 @@
             const tbody = document.getElementById('ordersTableBodyHistory');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<td><td colspan="7" class="no-results">Geen historische ritten</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen historische ritten</span></tr>';
             } else {
                 tbody.innerHTML = orders.map(order => {
                     let statusText = order.status === 'completed' ? '✅ Uitgevoerd' : (order.status === 'cancelled' ? '❌ Geannuleerd' : '📋 Gepasseerd');
@@ -813,8 +813,8 @@
                             <td>${order.name}</td>
                             <td>${order.pickup} → ${order.destination}</td>
                             <td>${order.vehicle}</td>
-                            <td>€${(order.amount || 0).toFixed(2)}</td>
-                            <td>${statusText}</td>
+                            <td>€${(order.amount || 0).toFixed(2)}</span></td>
+                            <td>${statusText}</span></td>
                         </tr>
                     `;
                 }).join('');
@@ -838,7 +838,7 @@
         }
 
         // ============================================
-        // MODAL & FICHE FUNCTIES
+        // MODAL & FICHE FUNCTIES (aangepast voor vluchtnummer)
         // ============================================
         async function confirmOrder(orderId) {
             const success = await updateBookingStatus(orderId, 'confirmed');
@@ -870,6 +870,7 @@
                     <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
                     <div class="fiche-row"><span class="fiche-label">Template:</span><span class="fiche-value">${order.template}</span></div>
                     <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
+                    ${order.flight_number ? `<div class="fiche-row"><span class="fiche-label">✈️ Vluchtnummer:</span><span class="fiche-value">${order.flight_number}</span></div>` : ''}
                 </div>
                 <div class="fiche-section"><h4>Klantgegevens</h4>
                     <div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div>
@@ -910,6 +911,7 @@
                 <div class="fiche-section"><h4>Boekingsinformatie</h4>
                     <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
                     <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
+                    ${order.flight_number ? `<div class="fiche-row"><span class="fiche-label">✈️ Vluchtnummer:</span><span class="fiche-value">${order.flight_number}</span></div>` : ''}
                 </div>
                 <div class="fiche-section"><h4>Klantgegevens</h4>
                     <div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div>
@@ -963,9 +965,13 @@
                             <thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Bedrag</th><th>Status</th></tr></thead>
                             <tbody>
                                 ${allBookings.slice(0, 10).map(b => `
-                                    <tr><td>${b.id}</td><td>${b.datetime}</td><td>${b.name}</td><td>€${(b.amount || 0).toFixed(2)}</td><td>${b.status || 'pending'}</td></tr>
+                                    <tr><td>${b.id}</span></td>
+                                    <td>${b.datetime}</span></span></td>
+                                    <td>${b.name}</span></span></td>
+                                    <td>€${(b.amount || 0).toFixed(2)}</span></span></td>
+                                    <td>${b.status || 'pending'}</span></span></td>
                                 `).join('')}
-                                ${allBookings.length === 0 ? '<tr><td colspan="5" class="no-results">Geen boekingen</td></tr>' : ''}
+                                ${allBookings.length === 0 ? '<tr><td colspan="5" class="no-results">Geen boekingen</span></tr>' : ''}
                             </tbody>
                         </table>
                     </div>
