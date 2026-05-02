@@ -885,10 +885,13 @@
                     body: JSON.stringify(record)
                 });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                alert(`🎉 Bedankt ${record.name}!\n\n📋 Boekingsnummer: ${record.id}\n✉️ Bevestiging naar ${record.email}`);
+                
+                // Vriendelijk bedankbericht voor de klant
+                alert(`🎉 Bedankt voor uw reservering, ${record.name}! 🎉\n\n✅ Uw rit is succesvol vastgelegd.\n✉️ Een bevestiging werd verstuurd naar ${record.email}\n\n🚖 We zien u graag binnen!`);
+                
                 return true;
             } catch (error) {
-                alert(`❌ Fout: ${error.message}`);
+                alert(`❌ Er ging iets mis: ${error.message}\n\nProbeer opnieuw of contacteer ons.`);
                 return false;
             }
         }
