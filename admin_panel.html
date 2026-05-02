@@ -29,6 +29,8 @@
         .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 20px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .logout-btn:hover { background: #dc2626; }
         .user-info { font-size: 0.8rem; color: #64748b; }
+        .refresh-btn { background: #2dd4bf; color: #0f172a; border: none; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .refresh-btn:hover { background: #14b8a6; }
         .download-buttons { display: flex; gap: 10px; }
         .download-btn { background: #0f172a; color: white; border: none; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .content { padding: 32px; }
@@ -47,7 +49,6 @@
         .action-btn { background: #2dd4bf; color: #0f172a; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.75rem; }
         .delete-btn { background: #ef4444; color: white; margin-left: 8px; }
         .add-btn { background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.75rem; }
-        .secondary-btn { background: #f59e0b; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.7rem; margin-top: 8px; }
         .order-count { background: #2dd4bf20; padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 600; color: #0f172a; }
         .hidden { display: none; }
         .template-tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
@@ -71,28 +72,14 @@
         .fiche-total .amount { font-size: 1.5rem; font-weight: 700; color: #2dd4bf; }
         .fiche-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
         .fiche-btn { padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
-        .fiche-btn.print { background: #e2e8f0; color: #1e293b; }
-        .fiche-btn.json { background: #3b82f6; color: white; }
         .fiche-btn.confirm { background: #10b981; color: white; }
-        .fiche-btn.assign { background: #f59e0b; color: white; margin-left: 8px; }
         .fiche-btn.close { background: #ef4444; color: white; }
-        select, .assign-select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; margin-top: 8px; }
-        .assigned-driver { background: #d1fae5; padding: 10px; border-radius: 8px; margin-top: 8px; text-align: center; color: #065f46; font-weight: 500; }
+        .fiche-btn.assign { background: #f59e0b; color: white; }
         .people-card { background: white; border-radius: 16px; padding: 20px; }
-        .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-top: 16px; }
-        .person-item { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; position: relative; }
-        .person-name { font-weight: 600; font-size: 1rem; margin-bottom: 8px; color: #0f172a; }
-        .person-detail { font-size: 0.8rem; color: #475569; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-        .person-detail i { width: 20px; color: #2dd4bf; }
-        .item-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-card h4 { font-size: 0.75rem; text-transform: uppercase; color: #64748b; margin-bottom: 8px; }
         .stat-card .value { font-size: 1.8rem; font-weight: 700; }
-        .period-buttons { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .period-btn { padding: 8px 20px; border-radius: 40px; border: none; cursor: pointer; font-weight: 500; background: #e2e8f0; transition: all 0.2s; }
-        .period-btn.active { background: #2dd4bf; color: #0f172a; }
-        .finance-summary { background: #f8fafc; border-radius: 16px; padding: 20px; margin-top: 20px; }
         .calendar-container { background: white; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
         .calendar-header h2 { font-size: 1.3rem; font-weight: 600; }
@@ -107,13 +94,11 @@
         .calendar-day.other-month { color: #94a3b8; }
         .calendar-day.today { border: 2px solid #2dd4bf; }
         .calendar-day.has-rides { background: #dbeafe; }
-        .calendar-day.has-rides.selected { background: #2dd4bf; }
         .ride-dot { width: 6px; height: 6px; background: #2dd4bf; border-radius: 50%; margin-top: 2px; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
         @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } }
-        .info-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; cursor: pointer; }
-        .info-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .info-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .mini-flip-container { perspective: 600px; height: 140px; }
         .mini-flip-card { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; }
         .mini-flip-card.flipped { transform: rotateY(180deg); }
@@ -126,7 +111,6 @@
         .stat-card-simple { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 16px; padding: 16px; height: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .stat-card-simple .value { font-size: 1.8rem; font-weight: 700; margin: 8px 0; }
         .stat-card-simple .label { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-card-simple .progress { font-size: 0.7rem; margin-top: 8px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 20px; }
         .planning-container { perspective: 1000px; margin-top: 20px; }
         .flip-card { background-color: transparent; width: 100%; height: 400px; position: relative; }
         .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
@@ -143,31 +127,26 @@
         .planning-ride { font-size: 0.85rem; color: #475569; }
         .empty-planning { text-align: center; padding: 40px; color: #94a3b8; }
         .finance-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
-        .date-range-picker { display: flex; gap: 12px; align-items: center; background: white; padding: 8px 16px; border-radius: 48px; }
-        .date-range-picker input { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 24px; font-family: 'Inter', sans-serif; }
-        .comparison-card { background: white; border-radius: 16px; padding: 20px; margin-top: 20px; }
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; }
-        .comparison-item { text-align: center; padding: 16px; background: #f8fafc; border-radius: 12px; }
-        .comparison-item .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
-        .comparison-item .value { font-size: 1.5rem; font-weight: 700; margin: 8px 0; }
+        .period-buttons { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .period-btn { padding: 8px 20px; border-radius: 40px; border: none; cursor: pointer; font-weight: 500; background: #e2e8f0; }
+        .period-btn.active { background: #2dd4bf; color: #0f172a; }
         .chart-container { background: white; border-radius: 16px; padding: 20px; margin-top: 24px; }
         canvas { max-height: 300px; width: 100% !important; }
         .export-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
         .export-btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
         .export-csv { background: #10b981; color: white; }
         .export-json { background: #3b82f6; color: white; }
-        .export-pdf { background: #ef4444; color: white; }
         .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
         @media (max-width: 1000px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
-        .kpi-card { background: white; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .kpi-card .icon { font-size: 2rem; margin-bottom: 8px; }
+        .kpi-card { background: white; border-radius: 16px; padding: 20px; text-align: center; }
         .kpi-card .value { font-size: 1.8rem; font-weight: 700; }
         .kpi-card .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; margin-top: 8px; }
         .wiki-container { background: white; border-radius: 16px; padding: 24px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
         .wiki-empty { text-align: center; color: #94a3b8; }
         .wiki-empty i { font-size: 4rem; margin-bottom: 16px; opacity: 0.5; }
         @media (max-width: 768px) { .sidebar { width: 220px; } .content { padding: 16px; } .flip-card { height: 500px; } }
+        select, .assign-select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; margin-top: 8px; }
+        .assigned-driver { background: #d1fae5; padding: 10px; border-radius: 8px; margin-top: 8px; text-align: center; color: #065f46; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -196,6 +175,7 @@
         <div class="header">
             <h1 id="pageTitle">Agenda</h1>
             <div class="header-right">
+                <button class="refresh-btn" onclick="refreshAllData()"><i class="fas fa-sync-alt"></i> Vernieuwen</button>
                 <span class="user-info" id="userEmail"></span>
                 <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
             </div>
@@ -216,21 +196,44 @@
 
     <script>
         // ============================================
-        // JOUW SUPABASE CONFIGURATIE
+        // SUPABASE CONFIGURATIE
         // ============================================
         const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
         
         let supabaseClient = null;
-        let supabaseConnected = false;
         let currentUser = null;
+        
+        // Globale data
+        let allBookings = [];
+        let newOrders = [];
+        let ordersList = [];
+        let historyOrders = [];
+        let driversList = [];
+        let onderaannemersList = [];
+        
+        // Huidige tijd (gebruik echte huidige tijd)
+        const NOW = new Date();
+        
+        // UI variabelen
+        let currentTab = 'agenda';
+        let selectedDate = new Date(NOW);
+        let isFlipped = false;
+        let currentMonth = new Date(NOW);
+        let flipStates = { omzet: false, cash: false, orders: false };
+        let financePeriod = 'month';
+        let financeChart = null;
+        let currentSelectedOrder = null;
+        let selectedDriverId = null;
 
+        // ============================================
+        // AUTHENTICATIE
+        // ============================================
         async function initSupabase() {
             try {
                 const { createClient } = supabaseJs;
                 supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                // Check current session
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (!session) {
                     window.location.href = 'login.html';
@@ -238,18 +241,13 @@
                 }
                 
                 currentUser = session.user;
-                document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || currentUser.user_metadata?.full_name || 'Admin'}`;
+                document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || 'Admin'}`;
                 
-                const { data, error } = await supabaseClient.from('bookings').select('count', { count: 'exact', head: true });
-                if (!error) {
-                    supabaseConnected = true;
-                    console.log('Supabase connected successfully');
-                } else {
-                    supabaseConnected = false;
-                }
+                await loadBookingsFromSupabase();
+                await loadDriversFromSupabase();
+                
             } catch (e) {
-                supabaseConnected = false;
-                console.error('Failed to initialize Supabase:', e);
+                console.error('Failed to initialize:', e);
                 window.location.href = 'login.html';
             }
         }
@@ -261,10 +259,87 @@
         }
 
         // ============================================
-        // 1. CONFIGURATIE & HUIDIGE TIJD
+        // DATA OPHALEN UIT SUPABASE
         // ============================================
-        const NOW = new Date(2026, 3, 26, 9, 18);
-        
+        async function loadBookingsFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('bookings')
+                    .select('*')
+                    .order('datetime', { ascending: false });
+                
+                if (error) throw error;
+                
+                allBookings = data || [];
+                console.log(`✅ ${allBookings.length} boekingen geladen uit Supabase`);
+                filterAndSortData();
+                refreshCurrentTab();
+            } catch (error) {
+                console.error('Fout bij laden boekingen:', error);
+                allBookings = [];
+            }
+        }
+
+        async function loadDriversFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('drivers')
+                    .select('*');
+                
+                if (!error && data) {
+                    driversList = data;
+                }
+            } catch (error) {
+                console.error('Fout bij laden chauffeurs:', error);
+                driversList = [];
+            }
+        }
+
+        // ============================================
+        // DATA BEWERKEN IN SUPABASE
+        // ============================================
+        async function updateBookingStatus(bookingId, newStatus, additionalData = {}) {
+            try {
+                const { error } = await supabaseClient
+                    .from('bookings')
+                    .update({ status: newStatus, ...additionalData })
+                    .eq('id', bookingId);
+                
+                if (error) throw error;
+                
+                await loadBookingsFromSupabase();
+                return true;
+            } catch (error) {
+                console.error('Fout bij updaten:', error);
+                alert('Fout bij opslaan: ' + error.message);
+                return false;
+            }
+        }
+
+        async function assignDriverToBooking(bookingId, driverId) {
+            const driver = driversList.find(d => d.id == driverId);
+            if (!driver) return false;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('bookings')
+                    .update({ assigned_driver: driver })
+                    .eq('id', bookingId);
+                
+                if (error) throw error;
+                
+                await loadBookingsFromSupabase();
+                return true;
+            } catch (error) {
+                console.error('Fout bij toewijzen chauffeur:', error);
+                alert('Fout bij toewijzen: ' + error.message);
+                return false;
+            }
+        }
+
+        // ============================================
+        // DATUM & TIJD FUNCTIES
+        // ============================================
         function parseDateTime(dateStr, timeStr) {
             const parts = dateStr.split('-');
             const timeParts = timeStr ? timeStr.split(':') : ['00', '00'];
@@ -277,74 +352,66 @@
         }
 
         // ============================================
-        // 2. RAW DATA - ALLES LEEG
+        // DATA SORTEREN
         // ============================================
-        let rawNewOrders = [];
-        let rawConfirmedOrders = [];
-        let onderaannemersList = [];
-        let driversList = [];
-
-        // ============================================
-        // 3. GLOBALE VARIABELEN
-        // ============================================
-        let allRides = [];
-        let selectedDate = new Date(NOW);
-        let isFlipped = false;
-        let currentMonth = new Date(NOW);
-        let flipStates = { omzet: false, cash: false, orders: false };
-        let newOrders = [];
-        let ordersList = [];
-        let historyOrders = [];
-        let currentTab = 'agenda';
-        let currentSelectedOrder = null;
-        let selectedDriverId = null;
-        
-        let financePeriod = 'month';
-        let customStartDate = null;
-        let customEndDate = null;
-        let financeChart = null;
-
-        // ============================================
-        // 4. DATA FUNCTIES
-        // ============================================
-        function updateAgendaData() {
-            allRides = [];
-            rawConfirmedOrders.forEach(order => {
-                allRides.push({
-                    id: order.id, date: order.datetime, time: order.time, name: order.name,
-                    pickup: order.pickup, destination: order.destination, vehicle: order.vehicle,
-                    driver: order.assignedDriver, amount: order.amount, template: order.template,
-                    completed: order.completed || false, canceled: order.canceled || false, payment: order.payment
-                });
-            });
-        }
-
-        function getRidesByDate(dateStr) {
-            return allRides.filter(ride => ride.date === dateStr);
-        }
-
         function filterAndSortData() {
-            newOrders = rawNewOrders.filter(order => isOrderInFuture(order));
-            ordersList = [];
-            historyOrders = [];
+            // New Orders: status = 'pending' OF nog niet bevestigd
+            newOrders = allBookings.filter(booking => 
+                booking.status === 'pending' || booking.status === 'new'
+            );
             
-            rawConfirmedOrders.forEach(order => {
-                if (isOrderInFuture(order)) {
-                    ordersList.push({ ...order });
-                } else {
-                    historyOrders.push({ ...order });
-                }
-            });
+            // Orders: status = 'confirmed' EN datum/tijd >= nu
+            ordersList = allBookings.filter(booking => 
+                (booking.status === 'confirmed' || booking.status === 'active') && 
+                isOrderInFuture(booking)
+            );
             
+            // History: status = 'completed' OF 'cancelled' OF datum/tijd < nu
+            historyOrders = allBookings.filter(booking => 
+                booking.status === 'completed' || 
+                booking.status === 'cancelled' ||
+                (!isOrderInFuture(booking) && booking.status !== 'pending')
+            );
+            
+            // Sorteren
             ordersList.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
             historyOrders.sort((a, b) => parseDateTime(b.datetime, b.time) - parseDateTime(a.datetime, a.time));
+            newOrders.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
         }
 
         // ============================================
-        // 5. AGENDA FUNCTIES
+        // AGENDA FUNCTIES
         // ============================================
+        function getRidesByDate(dateStr) {
+            return allBookings.filter(booking => booking.datetime === dateStr);
+        }
+
         function getTodayStats() {
-            return { total: 0, cash: 0, factuur: 0, commission: 0, completed: 0, canceled: 0, futureRides: 0, totalRides: 0 };
+            const todayStr = `${NOW.getDate().toString().padStart(2,'0')}-${(NOW.getMonth()+1).toString().padStart(2,'0')}-${NOW.getFullYear()}`;
+            const todayRides = getRidesByDate(todayStr);
+            const todayCompleted = todayRides.filter(r => r.status === 'completed');
+            const todayCanceled = todayRides.filter(r => r.status === 'cancelled');
+            const todayCash = todayRides.filter(r => r.payment === 'Cash').reduce((sum, r) => sum + (r.amount || 0), 0);
+            const todayFactuur = todayRides.filter(r => r.payment === 'Factuur').reduce((sum, r) => sum + (r.amount || 0), 0);
+            const todayTotal = todayCash + todayFactuur;
+            const commission = todayTotal * 0.10;
+            
+            const nowTime = `${NOW.getHours().toString().padStart(2,'0')}:${NOW.getMinutes().toString().padStart(2,'0')}`;
+            const futureRidesToday = todayRides.filter(r => {
+                if (r.status === 'completed' || r.status === 'cancelled') return false;
+                return r.time > nowTime;
+            });
+            
+            return {
+                total: todayTotal,
+                cash: todayCash,
+                factuur: todayFactuur,
+                commission: commission,
+                completed: todayCompleted.length,
+                canceled: todayCanceled.length,
+                futureRides: futureRidesToday.length,
+                totalRides: todayRides.length
+            };
         }
 
         function renderDashboardGrid() {
@@ -354,33 +421,73 @@
                     <div class="info-card" onclick="toggleFlipCard('omzet')">
                         <div class="mini-flip-container">
                             <div class="mini-flip-card ${flipStates.omzet ? 'flipped' : ''}">
-                                <div class="mini-flip-front"><i class="fas fa-euro-sign" style="font-size: 1.5rem;"></i><div class="value">€ 0,00</div><div class="label">Dagelijkse Omzet</div><div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor commissie</div></div>
-                                <div class="mini-flip-back"><i class="fas fa-percent" style="font-size: 1.5rem;"></i><div class="value">€ 0,00</div><div class="label">10% Commissie</div><div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div></div>
+                                <div class="mini-flip-front">
+                                    <i class="fas fa-euro-sign" style="font-size: 1.5rem;"></i>
+                                    <div class="value">€ ${stats.total.toFixed(2)}</div>
+                                    <div class="label">Dagelijkse Omzet</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor commissie</div>
+                                </div>
+                                <div class="mini-flip-back">
+                                    <i class="fas fa-percent" style="font-size: 1.5rem;"></i>
+                                    <div class="value">€ ${stats.commission.toFixed(2)}</div>
+                                    <div class="label">10% Commissie</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="info-card" onclick="toggleFlipCard('cash')">
                         <div class="mini-flip-container">
                             <div class="mini-flip-card ${flipStates.cash ? 'flipped' : ''}">
-                                <div class="mini-flip-front"><i class="fas fa-money-bill-wave" style="font-size: 1.5rem;"></i><div class="value">€ 0,00</div><div class="label">Cash Betalingen</div><div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor factuur</div></div>
-                                <div class="mini-flip-back"><i class="fas fa-file-invoice" style="font-size: 1.5rem;"></i><div class="value">€ 0,00</div><div class="label">Factuur Betalingen</div><div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div></div>
+                                <div class="mini-flip-front">
+                                    <i class="fas fa-money-bill-wave" style="font-size: 1.5rem;"></i>
+                                    <div class="value">€ ${stats.cash.toFixed(2)}</div>
+                                    <div class="label">Cash Betalingen</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor factuur</div>
+                                </div>
+                                <div class="mini-flip-back">
+                                    <i class="fas fa-file-invoice" style="font-size: 1.5rem;"></i>
+                                    <div class="value">€ ${stats.factuur.toFixed(2)}</div>
+                                    <div class="label">Factuur Betalingen</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="info-card" onclick="toggleFlipCard('orders')">
                         <div class="mini-flip-container">
                             <div class="mini-flip-card ${flipStates.orders ? 'flipped' : ''}">
-                                <div class="mini-flip-front"><i class="fas fa-check-circle" style="font-size: 1.5rem;"></i><div class="value">0</div><div class="label">Uitgevoerde Orders</div><div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor annuleringen</div></div>
-                                <div class="mini-flip-back"><i class="fas fa-ban" style="font-size: 1.5rem;"></i><div class="value">0</div><div class="label">Geannuleerde Ritten</div><div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div></div>
+                                <div class="mini-flip-front">
+                                    <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
+                                    <div class="value">${stats.completed}</div>
+                                    <div class="label">Uitgevoerde Orders</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik voor annuleringen</div>
+                                </div>
+                                <div class="mini-flip-back">
+                                    <i class="fas fa-ban" style="font-size: 1.5rem;"></i>
+                                    <div class="value">${stats.canceled}</div>
+                                    <div class="label">Geannuleerde Ritten</div>
+                                    <div class="flip-hint"><i class="fas fa-sync-alt"></i> tik terug</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="info-card"><div class="stat-card-simple"><i class="fas fa-clock" style="font-size: 1.5rem;"></i><div class="value">0</div><div class="label">Toekomstige ritten vandaag</div><div class="progress">Nog te rijden</div></div></div>
+                    <div class="info-card">
+                        <div class="stat-card-simple">
+                            <i class="fas fa-clock" style="font-size: 1.5rem;"></i>
+                            <div class="value">${stats.futureRides}</div>
+                            <div class="label">Toekomstige ritten vandaag</div>
+                            <div class="progress">Nog te rijden</div>
+                        </div>
+                    </div>
                 </div>
             `;
         }
 
-        function toggleFlipCard(cardName) { flipStates[cardName] = !flipStates[cardName]; refreshAgenda(); }
+        function toggleFlipCard(cardName) {
+            flipStates[cardName] = !flipStates[cardName];
+            refreshAgenda();
+        }
 
         function renderCalendar() {
             const year = currentMonth.getFullYear();
@@ -389,116 +496,567 @@
             const startDay = firstDayOfMonth.getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const prevMonthDays = new Date(year, month, 0).getDate();
+            
             let calendarHTML = `<div class="calendar-container"><div class="calendar-header"><h2>${firstDayOfMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })}</h2><div class="calendar-nav"><button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button><button onclick="goToToday()">Vandaag</button><button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button></div></div><div class="calendar-weekdays"><div>Ma</div><div>Di</div><div>Wo</div><div>Do</div><div>Vr</div><div>Za</div><div>Zo</div></div><div class="calendar-days">`;
+            
             let adjustedStartDay = startDay === 0 ? 6 : startDay - 1;
-            for (let i = adjustedStartDay - 1; i >= 0; i--) { const day = prevMonthDays - i; calendarHTML += `<div class="calendar-day other-month" onclick="selectDateByString('${day}-${month}-${year}')">${day}</div>`; }
+            
+            for (let i = adjustedStartDay - 1; i >= 0; i--) {
+                const day = prevMonthDays - i;
+                calendarHTML += `<div class="calendar-day other-month" onclick="selectDateByString('${day}-${month}-${year}')">${day}</div>`;
+            }
+            
             for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${day}-${month+1}-${year}`;
+                const dateStr = `${day.toString().padStart(2,'0')}-${(month+1).toString().padStart(2,'0')}-${year}`;
                 const hasRides = getRidesByDate(dateStr).length > 0;
                 const isToday = (day === NOW.getDate() && month === NOW.getMonth() && year === NOW.getFullYear());
                 const isSelected = (selectedDate && day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear());
+                
                 let classes = 'calendar-day';
                 if (isToday) classes += ' today';
                 if (isSelected) classes += ' selected';
                 if (hasRides) classes += ' has-rides';
+                
                 calendarHTML += `<div class="${classes}" onclick="selectDateByString('${dateStr}')">${day}${hasRides ? '<div class="ride-dot"></div>' : ''}</div>`;
             }
+            
             const remainingDays = 42 - (adjustedStartDay + daysInMonth);
-            for (let day = 1; day <= remainingDays; day++) { calendarHTML += `<div class="calendar-day other-month" onclick="selectDateByString('${day}-${month+2}-${year}')">${day}</div>`; }
+            for (let day = 1; day <= remainingDays; day++) {
+                calendarHTML += `<div class="calendar-day other-month" onclick="selectDateByString('${day}-${month+2}-${year}')">${day}</div>`;
+            }
+            
             calendarHTML += `</div></div>`;
             return calendarHTML;
         }
         
         function renderPlanning() {
-            const selectedDateStr = `${selectedDate.getDate()}-${selectedDate.getMonth()+1}-${selectedDate.getFullYear()}`;
+            const selectedDateStr = `${selectedDate.getDate().toString().padStart(2,'0')}-${(selectedDate.getMonth()+1).toString().padStart(2,'0')}-${selectedDate.getFullYear()}`;
             const rides = getRidesByDate(selectedDateStr);
             const formattedDate = selectedDate.toLocaleDateString('nl-NL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            let ridesHtml = rides.length === 0 ? '<div class="empty-planning"><i class="fas fa-calendar-day"></i> Geen ritten op deze dag</div>' : rides.map(ride => `<div class="planning-item"><div class="planning-time"><i class="fas fa-clock"></i> ${ride.time} uur</div><div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div><div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div></div>`).join('');
-            const futureRidesAll = allRides.filter(ride => { const rideDateTime = parseDateTime(ride.date, ride.time); return rideDateTime > NOW && !ride.completed && !ride.canceled; });
-            let futureHtml = futureRidesAll.length === 0 ? '<div class="empty-planning"><i class="fas fa-calendar-plus"></i> Geen toekomstige ritten</div>' : futureRidesAll.sort((a,b) => parseDateTime(a.date,a.time) - parseDateTime(b.date,b.time)).map(ride => `<div class="planning-item"><div class="planning-time"><i class="fas fa-calendar-alt"></i> ${ride.date} om ${ride.time} uur</div><div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div><div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div></div>`).join('');
-            return `<div class="planning-container"><div class="flip-card ${isFlipped ? 'flipped' : ''}" id="flipCard"><div class="flip-card-inner"><div class="flip-card-front"><div class="flip-header"><h3><i class="fas fa-calendar-day"></i> ${formattedDate}</h3><button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Toekomst</button></div><div class="planning-list">${ridesHtml}</div></div><div class="flip-card-back"><div class="flip-header"><h3><i class="fas fa-calendar-week"></i> Toekomstige ritten</h3><button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Terug</button></div><div class="planning-list">${futureHtml}</div></div></div></div></div>`;
+            
+            let ridesHtml = '';
+            if (rides.length === 0) {
+                ridesHtml = '<div class="empty-planning"><i class="fas fa-calendar-day"></i> Geen ritten op deze dag</div>';
+            } else {
+                rides.sort((a, b) => a.time.localeCompare(b.time));
+                ridesHtml = rides.map(ride => `
+                    <div class="planning-item">
+                        <div class="planning-time"><i class="fas fa-clock"></i> ${ride.time} uur ${ride.status === 'completed' ? '<span style="color:#10b981;">✓ Uitgevoerd</span>' : (ride.status === 'cancelled' ? '<span style="color:#ef4444;">✗ Geannuleerd</span>' : '')}</div>
+                        <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
+                        <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
+                        ${ride.assigned_driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.assigned_driver.name}</div>` : '<div class="planning-driver"><i class="fas fa-user-clock"></i> Nog geen chauffeur toegewezen</div>'}
+                    </div>
+                `).join('');
+            }
+            
+            const futureRidesAll = allBookings.filter(booking => {
+                const rideDateTime = parseDateTime(booking.datetime, booking.time);
+                return rideDateTime > NOW && booking.status !== 'completed' && booking.status !== 'cancelled';
+            });
+            
+            let futureHtml = '';
+            if (futureRidesAll.length === 0) {
+                futureHtml = '<div class="empty-planning"><i class="fas fa-calendar-plus"></i> Geen toekomstige ritten</div>';
+            } else {
+                futureRidesAll.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
+                futureHtml = futureRidesAll.slice(0, 10).map(ride => `
+                    <div class="planning-item">
+                        <div class="planning-time"><i class="fas fa-calendar-alt"></i> ${ride.datetime} om ${ride.time} uur</div>
+                        <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
+                        <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
+                        ${ride.assigned_driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.assigned_driver.name}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+            
+            return `
+                <div class="planning-container">
+                    <div class="flip-card ${isFlipped ? 'flipped' : ''}" id="flipCard">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="flip-header">
+                                    <h3><i class="fas fa-calendar-day"></i> ${formattedDate}</h3>
+                                    <button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Toekomst</button>
+                                </div>
+                                <div class="planning-list">
+                                    ${ridesHtml}
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="flip-header">
+                                    <h3><i class="fas fa-calendar-week"></i> Toekomstige ritten</h3>
+                                    <button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Terug</button>
+                                </div>
+                                <div class="planning-list">
+                                    ${futureHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
         function refreshAgenda() {
-            if (currentTab === 'agenda') document.getElementById('contentArea').innerHTML = `${renderDashboardGrid()}${renderCalendar()}${renderPlanning()}`;
+            if (currentTab === 'agenda') {
+                document.getElementById('contentArea').innerHTML = `
+                    ${renderDashboardGrid()}
+                    ${renderCalendar()}
+                    ${renderPlanning()}
+                `;
+            }
         }
         
-        function selectDateByString(dateStr) { const parts = dateStr.split('-'); selectedDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])); isFlipped = false; refreshAgenda(); }
-        function toggleFlip() { isFlipped = !isFlipped; refreshAgenda(); }
-        function changeMonth(delta) { currentMonth.setMonth(currentMonth.getMonth() + delta); refreshAgenda(); }
-        function goToToday() { currentMonth = new Date(NOW); selectedDate = new Date(NOW); isFlipped = false; refreshAgenda(); }
+        function selectDateByString(dateStr) {
+            const parts = dateStr.split('-');
+            selectedDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            isFlipped = false;
+            refreshAgenda();
+        }
+        
+        function toggleFlip() {
+            isFlipped = !isFlipped;
+            refreshAgenda();
+        }
+        
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            refreshAgenda();
+        }
+        
+        function goToToday() {
+            currentMonth = new Date(NOW);
+            selectedDate = new Date(NOW);
+            isFlipped = false;
+            refreshAgenda();
+        }
 
         // ============================================
-        // 6. FINANCIËLE FUNCTIES (LEEG)
+        // NEW ORDERS RENDER
         // ============================================
-        function getDateRange() { return { startDate: new Date(), endDate: new Date() }; }
-        function getAllBookingsForFinance() { return []; }
-        function getBookingsInRange() { return []; }
-        function getPreviousPeriodData() { return { total: 0, cash: 0, factuur: 0, count: 0 }; }
-        function getFinanceStatistics() { return { total: 0, cash: 0, factuur: 0, commission: 0, netRevenue: 0, byTemplate: { T1:0, T2:0, T3:0, T4:0, T5:0 }, avgOrderValue: 0, cashPercentage: 0, factuurPercentage: 0, count: 0 }; }
-        function getChartData() { return { days: [], totals: [], cashData: [], factuurData: [] }; }
-        function getOnderaannemerStats() { return []; }
-
-        function renderFinance() {
-            const periodNames = { day: 'Vandaag', week: 'Deze Week', month: 'Deze Maand', year: 'Dit Jaar', custom: 'Aangepaste periode' };
-            const html = `<div class="finance-toolbar"><div class="period-buttons"><button class="period-btn ${financePeriod === 'day' ? 'active' : ''}" onclick="setFinancePeriod('day')">Dagelijks</button><button class="period-btn ${financePeriod === 'week' ? 'active' : ''}" onclick="setFinancePeriod('week')">Wekelijks</button><button class="period-btn ${financePeriod === 'month' ? 'active' : ''}" onclick="setFinancePeriod('month')">Maandelijks</button><button class="period-btn ${financePeriod === 'year' ? 'active' : ''}" onclick="setFinancePeriod('year')">Jaarlijks</button><button class="period-btn ${financePeriod === 'custom' ? 'active' : ''}" onclick="setFinancePeriod('custom')">Custom</button></div><div class="date-range-picker ${financePeriod !== 'custom' ? 'hidden' : ''}" id="customDateRange"><label>Van:</label><input type="date" id="startDate" onchange="updateCustomRange()"><label>Tot:</label><input type="date" id="endDate" onchange="updateCustomRange()"></div><div class="export-buttons"><button class="export-btn export-csv" onclick="exportFinanceCSV()">CSV</button><button class="export-btn export-json" onclick="exportFinanceJSON()">JSON</button><button class="export-btn export-pdf" onclick="exportFinancePDF()">PDF</button></div></div><div class="kpi-grid"><div class="kpi-card"><div class="icon">💰</div><div class="value">€ 0,00</div><div class="label">Totale Omzet</div></div><div class="kpi-card"><div class="icon">💵</div><div class="value">€ 0,00</div><div class="label">Cash Betalingen</div></div><div class="kpi-card"><div class="icon">📄</div><div class="value">€ 0,00</div><div class="label">Factuur Betalingen</div></div><div class="kpi-card"><div class="icon">📊</div><div class="value">0</div><div class="label">Aantal Ritten</div></div><div class="kpi-card"><div class="icon">⭐</div><div class="value">€ 0,00</div><div class="label">Gem. Ritwaarde</div></div></div><div class="stats-grid"><div class="stat-card"><h4>📈 10% Commissie</h4><div class="value">€ 0,00</div></div><div class="stat-card"><h4>🏦 Netto Omzet</h4><div class="value">€ 0,00</div></div><div class="stat-card"><h4>📊 Cash vs Factuur</h4><div class="value">0% / 0%</div></div></div><div class="chart-container"><h3>📈 Omzet Trend - ${periodNames[financePeriod]}</h3><canvas id="financeChart"></canvas></div><div class="comparison-card"><h3>📊 Vergelijking met vorige periode</h3><div class="comparison-grid"><div class="comparison-item"><div class="label">Omzet</div><div class="value">€ 0,00</div></div><div class="comparison-item"><div class="label">Cash</div><div class="value">€ 0,00</div></div><div class="comparison-item"><div class="label">Aantal Ritten</div><div class="value">0</div></div><div class="comparison-item"><div class="label">Gem. Ritwaarde</div><div class="value">€ 0,00</div></div></div></div><div class="finance-summary"><h3>📋 Omzet per Template</h3><div style="padding:10px 0;"><span><strong>T1-T5</strong></span><span>€ 0,00 (0%)</span></div></div><div class="finance-summary"><h3>🚗 Chauffeurs & Onderaannemers</h3><div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>Onderaannemer</th><th>Chauffeur</th><th>Voertuig</th><th>Ritten</th><th>Omzet</th></tr></thead><tbody><tr><td colspan="5" class="no-results">Geen chauffeurs</span></tr></tbody>}</div></div>`;
+        function renderNewOrders() {
+            const html = `
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Order ID</label><input type="text" id="filterOrderNew" placeholder="Zoek op ID"></div>
+                    <div class="filter-group"><label>Naam</label><input type="text" id="filterNameNew" placeholder="Klant"></div>
+                    <div class="filter-actions">
+                        <button class="btn-filter" onclick="applyFiltersNewOrders()">Zoek</button>
+                        <button class="btn-reset" onclick="resetFiltersNewOrders()">Reset</button>
+                    </div>
+                </div>
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead><tr><th>Order ID</th><th>Datum & Tijd</th><th>Naam</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Actie</th></tr></thead>
+                        <tbody id="ordersTableBodyNew"></tbody>
+                    </table>
+                </div>
+            `;
             document.getElementById('contentArea').innerHTML = html;
-            setTimeout(() => { const ctx = document.getElementById('financeChart')?.getContext('2d'); if(ctx){ if(financeChart) financeChart.destroy(); financeChart = new Chart(ctx,{ type:'line', data:{ labels:[], datasets:[{ label:'Omzet', data:[], borderColor:'#2dd4bf' }] } }); } }, 100);
+            renderNewOrdersTable(newOrders);
+            document.getElementById('pageTitle').innerHTML = `New Orders <span class="order-count">${newOrders.length}</span>`;
         }
-        
-        function setFinancePeriod(period) { financePeriod = period; renderFinance(); }
-        function updateCustomRange() { renderFinance(); }
-        function exportFinanceCSV() { alert('Geen data'); }
-        function exportFinanceJSON() { alert('Geen data'); }
-        function exportFinancePDF() { alert('PDF Export - gebruik Ctrl+P'); }
+
+        function renderNewOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBodyNew');
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen nieuwe orders</td></tr>';
+            } else {
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
+                        <td>${order.datetime} ${order.time}</td>
+                        <td>${order.name}</td>
+                        <td>${order.pickup} → ${order.destination}</td>
+                        <td>${order.vehicle}</td>
+                        <td>€${(order.amount || 0).toFixed(2)}</td>
+                        <td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function applyFiltersNewOrders() {
+            const orderFilter = document.getElementById("filterOrderNew")?.value.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterNameNew")?.value.toLowerCase() || "";
+            const filtered = newOrders.filter(order => {
+                return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
+                       (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
+            });
+            renderNewOrdersTable(filtered);
+        }
+
+        function resetFiltersNewOrders() {
+            document.getElementById("filterOrderNew").value = "";
+            document.getElementById("filterNameNew").value = "";
+            renderNewOrdersTable(newOrders);
+        }
 
         // ============================================
-        // 7. OVERIGE TABS (LEEG)
+        // ORDERS RENDER
         // ============================================
-        function renderNewOrders() { document.getElementById('contentArea').innerHTML = `<div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>Order ID</th><th>Datum</th><th>Naam</th><th>Route</th><th>Bedrag</th><th>Actie</th></tr></thead><tbody><tr><td colspan="6" class="no-results">Geen nieuwe orders</span></tbody>}</div>`; document.getElementById('pageTitle').innerHTML = 'New Orders <span class="order-count">0</span>'; }
-        function renderOrders() { document.getElementById('contentArea').innerHTML = `<div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>Order ID</th><th>Datum</th><th>Naam</th><th>Route</th><th>Bedrag</th><th>Actie</th></tr></thead><tbody><tr><td colspan="6" class="no-results">Geen bevestigde orders</span></tbody>}</div>`; document.getElementById('pageTitle').innerHTML = 'Orders <span class="order-count">0</span>'; }
-        function renderHistory() { document.getElementById('contentArea').innerHTML = `<div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>Order ID</th><th>Datum</th><th>Naam</th><th>Route</th><th>Bedrag</th></tr></thead><tbody><tr><td colspan="5" class="no-results">Geen historische ritten</span></tbody>}</div>`; document.getElementById('pageTitle').innerHTML = 'History <span class="order-count">0</span>'; document.getElementById('downloadButtons').classList.remove('hidden'); }
-        function renderDrivers() { document.getElementById('contentArea').innerHTML = `<div class="people-card"><h3>Chauffeurs</h3><div class="empty-planning">Geen chauffeurs gevonden</div></div>`; }
-        function renderOnderaannemers() { document.getElementById('contentArea').innerHTML = `<div class="people-card"><div style="display:flex;justify-content:space-between;"><h3>Onderaannemers</h3><button class="add-btn" onclick="addOnderaannemer()">Toevoegen</button></div><div class="empty-planning">Geen onderaannemers</div></div>`; }
-        function renderWiki() { document.getElementById('contentArea').innerHTML = `<div class="wiki-container"><div class="wiki-empty"><i class="fas fa-robot"></i><h3>Wiki Agent</h3><p>Geen inhoud beschikbaar</p></div></div>`; }
-        
-        function addOnderaannemer() { alert('Demo: Onder aannemer toevoegen'); }
-        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
-        function downloadCSV() { alert('Geen geschiedenis om te downloaden'); }
-        function downloadJSON() { alert('Geen geschiedenis om te downloaden'); }
+        function renderOrders() {
+            const html = `
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Order ID</label><input type="text" id="filterOrderOrders" placeholder="Zoek op ID"></div>
+                    <div class="filter-group"><label>Naam</label><input type="text" id="filterNameOrders" placeholder="Klant"></div>
+                    <div class="filter-actions">
+                        <button class="btn-filter" onclick="applyFiltersOrders()">Zoek</button>
+                        <button class="btn-reset" onclick="resetFiltersOrders()">Reset</button>
+                    </div>
+                </div>
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead><tr><th>Order ID</th><th>Datum & Tijd</th><th>Naam</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Actie</th></tr></thead>
+                        <tbody id="ordersTableBodyOrders"></tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+            renderOrdersTable(ordersList);
+            document.getElementById('pageTitle').innerHTML = `Orders <span class="order-count">${ordersList.length}</span>`;
+        }
+
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBodyOrders');
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen bevestigde orders</td></tr>';
+            } else {
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
+                        <td>${order.datetime} ${order.time}</td>
+                        <td>${order.name}</td>
+                        <td>${order.pickup} → ${order.destination}</td>
+                        <td>${order.vehicle}</td>
+                        <td>€${(order.amount || 0).toFixed(2)}</td>
+                        <td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function applyFiltersOrders() {
+            const orderFilter = document.getElementById("filterOrderOrders")?.value.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterNameOrders")?.value.toLowerCase() || "";
+            const filtered = ordersList.filter(order => {
+                return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
+                       (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
+            });
+            renderOrdersTable(filtered);
+        }
+
+        function resetFiltersOrders() {
+            document.getElementById("filterOrderOrders").value = "";
+            document.getElementById("filterNameOrders").value = "";
+            renderOrdersTable(ordersList);
+        }
 
         // ============================================
-        // 8. SWITCH TAB
+        // HISTORY RENDER
         // ============================================
+        function renderHistory() {
+            const html = `
+                <div class="filter-bar">
+                    <div class="filter-group"><label>Order ID</label><input type="text" id="filterOrderHistory" placeholder="Zoek op ID"></div>
+                    <div class="filter-group"><label>Naam</label><input type="text" id="filterNameHistory" placeholder="Klant"></div>
+                    <div class="filter-actions">
+                        <button class="btn-filter" onclick="applyFiltersHistory()">Zoek</button>
+                        <button class="btn-reset" onclick="resetFiltersHistory()">Reset</button>
+                    </div>
+                </div>
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead><tr><th>Order ID</th><th>Datum & Tijd</th><th>Naam</th><th>Route</th><th>Voertuig</th><th>Bedrag</th><th>Status</th></tr></thead>
+                        <tbody id="ordersTableBodyHistory"></tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+            renderHistoryTable(historyOrders);
+            document.getElementById('pageTitle').innerHTML = `History <span class="order-count">${historyOrders.length}</span>`;
+            document.getElementById('downloadButtons').classList.remove('hidden');
+        }
+
+        function renderHistoryTable(orders) {
+            const tbody = document.getElementById('ordersTableBodyHistory');
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen historische ritten</td></tr>';
+            } else {
+                tbody.innerHTML = orders.map(order => {
+                    let statusText = order.status === 'completed' ? '✅ Uitgevoerd' : (order.status === 'cancelled' ? '❌ Geannuleerd' : '📋 Gepasseerd');
+                    return `
+                        <tr>
+                            <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
+                            <td>${order.datetime} ${order.time}</td>
+                            <td>${order.name}</td>
+                            <td>${order.pickup} → ${order.destination}</td>
+                            <td>${order.vehicle}</td>
+                            <td>€${(order.amount || 0).toFixed(2)}</td>
+                            <td>${statusText}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function applyFiltersHistory() {
+            const orderFilter = document.getElementById("filterOrderHistory")?.value.toLowerCase() || "";
+            const nameFilter = document.getElementById("filterNameHistory")?.value.toLowerCase() || "";
+            const filtered = historyOrders.filter(order => {
+                return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
+                       (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
+            });
+            renderHistoryTable(filtered);
+        }
+
+        function resetFiltersHistory() {
+            document.getElementById("filterOrderHistory").value = "";
+            document.getElementById("filterNameHistory").value = "";
+            renderHistoryTable(historyOrders);
+        }
+
+        // ============================================
+        // MODAL & FICHE FUNCTIES
+        // ============================================
+        async function confirmOrder(orderId) {
+            const success = await updateBookingStatus(orderId, 'confirmed');
+            if (success) {
+                alert(`Order ${orderId} is bevestigd.`);
+                closeModal();
+                refreshCurrentTab();
+            }
+        }
+
+        async function confirmAssignDriver(orderId) {
+            if (!selectedDriverId) { 
+                alert("Selecteer eerst een chauffeur."); 
+                return; 
+            }
+            const success = await assignDriverToBooking(orderId, selectedDriverId);
+            if (success) {
+                alert(`Chauffeur toegewezen.`);
+                closeModal();
+                refreshCurrentTab();
+            }
+        }
+
+        function showNewOrderFiche(order) {
+            currentSelectedOrder = order;
+            const ficheBody = document.getElementById('ficheBody');
+            ficheBody.innerHTML = `
+                <div class="fiche-section"><h4>Boekingsinformatie</h4>
+                    <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
+                    <div class="fiche-row"><span class="fiche-label">Template:</span><span class="fiche-value">${order.template}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
+                </div>
+                <div class="fiche-section"><h4>Klantgegevens</h4>
+                    <div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Email:</span><span class="fiche-value">${order.email || '-'}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Telefoon:</span><span class="fiche-value">${order.phone || '-'}</span></div>
+                </div>
+                <div class="fiche-section"><h4>Ritgegevens</h4>
+                    <div class="fiche-row"><span class="fiche-label">Pickup:</span><span class="fiche-value">${order.pickup}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Destination:</span><span class="fiche-value">${order.destination}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Voertuig:</span><span class="fiche-value">${order.vehicle}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Extra's:</span><span class="fiche-value">${order.extras || '-'}</span></div>
+                </div>
+                <div class="fiche-total"><div class="amount">€ ${(order.amount || 0).toFixed(2)}</div><div>Betaling: ${order.payment || 'Onbekend'}</div></div>
+                <div class="fiche-actions">
+                    <button class="fiche-btn confirm" onclick="confirmOrder('${order.id}')">Bevestig Order</button>
+                    <button class="fiche-btn close" onclick="closeModal()">Sluiten</button>
+                </div>
+            `;
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function showOrderFiche(order) {
+            currentSelectedOrder = order;
+            selectedDriverId = null;
+            
+            let driverSection = '';
+            if (order.assigned_driver) {
+                driverSection = `<div class="fiche-section"><h4>Toegewezen Chauffeur</h4><div class="assigned-driver"><strong>${order.assigned_driver.name}</strong><br>${order.assigned_driver.phone || ''}<br>${order.assigned_driver.vehicle || ''}</div></div>`;
+            } else if (driversList.length > 0) {
+                const driverOptions = driversList.map(d => `<option value="${d.id}">${d.name} - ${d.vehicle || ''}</option>`).join('');
+                driverSection = `<div class="fiche-section"><h4>Toewijzen aan Chauffeur</h4><select id="driverSelect" onchange="selectedDriverId = this.value"><option value="">-- Selecteer --</option>${driverOptions}</select><button class="fiche-btn assign" onclick="confirmAssignDriver('${order.id}')">Toewijzen</button></div>`;
+            } else {
+                driverSection = `<div class="fiche-section"><h4>Chauffeur</h4><div class="empty-planning">Geen chauffeurs beschikbaar</div></div>`;
+            }
+            
+            const ficheBody = document.getElementById('ficheBody');
+            ficheBody.innerHTML = `
+                <div class="fiche-section"><h4>Boekingsinformatie</h4>
+                    <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
+                    <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
+                </div>
+                <div class="fiche-section"><h4>Klantgegevens</h4>
+                    <div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Email:</span><span class="fiche-value">${order.email || '-'}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Telefoon:</span><span class="fiche-value">${order.phone || '-'}</span></div>
+                </div>
+                <div class="fiche-section"><h4>Ritgegevens</h4>
+                    <div class="fiche-row"><span class="fiche-label">Pickup:</span><span class="fiche-value">${order.pickup}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Destination:</span><span class="fiche-value">${order.destination}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Voertuig:</span><span class="fiche-value">${order.vehicle}</span></div>
+                </div>
+                ${driverSection}
+                <div class="fiche-total"><div class="amount">€ ${(order.amount || 0).toFixed(2)}</div></div>
+                <div class="fiche-actions"><button class="fiche-btn close" onclick="closeModal()">Sluiten</button></div>
+            `;
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function closeModal() { 
+            document.getElementById('bookingModal').style.display = 'none'; 
+            currentSelectedOrder = null; 
+            selectedDriverId = null; 
+        }
+
+        // ============================================
+        // FINANCIEEL (vereenvoudigd maar werkt)
+        // ============================================
+        function renderFinance() {
+            const totalRevenue = allBookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+            const cashRevenue = allBookings.filter(b => b.payment === 'Cash').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const factuurRevenue = allBookings.filter(b => b.payment === 'Factuur').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const commission = totalRevenue * 0.10;
+            
+            const html = `
+                <div class="kpi-grid">
+                    <div class="kpi-card"><div class="value">€ ${totalRevenue.toFixed(2)}</div><div class="label">Totale Omzet</div></div>
+                    <div class="kpi-card"><div class="value">€ ${cashRevenue.toFixed(2)}</div><div class="label">Cash Betalingen</div></div>
+                    <div class="kpi-card"><div class="value">€ ${factuurRevenue.toFixed(2)}</div><div class="label">Factuur Betalingen</div></div>
+                    <div class="kpi-card"><div class="value">${allBookings.length}</div><div class="label">Aantal Ritten</div></div>
+                    <div class="kpi-card"><div class="value">€ ${commission.toFixed(2)}</div><div class="label">10% Commissie</div></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><h4>📋 New Orders</h4><div class="value">${newOrders.length}</div></div>
+                    <div class="stat-card"><h4>✅ Actieve Orders</h4><div class="value">${ordersList.length}</div></div>
+                    <div class="stat-card"><h4>📜 History</h4><div class="value">${historyOrders.length}</div></div>
+                </div>
+                <div class="finance-summary">
+                    <h3>📋 Boekingen Overzicht</h3>
+                    <div class="orders-table-wrapper">
+                        <table class="orders-table">
+                            <thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Bedrag</th><th>Status</th></tr></thead>
+                            <tbody>
+                                ${allBookings.slice(0, 10).map(b => `
+                                    <tr><td>${b.id}</td><td>${b.datetime}</td><td>${b.name}</td><td>€${(b.amount || 0).toFixed(2)}</td><td>${b.status || 'pending'}</td></tr>
+                                `).join('')}
+                                ${allBookings.length === 0 ? '<tr><td colspan="5" class="no-results">Geen boekingen</td></tr>' : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        // ============================================
+        // ANDERE TABS
+        // ============================================
+        function renderDrivers() {
+            document.getElementById('contentArea').innerHTML = `
+                <div class="people-card">
+                    <h3>Chauffeurs</h3>
+                    <div class="people-grid">
+                        ${driversList.length === 0 ? '<div class="empty-planning">Geen chauffeurs gevonden</div>' : 
+                          driversList.map(d => `
+                            <div class="person-item">
+                                <div class="person-name">${d.name}</div>
+                                <div class="person-detail"><i class="fas fa-id-card"></i> ${d.id}</div>
+                                <div class="person-detail"><i class="fas fa-phone"></i> ${d.phone || '-'}</div>
+                                <div class="person-detail"><i class="fas fa-car"></i> ${d.vehicle || '-'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOnderaannemers() {
+            document.getElementById('contentArea').innerHTML = `
+                <div class="people-card">
+                    <h3>Onderaannemers</h3>
+                    <div class="empty-planning">Geen onderaannemers gevonden</div>
+                </div>
+            `;
+        }
+
+        function renderWiki() {
+            document.getElementById('contentArea').innerHTML = `
+                <div class="wiki-container">
+                    <div class="wiki-empty">
+                        <i class="fas fa-robot"></i>
+                        <h3>Wiki Agent</h3>
+                        <p>Documentatie wordt nog geladen...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // REFRESH & SWITCH TAB
+        // ============================================
+        async function refreshAllData() {
+            await loadBookingsFromSupabase();
+            await loadDriversFromSupabase();
+            refreshCurrentTab();
+        }
+
+        function refreshCurrentTab() {
+            if (currentTab === 'neworders') renderNewOrders();
+            else if (currentTab === 'orders') renderOrders();
+            else if (currentTab === 'history') renderHistory();
+            else if (currentTab === 'agenda') refreshAgenda();
+            else if (currentTab === 'drivers') renderDrivers();
+            else if (currentTab === 'onderaannemers') renderOnderaannemers();
+            else if (currentTab === 'financieel') renderFinance();
+            else if (currentTab === 'wiki') renderWiki();
+        }
+
         function switchTab(tabName) {
             currentTab = tabName;
             document.querySelectorAll('.nav-item').forEach(item => {
                 if (item.getAttribute('data-tab') === tabName) item.classList.add('active');
                 else item.classList.remove('active');
             });
+            
             const downloadButtons = document.getElementById('downloadButtons');
             if (tabName === 'history') downloadButtons.classList.remove('hidden');
             else downloadButtons.classList.add('hidden');
             
-            if (tabName === 'neworders') renderNewOrders();
-            else if (tabName === 'orders') renderOrders();
-            else if (tabName === 'history') renderHistory();
-            else if (tabName === 'agenda') refreshAgenda();
-            else if (tabName === 'drivers') renderDrivers();
-            else if (tabName === 'onderaannemers') renderOnderaannemers();
-            else if (tabName === 'financieel') renderFinance();
-            else if (tabName === 'wiki') renderWiki();
+            refreshCurrentTab();
+        }
+
+        function downloadCSV() {
+            const headers = ["ID", "Template", "Datum", "Tijd", "Naam", "Pickup", "Destination", "Bedrag", "Betaling", "Status"];
+            const rows = historyOrders.map(b => [b.id, b.template, b.datetime, b.time, b.name, b.pickup, b.destination, b.amount, b.payment, b.status]);
+            const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell || ''}"`).join(";")).join("\n");
+            const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fleet_history_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        function downloadJSON() {
+            const blob = new Blob([JSON.stringify(historyOrders, null, 2)], { type: "application/json" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fleet_history_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
         }
 
         // ============================================
-        // 9. INITIALISATIE
+        // INITIALISATIE
         // ============================================
         async function init() {
             await initSupabase();
-            filterAndSortData();
-            updateAgendaData();
-            refreshAgenda();
-            setInterval(() => { updateAgendaData(); filterAndSortData(); if(currentTab === 'agenda') refreshAgenda(); else if(['orders','history','neworders','financieel'].includes(currentTab)) switchTab(currentTab); }, 60000);
+            setInterval(refreshAllData, 60000); // Auto-refresh elke 60 seconden
         }
         
         init();
