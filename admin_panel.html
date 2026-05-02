@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+en hier <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Je volledige CSS blijft hier staan, is identiek aan jouw origineel */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; height: 100vh; display: flex; }
         .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; overflow-y: auto; }
@@ -232,14 +231,11 @@
         // ============================================
         async function initSupabase() {
             try {
-                // ** FIX 1: Gebruik de juiste globale variabele 'supabase' **
-                const { createClient } = supabase;  // niet supabaseJs!
+                const { createClient } = supabase;
                 supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                // ** FIX 2: Korte vertraging om sessie uit localStorage te laten laden **
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
-                // ** FIX 3: Haal sessie op met een extra fallback via onAuthStateChange **
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
@@ -251,7 +247,6 @@
                 currentUser = session.user;
                 document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || 'Admin'}`;
                 
-                // ** FIX 4: Luister naar auth changes om uitloggen op te vangen **
                 supabaseClient.auth.onAuthStateChange((event, newSession) => {
                     if (event === 'SIGNED_OUT') {
                         window.location.href = 'login.html';
@@ -374,32 +369,28 @@
         // DATA SORTEREN
         // ============================================
         function filterAndSortData() {
-            // New Orders: status = 'pending' OF nog niet bevestigd
             newOrders = allBookings.filter(booking => 
                 booking.status === 'pending' || booking.status === 'new'
             );
             
-            // Orders: status = 'confirmed' EN datum/tijd >= nu
             ordersList = allBookings.filter(booking => 
                 (booking.status === 'confirmed' || booking.status === 'active') && 
                 isOrderInFuture(booking)
             );
             
-            // History: status = 'completed' OF 'cancelled' OF datum/tijd < nu
             historyOrders = allBookings.filter(booking => 
                 booking.status === 'completed' || 
                 booking.status === 'cancelled' ||
                 (!isOrderInFuture(booking) && booking.status !== 'pending')
             );
             
-            // Sorteren
             ordersList.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
             historyOrders.sort((a, b) => parseDateTime(b.datetime, b.time) - parseDateTime(a.datetime, a.time));
             newOrders.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
         }
 
         // ============================================
-        // AGENDA FUNCTIES
+        // AGENDA FUNCTIES (blijven ongewijzigd)
         // ============================================
         function getRidesByDate(dateStr) {
             return allBookings.filter(booking => booking.datetime === dateStr);
@@ -679,17 +670,17 @@
             const tbody = document.getElementById('ordersTableBodyNew');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen nieuwe orders</span></tr>';
+                tbody.innerHTML = '<td><td colspan="7" class="no-results">Geen nieuwe orders</span></tr>';
             } else {
                 tbody.innerHTML = orders.map(order => `
                     <tr>
                         <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
-                        <td>${order.datetime} ${order.time}</span></td>
-                        <td>${order.name}</span></td>
-                        <td>${order.pickup} → ${order.destination}</span></td>
-                        <td>${order.vehicle}</span></td>
-                        <td>€${(order.amount || 0).toFixed(2)}</span></td>
-                        <td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></span></td>
+                        <td>${order.datetime} ${order.time}</td>
+                        <td>${order.name}</td>
+                        <td>${order.pickup} → ${order.destination}</td>
+                        <td>${order.vehicle}</td>
+                        <td>€${(order.amount || 0).toFixed(2)}</td>
+                        <td><button class="action-btn" onclick='showNewOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></td>
                     </tr>
                 `).join('');
             }
@@ -744,13 +735,13 @@
             } else {
                 tbody.innerHTML = orders.map(order => `
                     <tr>
-                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></td>
-                        <td>${order.datetime} ${order.time}</span></td>
-                        <td>${order.name}</span></td>
-                        <td>${order.pickup} → ${order.destination}</span></td>
-                        <td>${order.vehicle}</span></td>
-                        <td>€${(order.amount || 0).toFixed(2)}</span></td>
-                        <td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></span></td>
+                        <td><strong>${order.id}</strong><br><span class="template-tag template-${order.template}">${order.template}</span></span></td>
+                        <td>${order.datetime} ${order.time}</td>
+                        <td>${order.name}</td>
+                        <td>${order.pickup} → ${order.destination}</td>
+                        <td>${order.vehicle}</td>
+                        <td>€${(order.amount || 0).toFixed(2)}</td>
+                        <td><button class="action-btn" onclick='showOrderFiche(${JSON.stringify(order).replace(/'/g, "&#39;")})'><i class="fas fa-file-invoice"></i> Bekijk Fiche</button></td>
                     </tr>
                 `).join('');
             }
@@ -802,7 +793,7 @@
             const tbody = document.getElementById('ordersTableBodyHistory');
             if (!tbody) return;
             if (orders.length === 0) {
-                tbody.innerHTML = '<td><td colspan="7" class="no-results">Geen historische ritten</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="no-results">Geen historische ritten</td></tr>';
             } else {
                 tbody.innerHTML = orders.map(order => {
                     let statusText = order.status === 'completed' ? '✅ Uitgevoerd' : (order.status === 'cancelled' ? '❌ Geannuleerd' : '📋 Gepasseerd');
@@ -838,7 +829,7 @@
         }
 
         // ============================================
-        // MODAL & FICHE FUNCTIES
+        // MODAL & FICHE FUNCTIES (vluchtnummer toegevoegd)
         // ============================================
         async function confirmOrder(orderId) {
             const success = await updateBookingStatus(orderId, 'confirmed');
@@ -870,6 +861,7 @@
                     <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
                     <div class="fiche-row"><span class="fiche-label">Template:</span><span class="fiche-value">${order.template}</span></div>
                     <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
+                    ${order.flight_number ? `<div class="fiche-row"><span class="fiche-label">✈️ Vluchtnummer:</span><span class="fiche-value">${order.flight_number}</span></div>` : ''}
                 </div>
                 <div class="fiche-section"><h4>Klantgegevens</h4>
                     <div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div>
@@ -910,6 +902,7 @@
                 <div class="fiche-section"><h4>Boekingsinformatie</h4>
                     <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
                     <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
+                    ${order.flight_number ? `<div class="fiche-row"><span class="fiche-label">✈️ Vluchtnummer:</span><span class="fiche-value">${order.flight_number}</span></div>` : ''}
                 </div>
                 <div class="fiche-section"><h4>Klantgegevens</h4>
                     <div class="fiche-row"><span class="fiche-label">Naam:</span><span class="fiche-value">${order.name}</span></div>
@@ -1075,7 +1068,7 @@
         // ============================================
         async function init() {
             await initSupabase();
-            setInterval(refreshAllData, 60000); // Auto-refresh elke 60 seconden
+            setInterval(refreshAllData, 60000);
         }
         
         init();
