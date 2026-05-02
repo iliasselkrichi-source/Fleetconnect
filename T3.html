@@ -326,7 +326,6 @@
             margin-top: 8px;
         }
 
-        /* TAXI VOERTUIG GRID - aangepaste iconen */
         .vehicle-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -609,6 +608,33 @@
             margin-top: 20px;
         }
 
+        .suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            border-radius: 0 0 20px 20px;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .suggestion-item:hover {
+            background: #f1f5f9;
+        }
+
+        .suggest-wrapper {
+            position: relative;
+        }
+
         @media (max-width: 700px) {
             .tab-btn {
                 padding: 12px 12px;
@@ -721,7 +747,7 @@
         <button id="goToVehicleTab" class="full-width"><i class="fas fa-arrow-right"></i> Ga naar voertuigkeuze</button>
     </div>
 
-    <!-- TAB 3: VOERTUIG & OPTIES - AANGEPASTE ICONEN -->
+    <!-- TAB 3 -->
     <div id="tab3" class="tab-content">
         <h2><i class="fas fa-car"></i> Kies uw taxi</h2>
         <div class="vehicle-grid" id="vehicleGrid">
@@ -858,7 +884,7 @@
         }
 
         function buildSupabaseRecord(paymentMethod, finalAmount) {
-            return {
+            const record = {
                 id: generateBookingId(),
                 template: "FD",
                 datetime: document.getElementById('datetime').value?.split('T')[0]?.split('-').reverse().join('-') || "",
@@ -872,22 +898,52 @@
                 extras: getExtrasString(),
                 amount: parseFloat(finalAmount),
                 payment: paymentMethod,
-                status: "pending"
+                status: "pending",
+                flight_number: document.getElementById('flightNumber').value.trim() || null,
+                roundtrip: currentRoundTrip,
+                passengers: parseInt(document.getElementById('passengers').value),
+                luggage: parseInt(document.getElementById('luggage').value),
+                special_wishes: document.getElementById('specialWishes').value.trim() || null,
+                vat: document.getElementById('vat').value.trim() || null
             };
+            
+            console.log("📦 buildSupabaseRecord - Record wordt aangemaakt:", record);
+            return record;
         }
 
-        async function sendToSupabase(record) {
+        async function sendToSupabase(record, paymentMethod) {
+            console.log("🚀 sendToSupabase - Start met verzenden");
+            console.log("💰 Betaalmethode:", paymentMethod);
+            console.log("📦 Volledig record:", JSON.stringify(record, null, 2));
+            
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'return=minimal' },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'apikey': SUPABASE_ANON_KEY, 
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
+                        'Prefer': 'return=minimal'
+                    },
                     body: JSON.stringify(record)
                 });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                alert(`🎉 Bedankt ${record.name}!\n\n📋 Boekingsnummer: ${record.id}\n✉️ Bevestiging naar ${record.email}`);
+                
+                console.log("📡 Response status:", response.status);
+                console.log("📡 Response OK?", response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("❌ Fout response body:", errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                console.log("✅ Boeking succesvol opgeslagen in Supabase!");
+                alert(`🎉 Bedankt ${record.name}!\n\n📋 Boekingsnummer: ${record.id}\n✉️ Bevestiging naar ${record.email}\n\n✅ Uw rit is succesvol geboekt!`);
                 return true;
+                
             } catch (error) {
-                alert(`❌ Fout: ${error.message}`);
+                console.error("❌ Supabase fout:", error);
+                alert(`❌ Er ging iets mis met uw boeking:\n\n${error.message}\n\nProbeer opnieuw of contacteer ons.`);
                 return false;
             }
         }
@@ -1076,15 +1132,26 @@
         function hideOverlay() { document.getElementById('summaryOverlay').classList.remove('active'); }
 
         async function finalizeBooking() {
+            console.log("🔍 finalizeBooking - Start");
+            
             const pm = document.querySelector('input[name="payment"]:checked').value;
+            console.log("💰 Gekozen betaalmethode:", pm);
+            
             let total = 0;
             const totalLine = document.querySelector('#overlaySummary .summary-section:last-child .summary-line:last-child')?.innerText;
+            console.log("💰 Total line text:", totalLine);
+            
             const match = totalLine?.match(/€([\d.]+)/);
             if (match) total = parseFloat(match[1]);
+            console.log("💰 Totaalbedrag:", total);
+            
             const record = buildSupabaseRecord(pm, total);
+            console.log("📦 Record om te versturen:", record);
+            
             if (pm === 'Kaart' || pm === 'App') {
                 if (confirm(`Betaling met ${pm}. Doorgaan?`)) {
-                    if (await sendToSupabase(record)) {
+                    const success = await sendToSupabase(record, pm);
+                    if (success) {
                         alert(`🔜 Betaallink voor ${pm} (demo)`);
                         resetForm();
                         hideOverlay();
@@ -1093,7 +1160,9 @@
                 }
                 return;
             }
-            if (await sendToSupabase(record)) {
+            
+            const success = await sendToSupabase(record, pm);
+            if (success) {
                 resetForm();
                 hideOverlay();
                 switchTab('tab1');
@@ -1180,6 +1249,9 @@
         const defaultDT = new Date();
         defaultDT.setHours(defaultDT.getHours() + 1);
         document.getElementById('datetime').value = defaultDT.toISOString().slice(0, 16);
+        
+        console.log("✅ Applicatie geladen - klaar voor gebruik!");
+        console.log("🔗 Supabase URL:", SUPABASE_URL);
     })();
 </script>
 </body>
