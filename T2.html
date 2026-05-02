@@ -82,12 +82,22 @@
             return `T2-LM-${today}-${formatted}`;
         }
 
+        // AANGEPAST: Vluchtnummer en speciale wensen worden nu ook toegevoegd aan extras!
         function getExtrasString(){
             const extras=[];
             if(document.getElementById('meetGreet').checked) extras.push("Meet & Greet");
             if(document.getElementById('kissRide').checked) extras.push("Kiss & Ride");
             if(document.getElementById('waterBottle').checked) extras.push("Waterfles");
             if(document.getElementById('wifi').checked) extras.push("WiFi");
+            
+            // VLUCHTNUMMER TOEVOEGEN (als ingevuld)
+            const flightNum = document.getElementById('flightNumber').value.trim();
+            if(flightNum) extras.push(`✈️ Vlucht: ${flightNum}`);
+            
+            // SPECIALE WENSEN TOEVOEGEN (als ingevuld)
+            const specialWishes = document.getElementById('specialWishes').value.trim();
+            if(specialWishes) extras.push(`📝 ${specialWishes}`);
+            
             return extras.join(", ") || "Geen";
         }
 
@@ -100,7 +110,7 @@
             const pickupRaw=document.getElementById('pickupInput').value;
             const destRaw=document.getElementById('dropoffInput').value;
             const vehicleRaw=selectedVehicle;
-            const extrasRaw=getExtrasString();
+            const extrasRaw=getExtrasString();  // Bevat nu ook vluchtnummer en speciale wensen!
             const dtRaw=document.getElementById('datetime').value;
             let datePart="", timePart="";
             if(dtRaw){
@@ -144,7 +154,12 @@
                     throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
                 console.log('✅ Boeking opgeslagen (HTTP', response.status, ')');
-                alert(`🎉 Bedankt voor uw reservatie, ${record.name}! 🎉\n\n📋 Uw reserveringsnummer: ${record.id}\n✉️ Een bevestiging werd verstuurd naar ${record.email}\n\n✅ We zien u graag binnen!`);
+                
+                // Toon vluchtnummer in bevestiging als het ingevuld is
+                const flightInfo = document.getElementById('flightNumber').value.trim();
+                const flightMsg = flightInfo ? `\n✈️ Vluchtnummer: ${flightInfo}` : '';
+                
+                alert(`🎉 Bedankt voor uw reservatie, ${record.name}! 🎉\n\n📋 Uw reserveringsnummer: ${record.id}${flightMsg}\n✉️ Een bevestiging werd verstuurd naar ${record.email}\n\n✅ We zien u graag binnen!`);
                 return true;
             } catch (error) {
                 console.error('❌ Supabase fout:', error);
@@ -160,7 +175,7 @@
         function showNoResults(wid){showTempMsg(wid,'Geen adres in België')}
         function showErrorSuggestion(wid,msg){showTempMsg(wid,msg)}
         function showTempMsg(wid,msg){const w=document.getElementById(wid),sd=w.querySelector('.suggestions');sd.innerHTML=`<div class="suggestion-item" style="color:#b91c1c;">❌ ${msg}</div>`;sd.style.display='block';setTimeout(()=>{if(sd.style.display==='block')sd.style.display='none'},2500)}
-        async function calcRoute(lat1,lon1,lat2,lon2){const oUrl=`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;try{const r=await fetch(oUrl);if(r.status===429)throw new Error();const d=await r.json();if(d.code==='Ok'&&d.routes.length){const rt=d.routes[0];return{distanceKm:(rt.distance/1000).toFixed(1),durationMin:Math.round(rt.duration/60),geometry:rt.geometry}}}catch(e){}const ghUrl=`https://graphhopper.com/api/1/route?point=${lat1},${lon1}&point=${lat2},${lon2}&vehicle=car&locale=nl&points_encoded=false&key=`;try{const r=await fetch(ghUrl);const d=await r.json();if(d.paths&&d.paths.length){const p=d.paths[0];const distKm=(p.distance/1000).toFixed(1),timeMin=Math.round(p.time/60000),coords=p.points.coordinates.map(c=>[c[1],c[0]]);return{distanceKm:distKm,durationMin:timeMin,geometry:{type:"LineString",coordinates:coords}}}}catch(e){}return null}
+        async function calcRoute(lat1,lon1,lat2,lon2){const oUrl=`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;try{const r=await fetch(oUrl);if(r.status===429)throw new Error();const d=await r.json();if(d.code==='Ok'&&d.routes.length){const rt=d.routes[0];return{distanceKm:(rt.distance/1000).toFixed(1),durationMin:Math.round(rt.duration/60),geometry:rt.geometry}}}catch(e){}const ghUrl=`https://graphhopper.com/api/1/route?point=${lat1},${lat1}&point=${lat2},${lat2}&vehicle=car&locale=nl&points_encoded=false&key=`;try{const r=await fetch(ghUrl);const d=await r.json();if(d.paths&&d.paths.length){const p=d.paths[0];const distKm=(p.distance/1000).toFixed(1),timeMin=Math.round(p.time/60000),coords=p.points.coordinates.map(c=>[c[1],c[0]]);return{distanceKm:distKm,durationMin:timeMin,geometry:{type:"LineString",coordinates:coords}}}}catch(e){}return null}
         function isPast(ds){if(!ds)return false;return new Date(ds)<new Date()}
         function isWithinNextHour(ds){if(!ds)return false;const diff=new Date(ds)-new Date();return diff>0&&diff<3600000}
         function showErrorMsg(msg,isBack=false){const el=isBack?document.getElementById('backErrorMsg'):document.getElementById('errorMsg');el.innerText=msg;el.style.display='block';setTimeout(()=>el.style.display='none',5000)}
