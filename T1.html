@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Orders</title>
+    <title>Fleetconnect | Orders</title>
     <style>
         * {
             margin: 0;
@@ -16,30 +16,39 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 200px;
+            width: 220px;
             background: #ffffff;
             border-right: 1px solid #e9edf2;
             display: flex;
             flex-direction: column;
-            align-items: center;
             padding-top: 32px;
         }
         .menu-item {
-            background: linear-gradient(105deg, #eef2ff 0%, #ffffff 100%);
+            background: #f3f4f6;
             color: #1f2b48;
             padding: 14px 16px;
+            margin: 8px 16px;
             text-align: center;
             font-weight: 700;
             font-size: 15px;
             border-radius: 60px;
             cursor: pointer;
-            width: 140px;
-            border: 1px solid #e0e7f0;
+            transition: 0.2s;
+            border: 1px solid #e5e7eb;
+        }
+        .menu-item.active {
+            background: #1f2b48;
+            color: white;
+            border-color: #1f2b48;
+        }
+        .menu-item:hover:not(.active) {
+            background: #e5e7eb;
         }
         .main {
             flex: 1;
             padding: 28px 32px;
             background: #f4f6fa;
+            overflow-y: auto;
         }
         h2 {
             font-size: 26px;
@@ -56,7 +65,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 900px;
+            min-width: 800px;
         }
         th {
             background: #fafcff;
@@ -72,30 +81,98 @@
             font-size: 13px;
             color: #1f2a44;
             border-bottom: 1px solid #f0f4fa;
-            vertical-align: top;
+            vertical-align: middle;
         }
-        .fiche-cell {
-            background: #fefce8;
-            font-size: 11px;
-            line-height: 1.4;
-            min-width: 220px;
-        }
-        .fiche-content {
-            background: #fff9e6;
-            padding: 10px;
-            border-radius: 12px;
-            border-left: 3px solid #f59e0b;
-        }
-        .fiche-content p {
-            margin: 4px 0;
+        .fiche-icon {
+            font-size: 28px;
+            cursor: pointer;
+            text-align: center;
         }
         .empty-row td {
             text-align: center;
             color: #94a3b8;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #eef2ff;
+            padding-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .modal-header h3 {
+            font-size: 24px;
+        }
+        .created-info {
+            font-size: 13px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 40px;
+        }
+        .close {
+            cursor: pointer;
+            font-size: 32px;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .fiche-field {
+            margin: 14px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f4fa;
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fiche-label {
+            font-weight: 700;
+            color: #1f2b48;
+            width: 130px;
+        }
+        .fiche-value {
+            flex: 1;
+            color: #1f2a44;
+        }
+        .confirm-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            width: 100%;
+        }
+        .confirm-btn:hover { background: #059669; }
         @media (max-width: 720px) {
             .sidebar { width: 160px; }
-            .menu-item { width: 120px; font-size: 13px; }
+            .menu-item { font-size: 13px; }
             .main { padding: 20px; }
         }
     </style>
@@ -103,55 +180,102 @@
 <body>
 
 <div class="sidebar">
-    <div class="menu-item">NEW ORDERS</div>
+    <div class="menu-item active" data-tab="pending">📋 NEW ORDERS</div>
+    <div class="menu-item" data-tab="confirmed">✅ CONFIRMED ORDERS</div>
 </div>
 
 <div class="main">
-    <h2>New Orders</h2>
+    <h2 id="page-title">New Orders</h2>
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>PREFIX</th>
-                    <th>DATUM</th>
-                    <th>TIJD</th>
-                    <th>NAAM</th>
-                    <th>TRAJECT</th>
-                    <th>ACTIE / FICHE</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-        </table>
+        <div id="table-wrapper"></div>
+    </div>
+</div>
+
+<div id="ficheModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📋 Complete fiche</h3>
+            <div class="created-info" id="createdInfo"></div>
+            <span class="close">&times;</span>
+        </div>
+        <div id="modal-fiche-content"></div>
+        <div style="margin-top: 24px;" id="modal-action-btn"></div>
     </div>
 </div>
 
 <script>
     const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_5hdl73a9-jNd9n3lnsYVyQ_dMYgiSLA';
+    
+    let currentTab = 'pending';
+    let currentBookingId = null;
+    let currentBookingStatus = null;
 
-    function generateFiche(booking) {
-        return `
-            <div class="fiche-content">
-                <p><strong>📞 Tel:</strong> ${booking.phone}</p>
-                <p><strong>✉️ Email:</strong> ${booking.email}</p>
-                <p><strong>🚗 Voertuig:</strong> ${booking.vehicle}</p>
-                <p><strong>💰 €${booking.amount}</strong> / ${booking.payment}</p>
-                <p><strong>➕ Extras:</strong> ${booking.extras || 'geen'}</p>
-                <p><strong>🆔 ${booking.id}</strong></p>
-                <p><strong>📍 Pickup:</strong> ${booking.pickup}</p>
-                <p><strong>🏁 Destination:</strong> ${booking.destination}</p>
-            </div>
-        `;
+    async function updateBookingStatus(id, newStatus) {
+        const url = `${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`;
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        if (!response.ok) throw new Error('Update mislukt');
+        return true;
     }
 
-    function renderTable(orders) {
-        const tbody = document.getElementById('table-body');
-        let html = '';
+    function showFiche(booking, sourceTab) {
+        currentBookingId = booking.id;
+        currentBookingStatus = booking.status;
+        
+        document.getElementById('createdInfo').innerHTML = `🕒 Aangemaakt: ${new Date(booking.created_at).toLocaleString()}`;
+        
+        const modalContent = document.getElementById('modal-fiche-content');
+        modalContent.innerHTML = `
+            <div class="fiche-field"><span class="fiche-label">Prefix:</span><span class="fiche-value">${booking.id}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Datum / Tijd:</span><span class="fiche-value">${booking.datetime} — ${booking.time}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Naam:</span><span class="fiche-value">${booking.name}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Contact:</span><span class="fiche-value">${booking.email} — ${booking.phone}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Traject:</span><span class="fiche-value">${booking.pickup} → ${booking.destination}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Voertuig:</span><span class="fiche-value">${booking.vehicle}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Extras:</span><span class="fiche-value">${booking.extras || 'Geen'}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Bedrag / Betaling:</span><span class="fiche-value">€${parseFloat(booking.amount).toFixed(2)} — ${booking.payment}</span></div>
+            <div class="fiche-field"><span class="fiche-label">Status:</span><span class="fiche-value">${booking.status}</span></div>
+        `;
+        
+        const actionBtnDiv = document.getElementById('modal-action-btn');
+        if (sourceTab === 'pending') {
+            actionBtnDiv.innerHTML = `<button id="bevestigOrderBtn" class="confirm-btn">✅ Bevestig order → verplaats naar confirmed</button>`;
+            document.getElementById('bevestigOrderBtn').onclick = async () => {
+                try {
+                    await updateBookingStatus(currentBookingId, 'confirmed');
+                    document.getElementById('ficheModal').style.display = 'none';
+                    loadCurrentTab();
+                    alert('Order bevestigd! Staat nu in Confirmed Orders.');
+                } catch (err) {
+                    alert('Fout: ' + err.message);
+                }
+            };
+        } else {
+            actionBtnDiv.innerHTML = '';
+        }
+        
+        document.getElementById('ficheModal').style.display = 'flex';
+    }
+
+    function renderTable(orders, tabType) {
+        let html = `
+            <table>
+                <thead>
+                    <tr><th>PREFIX</th><th>DATUM</th><th>TIJD</th><th>NAAM</th><th>TRAJECT</th><th>ACTIE</th></tr>
+                </thead>
+                <tbody>
+        `;
         
         if (orders && orders.length > 0) {
             for (const o of orders) {
-                const fiche = generateFiche(o);
                 html += `
                     <tr>
                         <td><strong>${o.id}</strong></td>
@@ -159,44 +283,66 @@
                         <td>${o.time}</td>
                         <td>${o.name}</td>
                         <td>${o.pickup} → ${o.destination}</td>
-                        <td class="fiche-cell">${fiche}</td>
+                        <td class="fiche-icon" onclick='showFiche(${JSON.stringify(o).replace(/'/g, "&#39;")}, "${tabType}")'>📄</td>
                     </tr>
                 `;
             }
+        } else {
+            html += `<tr class="empty-row"><td colspan="6">⚠️ Geen ${tabType === 'pending' ? 'pending' : 'confirmed'} orders</td></tr>`;
         }
         
         const currentCount = orders ? orders.length : 0;
         const emptyNeeded = Math.max(0, 5 - currentCount);
-        
         for (let i = 0; i < emptyNeeded; i++) {
-            html += `<tr class="empty-row"><td colspan="6">⚠️ Geen order — wacht op nieuwe rit</td></tr>`;
+            html += `<tr class="empty-row"><td colspan="6">⏳ — vrije regel —</td></tr>`;
         }
         
-        tbody.innerHTML = html;
+        html += `</tbody></table>`;
+        return html;
     }
 
-    async function loadOrders() {
-        try {
-            const url = `${SUPABASE_URL}/rest/v1/bookings?status=eq.pending&order=created_at.desc`;
-            const res = await fetch(url, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            });
-            const orders = await res.json();
-            renderTable(orders);
-        } catch (err) {
-            let errorHtml = '';
-            for (let i = 0; i < 5; i++) {
-                errorHtml += `<tr class="empty-row"><td colspan="6">❌ Fout: ${err.message}</td></tr>`;
-            }
-            document.getElementById('table-body').innerHTML = errorHtml;
+    async function loadPendingOrders() {
+        const url = `${SUPABASE_URL}/rest/v1/bookings?status=eq.pending&order=created_at.desc`;
+        const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        const orders = await res.json();
+        return orders;
+    }
+    
+    async function loadConfirmedOrders() {
+        const url = `${SUPABASE_URL}/rest/v1/bookings?status=eq.confirmed&order=created_at.desc`;
+        const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        const orders = await res.json();
+        return orders;
+    }
+    
+    async function loadCurrentTab() {
+        const wrapper = document.getElementById('table-wrapper');
+        const title = document.getElementById('page-title');
+        if (currentTab === 'pending') {
+            title.innerText = '📋 New Orders (Pending)';
+            const orders = await loadPendingOrders();
+            wrapper.innerHTML = renderTable(orders, 'pending');
+        } else {
+            title.innerText = '✅ Confirmed Orders';
+            const orders = await loadConfirmedOrders();
+            wrapper.innerHTML = renderTable(orders, 'confirmed');
         }
     }
 
-    loadOrders();
-    setInterval(loadOrders, 10000);
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            item.classList.add('active');
+            currentTab = item.getAttribute('data-tab');
+            loadCurrentTab();
+        });
+    });
+    
+    document.querySelector('.close').onclick = () => document.getElementById('ficheModal').style.display = 'none';
+    window.onclick = (e) => { if (e.target === document.getElementById('ficheModal')) document.getElementById('ficheModal').style.display = 'none'; };
+    
+    loadCurrentTab();
+    setInterval(loadCurrentTab, 10000);
 </script>
 </body>
 </html>
