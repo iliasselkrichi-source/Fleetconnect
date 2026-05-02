@@ -586,7 +586,7 @@
             }
             
             const futureRidesAll = allBookings.filter(booking => {
-                const rideDateTime = parseDateTime(booking.datetime, booking.time);
+                const rideDateTime = parseDateTime(toDateKey(booking.datetime), booking.time);
                 return rideDateTime > NOW && booking.status !== 'completed' && booking.status !== 'cancelled';
             });
             
