@@ -892,22 +892,15 @@
 
         function showOrderFiche(order) {
             currentSelectedOrder = order;
-            selectedDriverId = null;
+            selectedDriverId = order.assigned_driver ? (order.assigned_driver.id || null) : null;
             
-            let driverSection = '';
-            if (order.assigned_driver) {
-                driverSection = `<div class="fiche-section"><h4>Toegewezen Chauffeur</h4><div class="assigned-driver"><strong>${order.assigned_driver.name}</strong><br>${order.assigned_driver.phone || ''}<br>${order.assigned_driver.vehicle || ''}</div></div>`;
-            } else if (driversList.length > 0) {
-                const driverOptions = driversList.map(d => `<option value="${d.id}">${d.name} - ${d.vehicle || ''}</option>`).join('');
-                driverSection = `<div class="fiche-section"><h4>Toewijzen aan Chauffeur</h4><select id="driverSelect" onchange="selectedDriverId = this.value"><option value="">-- Selecteer --</option>${driverOptions}</select><button class="fiche-btn assign" onclick="confirmAssignDriver('${order.id}')">Toewijzen</button></div>`;
-            } else {
-                driverSection = `<div class="fiche-section"><h4>Chauffeur</h4><div class="empty-planning">Geen chauffeurs beschikbaar</div></div>`;
-            }
+            let driverOptions = driversList.map(d => `<option value="${d.id}" ${order.assigned_driver && order.assigned_driver.id == d.id ? 'selected' : ''}>${d.name} - ${d.vehicle || ''}</option>`).join('');
             
             const ficheBody = document.getElementById('ficheBody');
             ficheBody.innerHTML = `
                 <div class="fiche-section"><h4>Boekingsinformatie</h4>
                     <div class="fiche-row"><span class="fiche-label">Boekingsnummer:</span><span class="fiche-value"><strong>${order.id}</strong></span></div>
+                    <div class="fiche-row"><span class="fiche-label">Template:</span><span class="fiche-value">${order.template}</span></div>
                     <div class="fiche-row"><span class="fiche-label">Datum & Tijd:</span><span class="fiche-value">${order.datetime} om ${order.time} uur</span></div>
                     ${order.flight_number ? `<div class="fiche-row"><span class="fiche-label">✈️ Vluchtnummer:</span><span class="fiche-value">${order.flight_number}</span></div>` : ''}
                 </div>
@@ -920,10 +913,19 @@
                     <div class="fiche-row"><span class="fiche-label">Pickup:</span><span class="fiche-value">${order.pickup}</span></div>
                     <div class="fiche-row"><span class="fiche-label">Destination:</span><span class="fiche-value">${order.destination}</span></div>
                     <div class="fiche-row"><span class="fiche-label">Voertuig:</span><span class="fiche-value">${order.vehicle}</span></div>
+                    <div class="fiche-row"><span class="fiche-label">Extra's:</span><span class="fiche-value">${order.extras || '-'}</span></div>
                 </div>
-                ${driverSection}
-                <div class="fiche-total"><div class="amount">€ ${(order.amount || 0).toFixed(2)}</div></div>
-                <div class="fiche-actions"><button class="fiche-btn close" onclick="closeModal()">Sluiten</button></div>
+                <div class="fiche-section"><h4>Chauffeur Toewijzen</h4>
+                    <select id="driverSelect" onchange="selectedDriverId = this.value">
+                        <option value="">-- Selecteer Chauffeur --</option>
+                        ${driverOptions}
+                    </select>
+                </div>
+                <div class="fiche-total"><div class="amount">€ ${(order.amount || 0).toFixed(2)}</div><div>Betaling: ${order.payment || 'Onbekend'}</div></div>
+                <div class="fiche-actions">
+                    <button class="fiche-btn assign" onclick="confirmAssignDriver('${order.id}')">Assign Driver</button>
+                    <button class="fiche-btn close" onclick="closeModal()">Sluiten</button>
+                </div>
             `;
             document.getElementById('bookingModal').style.display = 'flex';
         }
