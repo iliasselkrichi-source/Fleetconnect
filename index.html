@@ -125,6 +125,7 @@
             };
         }
 
+        // ========== HIER IS DE ENIGE AANPASSING ==========
         async function sendToSupabase(record, paymentMethod) {
             console.log('📦 Verzenden naar Supabase:', record);
             try {
@@ -133,7 +134,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Prefer': 'return=minimal'
                     },
                     body: JSON.stringify(record)
                 });
@@ -141,8 +143,7 @@
                     const errorText = await response.text();
                     throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
-                const data = await response.json();
-                console.log('✅ Supabase response:', data);
+                console.log('✅ Boeking opgeslagen (HTTP', response.status, ')');
                 alert(`✅ Boeking succesvol opgeslagen!\n\nID: ${record.id}\nStatus: pending`);
                 return true;
             } catch (error) {
@@ -151,6 +152,7 @@
                 return false;
             }
         }
+        // ================================================
 
         async function fetchAddresses(q,wid){if(q.length<3){clearSuggestions(wid);return}const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=0&countrycodes=be&accept-language=nl`;try{const r=await fetch(url,{headers:{'User-Agent':'TaxiPlanner/22.0'}});if(!r.ok)throw new Error();const d=await r.json();if(!d.length){showNoResults(wid);return}showSuggestions(d.map(p=>({text:p.display_name,lat:parseFloat(p.lat),lon:parseFloat(p.lon)})),wid)}catch{showErrorSuggestion(wid,'Netwerkfout')}}
         function showSuggestions(s,wid){const w=document.getElementById(wid),sd=w.querySelector('.suggestions');sd.innerHTML='';s.forEach(sug=>{const div=document.createElement('div');div.className='suggestion-item';div.textContent=sug.text.length>80?sug.text.slice(0,80)+'…':sug.text;div.onclick=()=>{w.querySelector('input').value=sug.text;setCoord(sug.lat,sug.lon,wid);sd.style.display='none'};sd.appendChild(div)});sd.style.display='block'}
