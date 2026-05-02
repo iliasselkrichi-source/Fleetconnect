@@ -204,7 +204,7 @@
 </div>
 
 <script>
-    // ========== JUISTE SUPABASE ANON KEY ==========
+    // ========== SUPABASE CONFIGURATIE ==========
     const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
     // =============================================
@@ -299,7 +299,8 @@
             html += `<tr class="empty-row"><td colspan="6">⏳ — vrije regel —</td></tr>`;
         }
         
-        html += `</tbody></table>`;
+        html += `</tbody>
+        </table>`;
         return html;
     }
 
