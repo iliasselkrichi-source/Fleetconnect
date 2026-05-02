@@ -1,168 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Login - Fleetconnect</title>
+    <title>Test Login</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #f1f5f9;
-            font-family: 'Inter', system-ui, sans-serif;
-            margin: 0;
-        }
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 32px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 360px;
-            text-align: center;
-        }
-        h1 { font-size: 28px; margin-bottom: 8px; color: #0f172a; }
-        h1 i { color: #2dd4bf; }
-        p { color: #64748b; margin-bottom: 24px; }
-        input {
-            width: 100%;
-            padding: 14px 20px;
-            margin: 12px 0;
-            border: 1px solid #e2e8f0;
-            border-radius: 60px;
-            font-size: 15px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        input:focus {
-            outline: none;
-            border-color: #2dd4bf;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #0f172a;
-            color: white;
-            border: none;
-            border-radius: 60px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 12px;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background: #2dd4bf;
-            color: #0f172a;
-        }
-        .error { 
-            color: #ef4444; 
-            margin-top: 16px; 
-            text-align: center; 
-            font-size: 14px;
-        }
-        .loading { 
-            opacity: 0.6; 
-            pointer-events: none; 
-        }
-        .info {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #94a3b8;
-        }
-        .demo-box {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-size: 12px;
-            text-align: left;
-            color: #475569;
-        }
-        .demo-box strong {
-            color: #0f172a;
-        }
-    </style>
 </head>
 <body>
-<div class="login-box">
-    <h1><i class="fas fa-truck"></i> Fleetconnect Admin</h1>
-    <p>Log in om het dashboard te openen</p>
-    <input type="email" id="email" placeholder="E-mailadres" autocomplete="off">
-    <input type="password" id="password" placeholder="Wachtwoord">
-    <button onclick="login()">Inloggen</button>
-    <div id="errorMsg" class="error"></div>
-    <div class="info">Gebruik je Supabase Auth account om in te loggen</div>
-    <div class="demo-box">
-        <strong>📋 Test gegevens:</strong><br>
-        E-mail: ryzen@fleetconnect.com<br>
-        Wachtwoord: iliassiliass
-    </div>
-</div>
+    <h2>Test Login</h2>
+    <input type="text" id="email" placeholder="email" value="ryzen@fleetconnect.com" style="width:300px;padding:10px;"><br><br>
+    <input type="password" id="password" placeholder="wachtwoord" style="width:300px;padding:10px;"><br><br>
+    <button onclick="testLogin()">Inloggen</button>
+    <pre id="result" style="margin-top:20px;background:#f0f0f0;padding:10px;"></pre>
 
-<script>
-    // ============================================
-    // JOUW SUPABASE CONFIGURATIE
-    // ============================================
-    const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Check of gebruiker al ingelogd is
-    async function checkSession() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            window.location.href = 'admin_panel.html';
+    <script>
+        const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerText = 'Proberen in te loggen met: ' + email + '\n\n';
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+            
+            if (error) {
+                resultDiv.innerText += '❌ FOUT: ' + error.message;
+            } else {
+                resultDiv.innerText += '✅ SUCCES! User: ' + data.user.email + '\n\n✅ Je kunt nu door naar admin_panel.html';
+            }
         }
-    }
-    
-    async function login() {
-        // DIRECT het email veld gebruiken - geen conversie meer!
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('errorMsg');
-        const btn = document.querySelector('button');
-        
-        errorDiv.innerText = '';
-        
-        if (!email || !password) {
-            errorDiv.innerText = 'Vul e-mail en wachtwoord in';
-            return;
-        }
-        
-        btn.classList.add('loading');
-        btn.innerText = 'Bezig met inloggen...';
-        
-        console.log('Inloggen met:', email);
-        
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        btn.classList.remove('loading');
-        btn.innerText = 'Inloggen';
-        
-        if (error) {
-            console.error('Login error:', error);
-            errorDiv.innerText = 'Ongeldig e-mailadres of wachtwoord';
-        } else {
-            console.log('Login succesvol!', data.user);
-            localStorage.setItem('supabase_session', JSON.stringify(data.session));
-            window.location.href = 'admin_panel.html';
-        }
-    }
-    
-    // Enter toets ondersteuning
-    document.getElementById('password').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') login();
-    });
-    document.getElementById('email').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') login();
-    });
-    
-    checkSession();
-</script>
+    </script>
 </body>
 </html>
