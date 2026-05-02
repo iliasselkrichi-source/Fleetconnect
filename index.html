@@ -1,4 +1,4 @@
-oke pas dit aan mijn html code <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
@@ -61,10 +61,10 @@ oke pas dit aan mijn html code <!DOCTYPE html>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     (function(){
-        // ========== SUPABASE CONFIGURATIE - INGEVULD DOOR ARCHITECT ==========
+        // ========== SUPABASE CONFIGURATIE ==========
         const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5hdl73a9-jNd9n3lnsYVyQ_dMYgiSLA';
-        // ====================================================================
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
+        // ===========================================
 
         let map,pickupCoord=null,dropoffCoord=null,routeLayer=null,pickupMarker=null,dropoffMarker=null,currentRouteData=null,currentRoundTrip=false,currentFlight="",currentDateTime="",selectedVehicle=null,selectedVehicleExtra=0;
 
@@ -125,6 +125,7 @@ oke pas dit aan mijn html code <!DOCTYPE html>
             };
         }
 
+        // ========== AANGEPASTE SEND FUNCTION (geen foutmelding, vriendelijke pop-up) ==========
         async function sendToSupabase(record, paymentMethod) {
             console.log('📦 Verzenden naar Supabase:', record);
             try {
@@ -133,7 +134,8 @@ oke pas dit aan mijn html code <!DOCTYPE html>
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Prefer': 'return=minimal'
                     },
                     body: JSON.stringify(record)
                 });
@@ -141,16 +143,17 @@ oke pas dit aan mijn html code <!DOCTYPE html>
                     const errorText = await response.text();
                     throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
-                const data = await response.json();
-                console.log('✅ Supabase response:', data);
-                alert(`✅ Boeking succesvol opgeslagen!\n\nID: ${record.id}\nStatus: pending`);
+                console.log('✅ Boeking opgeslagen (HTTP', response.status, ')');
+                // VRIENDELIJKE POP-UP IN PLAATS VAN TECHNISCHE MELDING
+                alert(`🎉 Bedankt voor uw reservatie, ${record.name}! 🎉\n\n📋 Uw reserveringsnummer: ${record.id}\n✉️ Een bevestiging werd verstuurd naar ${record.email}\n\n✅ We zien u graag binnen!`);
                 return true;
             } catch (error) {
                 console.error('❌ Supabase fout:', error);
-                alert(`❌ Fout bij opslaan: ${error.message}\n\nControleer uw Supabase URL en Anon Key.`);
+                alert(`❌ Er ging iets mis met uw reservatie: ${error.message}\n\nProbeer opnieuw of contacteer ons.`);
                 return false;
             }
         }
+        // =====================================================================================
 
         async function fetchAddresses(q,wid){if(q.length<3){clearSuggestions(wid);return}const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=0&countrycodes=be&accept-language=nl`;try{const r=await fetch(url,{headers:{'User-Agent':'TaxiPlanner/22.0'}});if(!r.ok)throw new Error();const d=await r.json();if(!d.length){showNoResults(wid);return}showSuggestions(d.map(p=>({text:p.display_name,lat:parseFloat(p.lat),lon:parseFloat(p.lon)})),wid)}catch{showErrorSuggestion(wid,'Netwerkfout')}}
         function showSuggestions(s,wid){const w=document.getElementById(wid),sd=w.querySelector('.suggestions');sd.innerHTML='';s.forEach(sug=>{const div=document.createElement('div');div.className='suggestion-item';div.textContent=sug.text.length>80?sug.text.slice(0,80)+'…':sug.text;div.onclick=()=>{w.querySelector('input').value=sug.text;setCoord(sug.lat,sug.lon,wid);sd.style.display='none'};sd.appendChild(div)});sd.style.display='block'}
@@ -171,7 +174,7 @@ oke pas dit aan mijn html code <!DOCTYPE html>
         function showOverlay(){document.getElementById('overlaySummary').innerHTML=buildSummaryHTML();document.getElementById('summaryOverlay').classList.add('active');preparePaymentLink()}
         function hideOverlay(){document.getElementById('summaryOverlay').classList.remove('active')}
         function preparePaymentLink(){const payment=document.querySelector('input[name="payment"]:checked').value;const container=document.getElementById('paymentLinkPlaceholder');if(payment==='Kaart'||payment==='App'){container.innerHTML=`<button id="demoPaymentBtn" class="payment-link-btn">🔗 Betaallink (${payment})</button>`;const btn=document.getElementById('demoPaymentBtn');if(btn)btn.onclick=()=>alert(`💳 Demo betaallink voor ${payment}.`)}else container.innerHTML=''}
-        async function finalizeBooking(){const pm=document.querySelector('input[name="payment"]:checked').value;let totalAmount=0;const totalLine=document.querySelector('#overlaySummary .summary-section:last-child .summary-line:last-child')?.innerText;if(totalLine){const match=totalLine.match(/€\s*([\d.]+)/);if(match)totalAmount=parseFloat(match[1])}const supabaseRecord=buildSupabaseRecord(pm,totalAmount);if(pm==='Kaart'||pm==='App'){if(confirm(`U heeft gekozen voor betaling met ${pm}. Wilt u doorgaan naar de betaalomgeving?`)){const success=await sendToSupabase(supabaseRecord,pm);if(success){alert(`🔜 U wordt doorgestuurd naar de betaallink voor ${pm}.\n(Demo - later echte integratie)`);resetAll();hideOverlay()}}return}const success=await sendToSupabase(supabaseRecord,pm);if(success){alert(`✅ BOEKING BEVESTIGD (CASH)!\n\nID: ${supabaseRecord.id}\nTotaal: € ${totalAmount}\n\nU ontvangt een bevestiging per e-mail.`);resetAll();hideOverlay()}}
+        async function finalizeBooking(){const pm=document.querySelector('input[name="payment"]:checked').value;let totalAmount=0;const totalLine=document.querySelector('#overlaySummary .summary-section:last-child .summary-line:last-child')?.innerText;if(totalLine){const match=totalLine.match(/€\s*([\d.]+)/);if(match)totalAmount=parseFloat(match[1])}const supabaseRecord=buildSupabaseRecord(pm,totalAmount);if(pm==='Kaart'||pm==='App'){if(confirm(`U heeft gekozen voor betaling met ${pm}. Wilt u doorgaan naar de betaalomgeving?`)){const success=await sendToSupabase(supabaseRecord,pm);if(success){alert(`🔜 U wordt doorgestuurd naar de betaallink voor ${pm}.\n(Demo - later echte integratie)`);resetAll();hideOverlay()}}return}const success=await sendToSupabase(supabaseRecord,pm);if(success){resetAll();hideOverlay()}}
         function resetAll(){document.getElementById('flipCardLeft').classList.remove('flipped');document.getElementById('flipCardRight').classList.remove('flipped');if(routeLayer)map.removeLayer(routeLayer);if(pickupMarker)map.removeLayer(pickupMarker);if(dropoffMarker)map.removeLayer(dropoffMarker);currentRouteData=null;pickupCoord=null;dropoffCoord=null;document.getElementById('distVal').innerText='—';document.getElementById('timeVal').innerText='—';document.getElementById('priceVal').innerText='—';document.getElementById('pickupInput').value='';document.getElementById('dropoffInput').value='';document.getElementById('firstName').value='';document.getElementById('lastName').value='';document.getElementById('phone').value='';document.getElementById('email').value='';document.getElementById('vat').value='';document.getElementById('flightNumber').value='';document.getElementById('roundtripCheckbox').checked=false;document.getElementById('passengers').value='1';document.getElementById('luggage').value='0';document.getElementById('meetGreet').checked=false;document.getElementById('kissRide').checked=false;document.getElementById('waterBottle').checked=false;document.getElementById('wifi').checked=false;document.getElementById('specialWishes').value='';currentRoundTrip=false;selectedVehicle=null}
         function onConfirmVehicle(){if(!selectedVehicle){const err=document.getElementById('vehicleError');err.innerText='Selecteer een voertuig.';err.style.display='block';setTimeout(()=>err.style.display='none',3000);return}showOverlay()}
         function backToPlanner(){document.getElementById('flipCardLeft').classList.remove('flipped')}
