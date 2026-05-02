@@ -379,17 +379,15 @@
                 booking.status === 'pending' || booking.status === 'new'
             );
             
-            // Orders: status = 'confirmed' EN datum/tijd >= nu
+            // Orders: status = 'confirmed' OF 'active'
             ordersList = allBookings.filter(booking => 
-                (booking.status === 'confirmed' || booking.status === 'active') && 
-                isOrderInFuture(booking)
+                booking.status === 'confirmed' || booking.status === 'active'
             );
             
-            // History: status = 'completed' OF 'cancelled' OF datum/tijd < nu
+            // History: status = 'completed' OF 'cancelled'
             historyOrders = allBookings.filter(booking => 
                 booking.status === 'completed' || 
-                booking.status === 'cancelled' ||
-                (!isOrderInFuture(booking) && booking.status !== 'pending')
+                booking.status === 'cancelled'
             );
             
             // Sorteren
