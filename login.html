@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login - Fleetconnect</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f4f6fa;
+            font-family: system-ui, sans-serif;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 32px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 360px;
+        }
+        h1 { font-size: 28px; margin-bottom: 8px; }
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 60px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #1f2b48;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .error { color: red; margin-top: 12px; text-align: center; }
+        .loading { opacity: 0.6; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <h1>🔐 Fleetconnect Admin</h1>
+    <p>Log in om orders te beheren</p>
+    <input type="text" id="username" placeholder="Gebruikersnaam" autocomplete="off">
+    <input type="password" id="password" placeholder="Wachtwoord">
+    <button onclick="login()">Inloggen</button>
+    <div id="errorMsg" class="error"></div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMsg');
+        const btn = document.querySelector('button');
+        
+        errorDiv.innerText = '';
+        btn.classList.add('loading');
+        btn.innerText = 'Bezig met inloggen...';
+        
+        // Gebruik de username als email (voeg @domein toe indien nodig)
+        let email = username;
+        if (!email.includes('@')) {
+            email = `${username}@fleetconnect.local`;
+        }
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        btn.classList.remove('loading');
+        btn.innerText = 'Inloggen';
+        
+        if (error) {
+            errorDiv.innerText = 'Ongeldige gebruikersnaam of wachtwoord';
+            console.error(error);
+        } else {
+            // Inloggen succesvol
+            localStorage.setItem('supabase_session', JSON.stringify(data.session));
+            window.location.href = 'admin_panel.html';
+        }
+    }
+</script>
+</body>
+</html>
