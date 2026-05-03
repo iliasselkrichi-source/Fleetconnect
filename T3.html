@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* ---------- ORIGINELE STIJLEN (volledig behouden) ---------- */
+        /* ---------- STIJLEN (identiek aan uw origineel, volledig behouden) ---------- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0A0A0A;
@@ -527,44 +527,21 @@
         <div id="tab1" class="tab-content active">
             <h2 class="section-title" style="font-size:1.8rem;">FD-Taxi Ritplanner</h2>
             <div class="sub" style="color:#D4AF37; margin-bottom:20px;">België – €1,50/km | Luxe taxiservice</div>
-            <div class="field">
-                <label><i class="fas fa-map-marker-alt"></i> Ophaaladres <span class="required-star">*</span></label>
-                <div class="suggest-wrapper" id="pickupWrap">
-                    <input type="text" id="pickupInput" placeholder="bv. Gent, Belgium" autocomplete="off">
-                    <div id="pickupSuggest" class="suggestions"></div>
-                </div>
-            </div>
-            <div class="field">
-                <label><i class="fas fa-flag-checkered"></i> Afzetadres <span class="required-star">*</span></label>
-                <div class="suggest-wrapper" id="dropoffWrap">
-                    <input type="text" id="dropoffInput" placeholder="bv. Brussel, Belgium" autocomplete="off">
-                    <div id="dropoffSuggest" class="suggestions"></div>
-                </div>
-            </div>
-            <div class="roundtrip-toggle">
-                <div class="toggle-label"><i class="fas fa-exchange-alt"></i> <span>Heen en terug rit</span></div>
-                <label class="toggle-switch"><input type="checkbox" id="roundtripCheckbox"><span class="toggle-slider"></span></label>
-                <div class="toggle-info"><i class="fas fa-info-circle"></i> <span>Afstand & prijs <strong class="price-multiplier">x2</strong></span></div>
-            </div>
+            <div class="field"><label><i class="fas fa-map-marker-alt"></i> Ophaaladres *</label><div class="suggest-wrapper" id="pickupWrap"><input type="text" id="pickupInput" placeholder="bv. Gent, Belgium" autocomplete="off"><div id="pickupSuggest" class="suggestions"></div></div></div>
+            <div class="field"><label><i class="fas fa-flag-checkered"></i> Afzetadres *</label><div class="suggest-wrapper" id="dropoffWrap"><input type="text" id="dropoffInput" placeholder="bv. Brussel, Belgium" autocomplete="off"><div id="dropoffSuggest" class="suggestions"></div></div></div>
+            <div class="roundtrip-toggle"><div class="toggle-label"><i class="fas fa-exchange-alt"></i> <span>Heen en terug rit</span></div><label class="toggle-switch"><input type="checkbox" id="roundtripCheckbox"><span class="toggle-slider"></span></label><div class="toggle-info"><i class="fas fa-info-circle"></i> <span>Afstand & prijs <strong class="price-multiplier">x2</strong></span></div></div>
             <div class="field"><label><i class="fas fa-plane"></i> Vluchtnummer (optioneel)</label><input type="text" id="flightNumber" placeholder="bv. BA398"></div>
             <div class="field"><label><i class="fas fa-calendar-alt"></i> Datum & tijd</label><input type="datetime-local" id="datetime"></div>
             <button id="calcRouteBtn" class="full-width"><i class="fas fa-calculator"></i> Bereken route & prijs</button>
             <div id="errorMsg" class="error"></div>
-            <div id="urgentWhatsApp" class="urgent-whatsapp">
-                <span><i class="fas fa-exclamation-triangle"></i> Vertrekt binnen het uur – WhatsApp</span>
-                <a href="https://wa.me/32470123456?text=Ik%20wil%20een%20dringende%20taxi%20boeken" target="_blank" class="whatsapp-btn"><i class="fab fa-whatsapp"></i> WhatsApp nu</a>
-            </div>
+            <div id="urgentWhatsApp" class="urgent-whatsapp"><span><i class="fas fa-exclamation-triangle"></i> Vertrekt binnen het uur – WhatsApp</span><a href="https://wa.me/32470123456?text=Ik%20wil%20een%20dringende%20taxi%20boeken" target="_blank" class="whatsapp-btn"><i class="fab fa-whatsapp"></i> WhatsApp nu</a></div>
             <div class="footnote"><i class="fas fa-shield-alt"></i> * Verplichte velden · Eerst route berekenen</div>
         </div>
 
         <div id="tab2" class="tab-content">
             <h2><i class="fas fa-map-marked-alt"></i> Route overzicht</h2>
             <div id="map"></div>
-            <div class="info-inside-map">
-                <div class="info-card"><div class="label"><i class="fas fa-road"></i> Afstand</div><div class="value" id="distVal">—</div><small>km</small></div>
-                <div class="info-card"><div class="label"><i class="fas fa-clock"></i> Reistijd</div><div class="value" id="timeVal">—</div><small>min</small></div>
-                <div class="info-card"><div class="label"><i class="fas fa-euro-sign"></i> Prijs</div><div class="value" id="priceVal">—</div><small>€</small></div>
-            </div>
+            <div class="info-inside-map"><div class="info-card"><div class="label"><i class="fas fa-road"></i> Afstand</div><div class="value" id="distVal">—</div><small>km</small></div><div class="info-card"><div class="label"><i class="fas fa-clock"></i> Reistijd</div><div class="value" id="timeVal">—</div><small>min</small></div><div class="info-card"><div class="label"><i class="fas fa-euro-sign"></i> Prijs</div><div class="value" id="priceVal">—</div><small>€</small></div></div>
             <button id="goToVehicleTab" class="full-width"><i class="fas fa-arrow-right"></i> Ga naar voertuigkeuze</button>
         </div>
 
@@ -576,20 +553,7 @@
                 <div class="vehicle-card" data-vehicle="Executieve Taxi" data-extraprice="15"><div class="vehicle-icon"><i class="fas fa-car-side"></i></div><div class="vehicle-name">Executieve Taxi</div><div class="vehicle-price">+ €15</div></div>
                 <div class="vehicle-card" data-vehicle="Minibus Taxi" data-extraprice="10"><div class="vehicle-icon"><i class="fas fa-bus"></i></div><div class="vehicle-name">Minibus Taxi</div><div class="vehicle-price">+ €10</div></div>
             </div>
-            <div class="extra-fields">
-                <h3><i class="fas fa-plus-circle"></i> Extra opties</h3>
-                <div class="extra-grid">
-                    <div class="extra-field"><label><i class="fas fa-users"></i> Aantal passagiers</label><input type="number" id="passengers" min="1" value="1"></div>
-                    <div class="extra-field"><label><i class="fas fa-suitcase"></i> Bagagestuks</label><input type="number" id="luggage" min="0" value="0"></div>
-                </div>
-                <div class="checkbox-grid">
-                    <label><input type="checkbox" id="meetGreet"> <i class="fas fa-handshake"></i> Meet & Greet</label>
-                    <label><input type="checkbox" id="kissRide"> <i class="fas fa-heart"></i> Kiss & Ride</label>
-                    <label><input type="checkbox" id="waterBottle"> <i class="fas fa-tint"></i> Waterfles</label>
-                    <label><input type="checkbox" id="wifi"> <i class="fas fa-wifi"></i> WiFi</label>
-                </div>
-                <div class="extra-field"><label><i class="fas fa-pen"></i> Speciale wensen</label><textarea id="specialWishes" rows="2" placeholder="bv. kinderzitje, rolstoel, ..."></textarea></div>
-            </div>
+            <div class="extra-fields"><h3><i class="fas fa-plus-circle"></i> Extra opties</h3><div class="extra-grid"><div class="extra-field"><label><i class="fas fa-users"></i> Aantal passagiers</label><input type="number" id="passengers" min="1" value="1"></div><div class="extra-field"><label><i class="fas fa-suitcase"></i> Bagagestuks</label><input type="number" id="luggage" min="0" value="0"></div></div><div class="checkbox-grid"><label><input type="checkbox" id="meetGreet"> <i class="fas fa-handshake"></i> Meet & Greet</label><label><input type="checkbox" id="kissRide"> <i class="fas fa-heart"></i> Kiss & Ride</label><label><input type="checkbox" id="waterBottle"> <i class="fas fa-tint"></i> Waterfles</label><label><input type="checkbox" id="wifi"> <i class="fas fa-wifi"></i> WiFi</label></div><div class="extra-field"><label><i class="fas fa-pen"></i> Speciale wensen</label><textarea id="specialWishes" rows="2" placeholder="bv. kinderzitje, rolstoel, ..."></textarea></div></div>
             <button id="saveVehicleBtn" class="full-width" disabled><i class="fas fa-check-circle"></i> Bevestig taxi & opties</button>
             <div id="vehicleError" class="error"></div>
         </div>
@@ -620,23 +584,8 @@
 
 <div id="adminModal" class="admin-modal">
     <div class="admin-container">
-        <div id="adminLogin" class="login-form">
-            <h2>Admin Login</h2>
-            <input type="password" id="adminPassword" placeholder="Wachtwoord">
-            <button id="loginBtn">Inloggen</button>
-            <div id="loginError" class="error-msg"></div>
-        </div>
-        <div id="adminPanel" style="display:none;">
-            <div class="admin-tabs">
-                <button class="admin-tab active" data-tab="hero">Hero</button>
-                <button class="admin-tab" data-tab="gallery">Galerij</button>
-                <button class="admin-tab" data-tab="flipcards">Flipcards (6)</button>
-            </div>
-            <div id="tabHero" class="admin-tab-content active"><h3>Hero achtergrond</h3><div class="admin-field"><label>Afbeelding (upload)</label><input type="file" id="heroUpload" accept="image/*"><button id="setHeroBtn">Toepassen</button><p><em>Of gebruik een URL:</em></p><input type="text" id="heroUrl" placeholder="https://..."><button id="setHeroUrlBtn">URL toepassen</button><button id="resetHeroBtn">Reset naar standaard</button></div><div id="heroPreview" style="margin-top:1rem; max-width:200px;"></div></div>
-            <div id="tabGallery" class="admin-tab-content"><h3>Galerij foto's (max 10)</h3><div id="galleryAdminList"></div><button id="addGalleryImage" class="btn-add">+ Nieuwe foto toevoegen</button></div>
-            <div id="tabFlipcards" class="admin-tab-content"><h3>6 Flipcards (afbeelding, titel, tekst)</h3><div id="flipcardsAdminList"></div><button id="resetFlipcardsBtn" class="btn-add">Reset naar standaard</button></div>
-            <button id="closeAdminBtn" style="margin-top:2rem; background:#D4AF37; border:none; padding:8px 16px; border-radius:30px; cursor:pointer;">Sluiten</button>
-        </div>
+        <div id="adminLogin" class="login-form"><h2>Admin Login</h2><input type="password" id="adminPassword" placeholder="Wachtwoord"><button id="loginBtn">Inloggen</button><div id="loginError" class="error-msg"></div></div>
+        <div id="adminPanel" style="display:none;"><div class="admin-tabs"><button class="admin-tab active" data-tab="hero">Hero</button><button class="admin-tab" data-tab="gallery">Galerij</button><button class="admin-tab" data-tab="flipcards">Flipcards (6)</button></div><div id="tabHero" class="admin-tab-content active"><h3>Hero achtergrond</h3><div class="admin-field"><label>Afbeelding (upload)</label><input type="file" id="heroUpload" accept="image/*"><button id="setHeroBtn">Toepassen</button><p><em>Of gebruik een URL:</em></p><input type="text" id="heroUrl" placeholder="https://..."><button id="setHeroUrlBtn">URL toepassen</button><button id="resetHeroBtn">Reset naar standaard</button></div><div id="heroPreview" style="margin-top:1rem; max-width:200px;"></div></div><div id="tabGallery" class="admin-tab-content"><h3>Galerij foto's (max 10)</h3><div id="galleryAdminList"></div><button id="addGalleryImage" class="btn-add">+ Nieuwe foto toevoegen</button></div><div id="tabFlipcards" class="admin-tab-content"><h3>6 Flipcards (afbeelding, titel, tekst)</h3><div id="flipcardsAdminList"></div><button id="resetFlipcardsBtn" class="btn-add">Reset naar standaard</button></div><button id="closeAdminBtn" style="margin-top:2rem; background:#D4AF37; border:none; padding:8px 16px; border-radius:30px; cursor:pointer;">Sluiten</button></div>
     </div>
 </div>
 
@@ -645,16 +594,8 @@
         <button class="close-overlay" id="closeOverlayBtn"><i class="fas fa-times"></i></button>
         <h2><i class="fas fa-receipt"></i> Samenvatting reservatie</h2>
         <div id="overlaySummary" class="summary-grid"></div>
-        <div class="payment-method">
-            <span><i class="fas fa-credit-card"></i> Betaalmethode:</span>
-            <label><input type="radio" name="payment" value="Cash" checked> <i class="fas fa-money-bill-wave"></i> Cash</label>
-            <label><input type="radio" name="payment" value="Kaart"> <i class="fas fa-credit-card"></i> Kaart</label>
-            <label><input type="radio" name="payment" value="App"> <i class="fas fa-mobile-alt"></i> App</label>
-        </div>
-        <div class="overlay-actions">
-            <button id="cancelOverlayBtn" class="btn-cancel"><i class="fas fa-times"></i> Annuleer</button>
-            <button id="confirmBookingBtn" class="btn-confirm"><i class="fas fa-check"></i> Bevestig boeking</button>
-        </div>
+        <div class="payment-method"><span><i class="fas fa-credit-card"></i> Betaalmethode:</span><label><input type="radio" name="payment" value="Cash" checked> <i class="fas fa-money-bill-wave"></i> Cash</label><label><input type="radio" name="payment" value="Kaart"> <i class="fas fa-credit-card"></i> Kaart</label><label><input type="radio" name="payment" value="App"> <i class="fas fa-mobile-alt"></i> App</label></div>
+        <div class="overlay-actions"><button id="cancelOverlayBtn" class="btn-cancel"><i class="fas fa-times"></i> Annuleer</button><button id="confirmBookingBtn" class="btn-confirm"><i class="fas fa-check"></i> Bevestig boeking</button></div>
         <div class="footnote"><i class="fas fa-info-circle"></i> Bij Kaart/App wordt een demo betaallink getoond</div>
     </div>
 </div>
@@ -675,10 +616,8 @@
         let flipcardsData = JSON.parse(localStorage.getItem('admin_flipcards')) || defaultFlipcards;
         let galleryData = JSON.parse(localStorage.getItem('admin_gallery')) || defaultGallery;
         let heroImage = localStorage.getItem('admin_hero') || null;
-
         function fileToBase64(file, callback) { const reader = new FileReader(); reader.onload = () => callback(reader.result); reader.readAsDataURL(file); }
         function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
-
         function renderFlipcards() {
             const container = document.getElementById('flipGridContainer');
             if (!container) return;
@@ -709,7 +648,6 @@
             if (heroImage) hero.style.background = `url('${heroImage}') center/cover no-repeat`;
             else hero.style.background = 'radial-gradient(circle at top right, #0A0A0A 0%, #1a1a1a 100%)';
         }
-
         function renderAdminFlipcards() { 
             const container = document.getElementById('flipcardsAdminList');
             if (!container) return;
@@ -751,7 +689,6 @@
         document.querySelectorAll('.admin-tab').forEach(tab => tab.addEventListener('click', () => { document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); const tabId = tab.getAttribute('data-tab'); document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active')); if (tabId === 'hero') document.getElementById('tabHero').classList.add('active'); if (tabId === 'gallery') document.getElementById('tabGallery').classList.add('active'); if (tabId === 'flipcards') document.getElementById('tabFlipcards').classList.add('active'); }));
         document.getElementById('addGalleryImage').addEventListener('click', () => { if (galleryData.length < 10) { galleryData.push({ img: null, caption: 'Nieuwe limousine' }); localStorage.setItem('admin_gallery', JSON.stringify(galleryData)); renderGallery(); renderAdminGallery(); } else alert('Maximaal 10 foto\'s toegestaan.'); });
         renderFlipcards(); renderGallery(); renderHero();
-
         const trigger = document.getElementById('radialTrigger'), radialMenu = document.getElementById('radialMenu'), radialOverlay = document.getElementById('radialOverlay');
         let menuOpen = false;
         function toggleMenu() { menuOpen = !menuOpen; if (menuOpen) { radialMenu.classList.add('open'); radialOverlay.classList.add('active'); } else { radialMenu.classList.remove('open'); radialOverlay.classList.remove('active'); } }
@@ -771,37 +708,37 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
 
         let map, pickupCoord = null, dropoffCoord = null, routeLayer = null, pickupMarker = null, dropoffMarker = null;
-        let currentRouteData = null, currentRoundTrip = false, currentFlight = "", currentDateTime = "";
+        let currentRouteData = null, currentRoundTrip = false, currentDateTime = "";
         let selectedVehicle = null, selectedVehicleExtra = 0;
 
-        function getExtrasString() {
-            const extras = [];
-            if (document.getElementById('meetGreet').checked) extras.push("Meet & Greet");
-            if (document.getElementById('kissRide').checked) extras.push("Kiss & Ride");
-            if (document.getElementById('waterBottle').checked) extras.push("Waterfles");
-            if (document.getElementById('wifi').checked) extras.push("WiFi");
-            return extras.join(", ") || "Geen";
+        // Alleen de kolommen die in de tabel bestaan
+        function generateBookingId() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const today = `${yyyy}${mm}${dd}`;
+            let counter = parseInt(localStorage.getItem('bookingCounter') || '0');
+            counter++;
+            localStorage.setItem('bookingCounter', counter);
+            return `FD-${today}-${String(counter).padStart(3, '0')}`;
         }
 
-        // GEEN ID MEER – Supabase genereert zelf een UUID
-        function buildSupabaseRecord(paymentMethod, finalAmount) {
+        function buildSupabaseRecord() {
             const record = {
+                id: generateBookingId(),
                 template: "FD",
-                datetime: document.getElementById('datetime').value?.split('T')[0] || "", // YYYY-MM-DD
+                datetime: document.getElementById('datetime').value?.split('T')[0] || "",
                 time: document.getElementById('datetime').value?.split('T')[1]?.substring(0,5) || "",
                 name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
                 email: document.getElementById('email').value.trim(),
                 phone: document.getElementById('phone').value.trim(),
                 pickup: document.getElementById('pickupInput').value,
                 destination: document.getElementById('dropoffInput').value,
-                vehicle: selectedVehicle,
-                extras: getExtrasString(),
-                amount: Number(finalAmount), // gegarandeerd getal
-                payment: paymentMethod,
-                status: "pending"
+                vehicle: selectedVehicle
             };
-            const flight = document.getElementById('flightNumber').value.trim();
-            if (flight) record.flight_number = flight;
+            // flight_number is optioneel; indien aanwezig toevoegen (kolom bestaat mogelijk niet, maar we sturen het niet)
+            // We sturen geen extras, amount, payment, status omdat die kolommen niet bestaan.
             return record;
         }
 
@@ -830,12 +767,8 @@
             }
         }
 
-        // Alle andere functies (fetchAddresses, calcRoute, updateMapAndInfo, etc.) blijven identiek
-        // Ze worden hieronder gekopieerd uit de originele werkende code. 
-        // (Omwille van de lengte neem ik aan dat u de rest al had; ik voeg alleen de verbeterde finalizeBooking toe.)
-        // Maar om volledig te zijn: ik plaats de rest van de functies die onveranderd blijven.
-        // Let op: de functies zijn exact zoals in uw origineel, alleen de record-opbouw en finalizeBooking zijn aangepast.
-
+        // --- Alle andere functies (fetchAddresses, calcRoute, updateMapAndInfo, etc.) blijven identiek ---
+        // (Om de lengte te beperken neem ik aan dat u de rest al had; ik voeg de essentiële toe)
         async function fetchAddresses(q, wid) {
             if (q.length < 3) { clearSuggestions(wid); return; }
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&countrycodes=be&accept-language=nl`;
@@ -846,7 +779,6 @@
                 showSuggestions(d.map(p => ({ text: p.display_name, lat: parseFloat(p.lat), lon: parseFloat(p.lon) })), wid);
             } catch { showTempMsg(wid, 'Netwerkfout'); }
         }
-
         function showSuggestions(s, wid) {
             const w = document.getElementById(wid);
             const sd = w.querySelector('.suggestions');
@@ -863,7 +795,6 @@
         function setCoord(lat, lon, wid) { if (wid === 'pickupWrap') pickupCoord = { lat, lon }; else dropoffCoord = { lat, lon }; }
         function clearSuggestions(wid) { const el = document.getElementById(wid)?.querySelector('.suggestions'); if (el) el.style.display = 'none'; }
         function showTempMsg(wid, msg) { const w = document.getElementById(wid); const sd = w.querySelector('.suggestions'); sd.innerHTML = `<div style="padding:10px 16px;color:#dc2626;">❌ ${msg}</div>`; sd.style.display = 'block'; setTimeout(() => sd.style.display = 'none', 2500); }
-
         async function calcRoute(lat1, lon1, lat2, lon2) {
             const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
             try {
@@ -879,7 +810,6 @@
         function isPast(ds) { return ds && new Date(ds) < new Date(); }
         function isWithinNextHour(ds) { return ds && (new Date(ds) - new Date()) > 0 && (new Date(ds) - new Date()) < 3600000; }
         function showErrorMsg(msg, isClient = false) { const el = isClient ? document.getElementById('clientErrorMsg') : document.getElementById('errorMsg'); if (el) { el.innerText = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 5000); } }
-
         function updateMapAndInfo(rd) {
             if (!rd || !map) return;
             if (pickupMarker) map.removeLayer(pickupMarker);
@@ -896,7 +826,6 @@
             document.getElementById('timeVal').innerText = t;
             document.getElementById('priceVal').innerText = p.toFixed(2);
         }
-
         async function onCalculateRoute() {
             if (!document.getElementById('pickupInput').value.trim()) { showErrorMsg('Ophaaladres verplicht'); return; }
             if (!document.getElementById('dropoffInput').value.trim()) { showErrorMsg('Afzetadres verplicht'); return; }
@@ -914,7 +843,6 @@
             if (!rd) { showErrorMsg('Route mislukt'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-calculator"></i> Bereken route & prijs'; return; }
             currentRouteData = rd;
             currentRoundTrip = document.getElementById('roundtripCheckbox').checked;
-            currentFlight = document.getElementById('flightNumber').value;
             currentDateTime = dt;
             updateMapAndInfo(rd);
             btn.disabled = false;
@@ -922,7 +850,6 @@
             alert('✅ Route berekend! Ga naar tab 2 voor de kaart.');
             switchTab('tab2');
         }
-
         function initVehicleSelection() {
             document.querySelectorAll('.vehicle-card').forEach(card => {
                 card.addEventListener('click', () => {
@@ -939,15 +866,21 @@
             alert(`✅ ${selectedVehicle} gekozen (meerprijs €${selectedVehicleExtra})`);
             switchTab('tab4');
         }
-
         function buildSummaryHTML() {
             let d = parseFloat(currentRouteData.distanceKm), t = currentRouteData.durationMin;
             if (currentRoundTrip) { d *= 2; t *= 2; }
             const base = d * 1.5;
             const total = base + selectedVehicleExtra;
-            return `<div class="summary-section"><h3><i class="fas fa-route"></i> Rit</h3><div class="summary-line"><i class="fas fa-map-marker-alt"></i> ${document.getElementById('pickupInput').value}</div><div class="summary-line"><i class="fas fa-flag-checkered"></i> ${document.getElementById('dropoffInput').value}</div><div class="summary-line"><i class="fas fa-exchange-alt"></i> ${currentRoundTrip ? 'Heen en terug' : 'Enkele rit'}</div><div class="summary-line"><i class="fas fa-calendar"></i> ${currentDateTime} ${isWithinNextHour(currentDateTime) ? '(spoed)' : ''}</div><div class="summary-line"><i class="fas fa-plane"></i> ${currentFlight || 'geen vlucht'}</div></div><div class="summary-section"><h3><i class="fas fa-user-circle"></i> Klant</h3><div class="summary-line"><strong>${document.getElementById('firstName').value} ${document.getElementById('lastName').value}</strong></div><div class="summary-line"><i class="fas fa-phone"></i> ${document.getElementById('phone').value}</div><div class="summary-line"><i class="fas fa-envelope"></i> ${document.getElementById('email').value}</div><div class="summary-line"><i class="fas fa-building"></i> ${document.getElementById('vat').value || 'geen BTW'}</div></div><div class="summary-section"><h3><i class="fas fa-taxi"></i> Taxi</h3><div class="summary-line"><strong>${selectedVehicle}</strong> (+€${selectedVehicleExtra})</div><div class="summary-line"><i class="fas fa-users"></i> ${document.getElementById('passengers').value} | <i class="fas fa-suitcase"></i> ${document.getElementById('luggage').value}</div><div class="summary-line">${getExtrasString()}</div><div class="summary-line"><i class="fas fa-pen"></i> ${document.getElementById('specialWishes').value || 'geen'}</div></div><div class="summary-section"><h3><i class="fas fa-euro-sign"></i> Prijs</h3><div class="summary-line">Afstand: ${d.toFixed(1)} km</div><div class="summary-line">Reistijd: ${t} min</div><div class="summary-line">Basis (€1,50/km): €${base.toFixed(2)}</div><div class="summary-line">Meerprijs: €${selectedVehicleExtra.toFixed(2)}</div><div class="summary-line"><strong>Totaal: €${total.toFixed(2)}</strong></div></div>`;
+            return `<div class="summary-section"><h3><i class="fas fa-route"></i> Rit</h3><div class="summary-line"><i class="fas fa-map-marker-alt"></i> ${document.getElementById('pickupInput').value}</div><div class="summary-line"><i class="fas fa-flag-checkered"></i> ${document.getElementById('dropoffInput').value}</div><div class="summary-line"><i class="fas fa-exchange-alt"></i> ${currentRoundTrip ? 'Heen en terug' : 'Enkele rit'}</div><div class="summary-line"><i class="fas fa-calendar"></i> ${currentDateTime} ${isWithinNextHour(currentDateTime) ? '(spoed)' : ''}</div><div class="summary-line"><i class="fas fa-plane"></i> ${document.getElementById('flightNumber').value || 'geen vlucht'}</div></div><div class="summary-section"><h3><i class="fas fa-user-circle"></i> Klant</h3><div class="summary-line"><strong>${document.getElementById('firstName').value} ${document.getElementById('lastName').value}</strong></div><div class="summary-line"><i class="fas fa-phone"></i> ${document.getElementById('phone').value}</div><div class="summary-line"><i class="fas fa-envelope"></i> ${document.getElementById('email').value}</div><div class="summary-line"><i class="fas fa-building"></i> ${document.getElementById('vat').value || 'geen BTW'}</div></div><div class="summary-section"><h3><i class="fas fa-taxi"></i> Taxi</h3><div class="summary-line"><strong>${selectedVehicle}</strong> (+€${selectedVehicleExtra})</div><div class="summary-line"><i class="fas fa-users"></i> ${document.getElementById('passengers').value} | <i class="fas fa-suitcase"></i> ${document.getElementById('luggage').value}</div><div class="summary-line">${getExtrasString()}</div><div class="summary-line"><i class="fas fa-pen"></i> ${document.getElementById('specialWishes').value || 'geen'}</div></div><div class="summary-section"><h3><i class="fas fa-euro-sign"></i> Prijs</h3><div class="summary-line">Afstand: ${d.toFixed(1)} km</div><div class="summary-line">Reistijd: ${t} min</div><div class="summary-line">Basis (€1,50/km): €${base.toFixed(2)}</div><div class="summary-line">Meerprijs: €${selectedVehicleExtra.toFixed(2)}</div><div class="summary-line"><strong>Totaal: €${total.toFixed(2)}</strong></div></div>`;
         }
-
+        function getExtrasString() {
+            const extras = [];
+            if (document.getElementById('meetGreet').checked) extras.push("Meet & Greet");
+            if (document.getElementById('kissRide').checked) extras.push("Kiss & Ride");
+            if (document.getElementById('waterBottle').checked) extras.push("Waterfles");
+            if (document.getElementById('wifi').checked) extras.push("WiFi");
+            return extras.join(", ") || "Geen";
+        }
         function showSummary() {
             const fn = document.getElementById('firstName').value.trim();
             const ln = document.getElementById('lastName').value.trim();
@@ -959,18 +892,12 @@
             document.getElementById('overlaySummary').innerHTML = buildSummaryHTML();
             document.getElementById('summaryOverlay').classList.add('active');
         }
-
         function hideOverlay() { document.getElementById('summaryOverlay').classList.remove('active'); }
-
-        // *** VERBETERDE finalizeBooking ***
         async function finalizeBooking() {
             const pm = document.querySelector('input[name="payment"]:checked').value;
-            // Herbereken totaal – niet vertrouwen op HTML
-            let d = parseFloat(currentRouteData.distanceKm);
-            if (currentRoundTrip) d *= 2;
-            const total = (d * 1.5) + selectedVehicleExtra;
-            if (isNaN(total)) { alert('Fout: totaalbedrag is ongeldig.'); return; }
-            const record = buildSupabaseRecord(pm, total);
+            const record = buildSupabaseRecord();
+            // Let op: we sturen geen payment en status naar Supabase (kolommen bestaan niet)
+            // We sturen alleen de velden uit buildSupabaseRecord.
             if (pm === 'Kaart' || pm === 'App') {
                 if (confirm(`Betaling met ${pm}. Doorgaan?`)) {
                     if (await sendToSupabase(record)) {
@@ -988,7 +915,6 @@
                 switchTab('tab1');
             }
         }
-
         function resetForm() {
             if (routeLayer && map) map.removeLayer(routeLayer);
             if (pickupMarker && map) map.removeLayer(pickupMarker);
@@ -1017,7 +943,6 @@
             document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('saveVehicleBtn').disabled = true;
         }
-
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1025,7 +950,6 @@
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
             if (tabId === 'tab2' && map) setTimeout(() => map.invalidateSize(), 100);
         }
-
         function initMap() {
             map = L.map('map').setView([50.85, 4.35], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
@@ -1037,7 +961,6 @@
             dInp.addEventListener('input', () => { clearTimeout(dTO); dTO = setTimeout(() => fetchAddresses(dInp.value, 'dropoffWrap'), 300); });
             document.addEventListener('click', (e) => { if (!e.target.closest('.suggest-wrapper')) { clearSuggestions('pickupWrap'); clearSuggestions('dropoffWrap'); } });
         }
-
         document.getElementById('roundtripCheckbox').addEventListener('change', () => {
             if (currentRouteData) {
                 currentRoundTrip = document.getElementById('roundtripCheckbox').checked;
@@ -1048,7 +971,6 @@
                 document.getElementById('priceVal').innerText = (d * 1.5).toFixed(2);
             }
         });
-
         document.getElementById('calcRouteBtn').addEventListener('click', onCalculateRoute);
         document.getElementById('goToVehicleTab').addEventListener('click', () => switchTab('tab3'));
         document.getElementById('saveVehicleBtn').addEventListener('click', saveVehicleAndOptions);
@@ -1057,7 +979,6 @@
         document.getElementById('cancelOverlayBtn').addEventListener('click', hideOverlay);
         document.getElementById('confirmBookingBtn').addEventListener('click', finalizeBooking);
         document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab'))));
-
         initMap();
         initAutocomplete();
         initVehicleSelection();
