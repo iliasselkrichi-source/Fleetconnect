@@ -334,15 +334,16 @@
                 if (!err2) chauffeursList = chauffeurs || [];
 
                 if (currentTab === 'onderaannemers') renderOnderaannemers();
+                if (currentTab === 'drivers') renderDrivers(); // extra
             } catch (error) {
                 console.error('Fout bij laden onderaannemers:', error);
             }
         }
 
-        async function voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email) {
+        async function voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email, prefix) {
             const { error } = await supabaseClient
                 .from('onderaannemers')
-                .insert([{ bedrijfsnaam, btw_nummer: btw, contactnaam: contact, mobiel, email }]);
+                .insert([{ bedrijfsnaam, btw_nummer: btw, contactnaam: contact, mobiel, email, prefix: prefix || null }]);
             if (error) alert('Fout: ' + error.message);
             else await loadOnderaannemersFromSupabase();
         }
@@ -364,21 +365,36 @@
             return prefix.slice(0, 4);
         }
 
-        async function voegChauffeurToe(onderaannemerId, voornaam, achternaam) {
+        async function voegChauffeurToe(onderaannemerId, voornaam, achternaam, mobiel, email, voertuigType, nummerplaat) {
             if (!voornaam || !achternaam) {
-                alert('Vul zowel voornaam als achternaam in.');
+                alert('Vul minimaal voornaam en achternaam in.');
                 return;
             }
             const bestaande = chauffeursList.filter(c => c.onderaannemer_id === onderaannemerId);
             const volgnummer = bestaande.length + 1;
             const onderaannemer = onderaannemersList.find(o => o.id === onderaannemerId);
             if (!onderaannemer) return;
-            const prefix = genereerPrefix(onderaannemer.bedrijfsnaam);
+
+            let prefix = onderaannemer.prefix;
+            if (!prefix || prefix.length !== 2) {
+                // fallback: eerste twee letters van bedrijfsnaam (zonder spaties)
+                let raw = onderaannemer.bedrijfsnaam.replace(/\s/g, '');
+                prefix = raw.slice(0,2).toUpperCase();
+            }
             const chauffeurId = `${prefix}-${String(volgnummer).padStart(2, '0')}`;
 
             const { error } = await supabaseClient
                 .from('chauffeurs')
-                .insert([{ onderaannemer_id: onderaannemerId, chauffeur_id: chauffeurId, voornaam, achternaam }]);
+                .insert([{
+                    onderaannemer_id: onderaannemerId,
+                    chauffeur_id: chauffeurId,
+                    voornaam,
+                    achternaam,
+                    mobiel: mobiel || null,
+                    email: email || null,
+                    voertuig_type: voertuigType || null,
+                    nummerplaat: nummerplaat || null
+                }]);
             if (error) alert('Fout: ' + error.message);
             else await loadOnderaannemersFromSupabase();
         }
@@ -1096,22 +1112,32 @@
         // ANDERE TABS
         // ============================================
         function renderDrivers() {
-            document.getElementById('contentArea').innerHTML = `
-                <div class="people-card">
-                    <h3>Chauffeurs</h3>
-                    <div class="people-grid">
-                        ${driversList.length === 0 ? '<div class="empty-planning">Geen chauffeurs gevonden</div>' : 
-                          driversList.map(d => `
-                            <div class="person-item">
-                                <div class="person-name">${d.name}</div>
-                                <div class="person-detail"><i class="fas fa-id-card"></i> ${d.id}</div>
-                                <div class="person-detail"><i class="fas fa-phone"></i> ${d.phone || '-'}</div>
-                                <div class="person-detail"><i class="fas fa-car"></i> ${d.vehicle || '-'}</div>
+            if (chauffeursList.length === 0) {
+                document.getElementById('contentArea').innerHTML = `<div class="people-card"><h3>Chauffeurs / Drivers</h3><div class="empty-planning">Geen chauffeurs gevonden</div></div>`;
+                return;
+            }
+            let html = `<div class="people-card"><h3>Chauffeurs / Drivers</h3><div style="margin-top: 20px;">`;
+            for (let c of chauffeursList) {
+                const onderaannemer = onderaannemersList.find(o => o.id === c.onderaannemer_id);
+                const bedrijfsnaam = onderaannemer ? onderaannemer.bedrijfsnaam : 'Onbekend';
+                html += `
+                    <div style="border:1px solid #ccc; border-radius:12px; padding:12px; margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <div>
+                                <strong>${escapeHtml(c.chauffeur_id)}</strong> – ${escapeHtml(c.voornaam)} ${escapeHtml(c.achternaam)}<br>
+                                <small>Onderaannemer: ${escapeHtml(bedrijfsnaam)}</small><br>
+                                ${c.mobiel ? `📱 ${escapeHtml(c.mobiel)}<br>` : ''}
+                                ${c.email ? `✉️ ${escapeHtml(c.email)}<br>` : ''}
+                                ${c.voertuig_type ? `🚗 ${escapeHtml(c.voertuig_type)}<br>` : ''}
+                                ${c.nummerplaat ? `🔢 ${escapeHtml(c.nummerplaat)}` : ''}
                             </div>
-                        `).join('')}
+                            <button class="delete-btn" onclick="verwijderChauffeur(${c.id})">🗑 Verwijder</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
+            html += `</div></div>`;
+            document.getElementById('contentArea').innerHTML = html;
         }
 
         function renderOnderaannemers() {
@@ -1129,15 +1155,38 @@
                             <button class="delete-btn" onclick="verwijderOnderaannemer(${oa.id})">🗑 Verwijder</button>
                         </div>
                         <p><strong>Contact:</strong> ${escapeHtml(oa.contactnaam || '-')} | ${escapeHtml(oa.mobiel || '-')} | ${escapeHtml(oa.email || '-')}</p>
+                        <p><strong>Prefix voor ID:</strong> ${escapeHtml(oa.prefix || 'Auto')}</p>
                         <hr style="margin: 10px 0;">
                         <h5>Chauffeurs</h5>
                         <ul style="list-style: none; padding: 0; margin-top: 10px;">
-                            ${chauffeursVanOa.map(c => `<li style="padding: 5px 0;">${escapeHtml(c.chauffeur_id)} - ${escapeHtml(c.voornaam)} ${escapeHtml(c.achternaam)} <button class="delete-btn" style="margin-left:10px; padding: 2px 8px;" onclick="verwijderChauffeur(${c.id})">✖</button></li>`).join('')}
+                            ${chauffeursVanOa.map(c => `
+                                <li style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${escapeHtml(c.chauffeur_id)}</strong> – ${escapeHtml(c.voornaam)} ${escapeHtml(c.achternaam)}
+                                        ${c.voertuig_type ? `<br><small>🚗 ${escapeHtml(c.voertuig_type)} (${escapeHtml(c.nummerplaat || '-')})</small>` : ''}
+                                    </div>
+                                    <button class="delete-btn" style="padding: 2px 8px;" onclick="verwijderChauffeur(${c.id})">✖</button>
+                                </li>
+                            `).join('')}
                         </ul>
-                        <div style="margin-top:15px; display: flex; gap: 10px; align-items: center;">
-                            <input type="text" id="voornaam_${oa.id}" placeholder="Voornaam" style="width:120px; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <input type="text" id="achternaam_${oa.id}" placeholder="Achternaam" style="width:120px; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <button class="action-btn" onclick="voegChauffeurToe(${oa.id}, document.getElementById('voornaam_${oa.id}').value, document.getElementById('achternaam_${oa.id}').value)">➕ Chauffeur toevoegen</button>
+                        <div style="margin-top:20px; background: #f8fafc; padding: 15px; border-radius: 12px;">
+                            <h6>Nieuwe chauffeur toevoegen</h6>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <input type="text" id="voornaam_${oa.id}" placeholder="Voornaam" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <input type="text" id="achternaam_${oa.id}" placeholder="Achternaam" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <input type="text" id="mobiel_${oa.id}" placeholder="Mobiel" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <input type="text" id="email_${oa.id}" placeholder="Email" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <input type="text" id="voertuig_${oa.id}" placeholder="Type Voertuig" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <input type="text" id="plaat_${oa.id}" placeholder="Nummerplaat" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            </div>
+                            <button class="action-btn" style="margin-top: 10px; width: 100%;" onclick="voegChauffeurToe(${oa.id},
+                                document.getElementById('voornaam_${oa.id}').value,
+                                document.getElementById('achternaam_${oa.id}').value,
+                                document.getElementById('mobiel_${oa.id}').value,
+                                document.getElementById('email_${oa.id}').value,
+                                document.getElementById('voertuig_${oa.id}').value,
+                                document.getElementById('plaat_${oa.id}').value
+                            )">➕ Chauffeur toevoegen</button>
                         </div>
                     </div>
                 `;
@@ -1156,7 +1205,9 @@
             const contact = prompt("Contactnaam:");
             const mobiel = prompt("Mobiel:");
             const email = prompt("Email:");
-            voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email);
+            let prefix = prompt("Prefix voor chauffeur ID (bijv. FL, max 2 letters, optioneel):") || "";
+            prefix = prefix.slice(0,2).toUpperCase();
+            voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email, prefix);
         }
 
         // Kleine helper om XSS te voorkomen (optioneel maar netjes)
@@ -1224,6 +1275,7 @@
         async function refreshAllData() {
             await loadBookingsFromSupabase();
             await loadDriversFromSupabase();
+            await loadOnderaannemersFromSupabase();
             refreshCurrentTab();
         }
 
