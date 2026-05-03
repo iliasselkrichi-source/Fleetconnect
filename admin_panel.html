@@ -173,6 +173,7 @@
         </div>
     </div>
     <div class="main">
+        <div id="errorMsg" style="display:none; background:#fee2e2; color:#b91c1c; padding:12px; text-align:center; font-weight:600; border-bottom:1px solid #fecaca;"></div>
         <div class="header">
             <h1 id="pageTitle">Agenda</h1>
             <div class="header-right">
@@ -202,31 +203,27 @@
         const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
         
-        let supabaseClient = null;
-        let currentUser = null;
-        
-        // Globale data
-        let allBookings = [];
-        let newOrders = [];
-        let ordersList = [];
-        let historyOrders = [];
-        let driversList = [];
-        let onderaannemersList = [];
-        let chauffeursList = [];
-        
-        // Huidige tijd (gebruik echte huidige tijd)
-        const NOW = new Date();
-        
-        // UI variabelen
-        let currentTab = 'agenda';
-        let selectedDate = new Date(NOW);
-        let isFlipped = false;
-        let currentMonth = new Date(NOW);
-        let flipStates = { omzet: false, cash: false, orders: false };
-        let financePeriod = 'month';
-        let financeChart = null;
-        let currentSelectedOrder = null;
-        let selectedDriverId = null;
+        let state = {
+            supabaseClient: null,
+            currentUser: null,
+            allBookings: [],
+            newOrders: [],
+            ordersList: [],
+            historyOrders: [],
+            driversList: [],
+            onderaannemersList: [],
+            chauffeursList: [],
+            NOW: new Date(),
+            currentTab: 'agenda',
+            selectedDate: new Date(),
+            isFlipped: false,
+            currentMonth: new Date(),
+            flipStates: { omzet: false, cash: false, orders: false },
+            financePeriod: 'month',
+            financeChart: null,
+            currentSelectedOrder: null,
+            selectedDriverId: null
+        };
 
         // ============================================
         // AUTHENTICATIE - GECORRIGEERD
@@ -235,13 +232,13 @@
             try {
                 // ** FIX 1: Gebruik de juiste globale variabele 'supabase' **
                 const { createClient } = supabase;  // niet supabaseJs!
-                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                state.supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
                 // ** FIX 2: Korte vertraging om sessie uit localStorage te laten laden **
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
                 // ** FIX 3: Haal sessie op met een extra fallback via onAuthStateChange **
-                const { data: { session } } = await supabaseClient.auth.getSession();
+                const { data: { session } } = await state.supabaseClient.auth.getSession();
                 
                 if (!session) {
                     console.log('Geen actieve sessie gevonden, redirect naar login.');
@@ -249,22 +246,21 @@
                     return;
                 }
                 
-                currentUser = session.user;
-                document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || 'Admin'}`;
+                state.currentUser = session.user;
+                document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${state.currentUser.email || 'Admin'}`;
                 
                 // ** FIX 4: Luister naar auth changes om uitloggen op te vangen **
-                supabaseClient.auth.onAuthStateChange((event, newSession) => {
+                state.supabaseClient.auth.onAuthStateChange((event, newSession) => {
                     if (event === 'SIGNED_OUT') {
                         window.location.href = 'login.html';
                     }
                     if (event === 'SIGNED_IN' && newSession) {
-                        currentUser = newSession.user;
-                        document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.email || 'Admin'}`;
+                        state.currentUser = newSession.user;
+                        document.getElementById('userEmail').innerHTML = `<i class="fas fa-user-circle"></i> ${state.currentUser.email || 'Admin'}`;
                     }
                 });
                 
-                await loadBookingsFromSupabase();
-                await loadDriversFromSupabase();
+                await laadAlleData();
                 
             } catch (e) {
                 console.error('Failed to initialize:', e);
@@ -273,7 +269,7 @@
         }
 
         async function logout() {
-            await supabaseClient.auth.signOut();
+            await state.supabaseClient.auth.signOut();
             localStorage.removeItem('supabase_session');
             window.location.href = 'login.html';
         }
@@ -281,88 +277,97 @@
         // ============================================
         // DATA OPHALEN UIT SUPABASE
         // ============================================
-        async function loadBookingsFromSupabase() {
+        async function laadAlleData() {
+            await laadBoekingen();
+            await laadDrivers();
+            await laadOnderaannemers();
+        }
+
+        function toonFoutmelding(bericht) {
+            const errDiv = document.getElementById('errorMsg');
+            if (errDiv) {
+                errDiv.innerText = bericht;
+                errDiv.style.display = 'block';
+                setTimeout(() => errDiv.style.display = 'none', 5000);
+            }
+        }
+
+        async function laadBoekingen() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await state.supabaseClient
                     .from('bookings')
                     .select('*')
                     .order('datetime', { ascending: false });
                 
                 if (error) throw error;
                 
-                allBookings = data || [];
-                console.log(`✅ ${allBookings.length} boekingen geladen uit Supabase`);
+                state.allBookings = data || [];
+                console.log(`✅ ${state.allBookings.length} boekingen geladen uit Supabase`);
                 filterAndSortData();
                 refreshCurrentTab();
             } catch (error) {
                 console.error('Fout bij laden boekingen:', error);
-                allBookings = [];
+                state.allBookings = [];
+                toonFoutmelding('Fout bij laden boekingen. Ververs de pagina.');
             }
         }
 
-        async function loadDriversFromSupabase() {
+        async function laadDrivers() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await state.supabaseClient
                     .from('drivers')
                     .select('*');
                 
-                if (!error && data) {
-                    driversList = data;
-                }
+                if (error) throw error;
+                if (data) state.driversList = data;
             } catch (error) {
                 console.error('Fout bij laden chauffeurs:', error);
-                driversList = [];
+                state.driversList = [];
+                toonFoutmelding('Fout bij laden chauffeurs.');
             }
         }
 
-        // ============================================
-        // ONDERAANNEMERS & CHAUFFEURS
-        // ============================================
-        async function loadOnderaannemersFromSupabase() {
+        async function laadOnderaannemers() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await state.supabaseClient
                     .from('onderaannemers')
                     .select('*')
                     .order('id');
                 if (error) throw error;
-                onderaannemersList = data || [];
+                state.onderaannemersList = data || [];
 
-                const { data: chauffeurs, error: err2 } = await supabaseClient
+                const { data: chauffeurs, error: err2 } = await state.supabaseClient
                     .from('chauffeurs')
                     .select('*')
                     .order('id');
-                if (!err2) chauffeursList = chauffeurs || [];
+                if (err2) throw err2;
+                state.chauffeursList = chauffeurs || [];
 
-                if (currentTab === 'onderaannemers') renderOnderaannemers();
-                if (currentTab === 'drivers') renderDrivers(); // extra
+                if (state.currentTab === 'onderaannemers') renderOnderaannemers();
+                if (state.currentTab === 'drivers') renderDrivers();
             } catch (error) {
                 console.error('Fout bij laden onderaannemers:', error);
+                toonFoutmelding('Fout bij laden onderaannemers/chauffeurs.');
             }
         }
 
         async function voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email, prefix) {
-            const { error } = await supabaseClient
+            const { error } = await state.supabaseClient
                 .from('onderaannemers')
                 .insert([{ bedrijfsnaam, btw_nummer: btw, contactnaam: contact, mobiel, email, prefix: prefix || null }]);
             if (error) alert('Fout: ' + error.message);
-            else await loadOnderaannemersFromSupabase();
+            else await laadAlleData();
         }
 
         async function verwijderOnderaannemer(id) {
             if (confirm('Weet je zeker dat je deze onderaannemer en alle chauffeurs wilt verwijderen?')) {
-                const { error } = await supabaseClient
+                const { error } = await state.supabaseClient
                     .from('onderaannemers')
                     .delete()
                     .eq('id', id);
                 if (error) alert('Fout: ' + error.message);
-                else await loadOnderaannemersFromSupabase();
+                else await laadAlleData();
             }
-        }
-
-        function genereerPrefix(bedrijfsnaam) {
-            let woorden = bedrijfsnaam.trim().split(/\s+/);
-            let prefix = woorden.map(w => w[0].toUpperCase()).join('');
-            return prefix.slice(0, 4);
         }
 
         async function voegChauffeurToe(onderaannemerId, voornaam, achternaam, mobiel, email, voertuigType, nummerplaat) {
@@ -370,9 +375,9 @@
                 alert('Vul minimaal voornaam en achternaam in.');
                 return;
             }
-            const bestaande = chauffeursList.filter(c => c.onderaannemer_id === onderaannemerId);
+            const bestaande = state.chauffeursList.filter(c => c.onderaannemer_id === onderaannemerId);
             const volgnummer = bestaande.length + 1;
-            const onderaannemer = onderaannemersList.find(o => o.id === onderaannemerId);
+            const onderaannemer = state.onderaannemersList.find(o => o.id === onderaannemerId);
             if (!onderaannemer) return;
 
             let prefix = onderaannemer.prefix;
@@ -383,7 +388,7 @@
             }
             const chauffeurId = `${prefix}-${String(volgnummer).padStart(2, '0')}`;
 
-            const { error } = await supabaseClient
+            const { error } = await state.supabaseClient
                 .from('chauffeurs')
                 .insert([{
                     onderaannemer_id: onderaannemerId,
@@ -396,17 +401,17 @@
                     nummerplaat: nummerplaat || null
                 }]);
             if (error) alert('Fout: ' + error.message);
-            else await loadOnderaannemersFromSupabase();
+            else await laadAlleData();
         }
 
         async function verwijderChauffeur(chauffeurId) {
             if (confirm('Verwijder deze chauffeur?')) {
-                const { error } = await supabaseClient
+                const { error } = await state.supabaseClient
                     .from('chauffeurs')
                     .delete()
                     .eq('id', chauffeurId);
                 if (error) alert('Fout: ' + error.message);
-                else await loadOnderaannemersFromSupabase();
+                else await laadAlleData();
             }
         }
 
@@ -415,14 +420,14 @@
         // ============================================
         async function updateBookingStatus(bookingId, newStatus, additionalData = {}) {
             try {
-                const { error } = await supabaseClient
+                const { error } = await state.supabaseClient
                     .from('bookings')
                     .update({ status: newStatus, ...additionalData })
                     .eq('id', bookingId);
                 
                 if (error) throw error;
                 
-                await loadBookingsFromSupabase();
+                await laadAlleData();
                 return true;
             } catch (error) {
                 console.error('Fout bij updaten:', error);
@@ -442,12 +447,12 @@
                     phone: chauffeur.mobiel || '',
                     chauffeur_id: chauffeur.chauffeur_id  // extra veld voor eigen ID
                 };
-                const { error } = await supabaseClient
+                const { error } = await state.supabaseClient
                     .from('bookings')
                     .update({ assigned_driver: driverObject })
                     .eq('id', bookingId);
                 if (error) throw error;
-                await loadBookingsFromSupabase();
+                await laadAlleData();
                 return true;
             } catch (error) {
                 console.error('Fout bij toewijzen chauffeur:', error);
@@ -456,95 +461,72 @@
             }
         }
 
-        async function assignDriverToBooking(bookingId, driverId) {
-            const driver = driversList.find(d => d.id == driverId);
-            if (!driver) return false;
-            
-            try {
-                const { error } = await supabaseClient
-                    .from('bookings')
-                    .update({ assigned_driver: driver })
-                    .eq('id', bookingId);
-                
-                if (error) throw error;
-                
-                await loadBookingsFromSupabase();
-                return true;
-            } catch (error) {
-                console.error('Fout bij toewijzen chauffeur:', error);
-                alert('Fout bij toewijzen: ' + error.message);
-                return false;
+
+        // ============================================
+        // DATUM & TIJD UTILS
+        // ============================================
+        const DateUtils = {
+            parse: (dateStr, timeStr) => {
+                if (!dateStr) return new Date(0);
+                const normalized = DateUtils.normalize(dateStr); // dd-mm-yyyy
+                const parts = normalized.split('-');
+                const timeParts = timeStr ? timeStr.split(':') : ['00', '00'];
+                return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]), parseInt(timeParts[0]), parseInt(timeParts[1]));
+            },
+            normalize: (dateStr) => {
+                if (!dateStr) return '';
+                const clean = dateStr.split(' ')[0];
+                let parts = clean.split('-');
+                if (parts.length === 3 && parts[0].length === 4) {
+                    // Inkomend is YYYY-DD-MM (dag en maand verwisseld)
+                    // Zet om naar DD-MM-YYYY
+                    return `${parts[1]}-${parts[2]}-${parts[0]}`;
+                }
+                return clean;
+            },
+            isFuture: (dateStr, timeStr) => {
+                return DateUtils.parse(dateStr, timeStr) > state.NOW;
             }
-        }
-
-        // ============================================
-        // DATUM & TIJD FUNCTIES
-        // ============================================
-        function parseDateTime(dateStr, timeStr) {
-            const parts = dateStr.split('-');
-            const timeParts = timeStr ? timeStr.split(':') : ['00', '00'];
-            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]), parseInt(timeParts[0]), parseInt(timeParts[1]));
-        }
-
-        function isOrderInFuture(order) {
-            // Zet datetime van DB (yyyy-mm-dd) om naar dd-mm-yyyy
-            const dateStr = toDateKey(order.datetime);
-            const orderDateTime = parseDateTime(dateStr, order.time);
-            return orderDateTime > NOW;
-        }
+        };
 
         // ============================================
         // DATA SORTEREN
         // ============================================
         function filterAndSortData() {
-            // New Orders: status = 'pending' of 'new'
-            newOrders = allBookings.filter(booking => 
+            // 1. New Orders: status = 'pending' of 'new'
+            state.newOrders = state.allBookings.filter(booking =>
                 booking.status === 'pending' || booking.status === 'new'
             );
 
-            // Orders: alleen 'confirmed' of 'active' die nog in de toekomst liggen
-            ordersList = allBookings.filter(booking => 
+            // 2. Orders: alleen 'confirmed' of 'active' die nog in de toekomst liggen
+            state.ordersList = state.allBookings.filter(booking =>
                 (booking.status === 'confirmed' || booking.status === 'active') &&
-                isOrderInFuture(booking)
+                DateUtils.isFuture(booking.datetime, booking.time)
             );
 
-            // History:
-            // - 'completed' of 'cancelled' (zoals eerder)
-            // - plus 'confirmed' of 'active' die NIET meer in de toekomst liggen (dus verleden)
-            historyOrders = allBookings.filter(booking => 
+            // 3. History: completed/cancelled of ritten in het verleden
+            state.historyOrders = state.allBookings.filter(booking =>
                 booking.status === 'completed' || 
                 booking.status === 'cancelled' ||
-                ((booking.status === 'confirmed' || booking.status === 'active') && !isOrderInFuture(booking))
+                ((booking.status === 'confirmed' || booking.status === 'active') && !DateUtils.isFuture(booking.datetime, booking.time))
             );
 
-            // Sorteren blijft gelijk
-            ordersList.sort((a, b) => parseDateTime(toDateKey(a.datetime), a.time) - parseDateTime(toDateKey(b.datetime), b.time));
-            historyOrders.sort((a, b) => parseDateTime(toDateKey(b.datetime), b.time) - parseDateTime(toDateKey(a.datetime), a.time));
-            newOrders.sort((a, b) => parseDateTime(toDateKey(a.datetime), a.time) - parseDateTime(toDateKey(b.datetime), b.time));
+            // Sorteren
+            state.ordersList.sort((a, b) => DateUtils.parse(a.datetime, a.time) - DateUtils.parse(b.datetime, b.time));
+            state.historyOrders.sort((a, b) => DateUtils.parse(b.datetime, b.time) - DateUtils.parse(a.datetime, a.time));
+            state.newOrders.sort((a, b) => DateUtils.parse(a.datetime, a.time) - DateUtils.parse(b.datetime, b.time));
         }
 
         // ============================================
-        // AGENDA FUNCTIES
+        // AGENDA HELPERS
         // ============================================
-        function toDateKey(dateStr) {
-            if (!dateStr) return '';
-            const clean = dateStr.split(' ')[0];
-            let parts = clean.split('-');
-            if (parts.length === 3 && parts[0].length === 4) {
-                // Inkomend is YYYY-DD-MM (dag en maand verwisseld)
-                // Zet om naar DD-MM-YYYY
-                return `${parts[1]}-${parts[2]}-${parts[0]}`;
-            }
-            return clean;
-        }
-
         function getRidesByDate(dateStr) {
-            const target = toDateKey(dateStr);
-            return allBookings.filter(booking => toDateKey(booking.datetime) === target);
+            const target = DateUtils.normalize(dateStr);
+            return state.allBookings.filter(booking => DateUtils.normalize(booking.datetime) === target);
         }
 
         function getTodayStats() {
-            const todayStr = `${NOW.getDate().toString().padStart(2,'0')}-${(NOW.getMonth()+1).toString().padStart(2,'0')}-${NOW.getFullYear()}`;
+            const todayStr = `${state.NOW.getDate().toString().padStart(2,'0')}-${(state.NOW.getMonth()+1).toString().padStart(2,'0')}-${state.NOW.getFullYear()}`;
             const todayRides = getRidesByDate(todayStr);
             const todayCompleted = todayRides.filter(r => r.status === 'completed');
             const todayCanceled = todayRides.filter(r => r.status === 'cancelled');
@@ -553,7 +535,7 @@
             const todayTotal = todayCash + todayFactuur;
             const commission = todayTotal * 0.10;
             
-            const nowTime = `${NOW.getHours().toString().padStart(2,'0')}:${NOW.getMinutes().toString().padStart(2,'0')}`;
+            const nowTime = `${state.NOW.getHours().toString().padStart(2,'0')}:${state.NOW.getMinutes().toString().padStart(2,'0')}`;
             const futureRidesToday = todayRides.filter(r => {
                 if (r.status === 'completed' || r.status === 'cancelled') return false;
                 return r.time > nowTime;
@@ -577,7 +559,7 @@
                 <div class="dashboard-grid">
                     <div class="info-card" onclick="toggleFlipCard('omzet')">
                         <div class="mini-flip-container">
-                            <div class="mini-flip-card ${flipStates.omzet ? 'flipped' : ''}">
+                            <div class="mini-flip-card ${state.flipStates.omzet ? 'flipped' : ''}">
                                 <div class="mini-flip-front">
                                     <i class="fas fa-euro-sign" style="font-size: 1.5rem;"></i>
                                     <div class="value">€ ${stats.total.toFixed(2)}</div>
@@ -595,7 +577,7 @@
                     </div>
                     <div class="info-card" onclick="toggleFlipCard('cash')">
                         <div class="mini-flip-container">
-                            <div class="mini-flip-card ${flipStates.cash ? 'flipped' : ''}">
+                            <div class="mini-flip-card ${state.flipStates.cash ? 'flipped' : ''}">
                                 <div class="mini-flip-front">
                                     <i class="fas fa-money-bill-wave" style="font-size: 1.5rem;"></i>
                                     <div class="value">€ ${stats.cash.toFixed(2)}</div>
@@ -613,7 +595,7 @@
                     </div>
                     <div class="info-card" onclick="toggleFlipCard('orders')">
                         <div class="mini-flip-container">
-                            <div class="mini-flip-card ${flipStates.orders ? 'flipped' : ''}">
+                            <div class="mini-flip-card ${state.flipStates.orders ? 'flipped' : ''}">
                                 <div class="mini-flip-front">
                                     <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
                                     <div class="value">${stats.completed}</div>
@@ -642,13 +624,13 @@
         }
 
         function toggleFlipCard(cardName) {
-            flipStates[cardName] = !flipStates[cardName];
+            state.flipStates[cardName] = !state.flipStates[cardName];
             refreshAgenda();
         }
 
         function renderCalendar() {
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth();
+            const year = state.currentMonth.getFullYear();
+            const month = state.currentMonth.getMonth();
             const firstDayOfMonth = new Date(year, month, 1);
             const startDay = firstDayOfMonth.getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -666,8 +648,8 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${day.toString().padStart(2,'0')}-${(month+1).toString().padStart(2,'0')}-${year}`;
                 const hasRides = getRidesByDate(dateStr).length > 0;
-                const isToday = (day === NOW.getDate() && month === NOW.getMonth() && year === NOW.getFullYear());
-                const isSelected = (selectedDate && day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear());
+                const isToday = (day === state.NOW.getDate() && month === state.NOW.getMonth() && year === state.NOW.getFullYear());
+                const isSelected = (state.selectedDate && day === state.selectedDate.getDate() && month === state.selectedDate.getMonth() && year === state.selectedDate.getFullYear());
                 
                 let classes = 'calendar-day';
                 if (isToday) classes += ' today';
@@ -686,49 +668,49 @@
             return calendarHTML;
         }
         
-        function renderPlanning() {
-            const selectedDateStr = `${selectedDate.getDate().toString().padStart(2,'0')}-${(selectedDate.getMonth()+1).toString().padStart(2,'0')}-${selectedDate.getFullYear()}`;
-            const rides = getRidesByDate(selectedDateStr);
-            const formattedDate = selectedDate.toLocaleDateString('nl-NL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
-            let ridesHtml = '';
+        function renderRittenLijst(rides) {
             if (rides.length === 0) {
-                ridesHtml = '<div class="empty-planning"><i class="fas fa-calendar-day"></i> Geen ritten op deze dag</div>';
-            } else {
-                rides.sort((a, b) => a.time.localeCompare(b.time));
-                ridesHtml = rides.map(ride => `
-                    <div class="planning-item">
-                        <div class="planning-time"><i class="fas fa-clock"></i> ${ride.time} uur ${ride.status === 'completed' ? '<span style="color:#10b981;">✓ Uitgevoerd</span>' : (ride.status === 'cancelled' ? '<span style="color:#ef4444;">✗ Geannuleerd</span>' : '')}</div>
-                        <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
-                        <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
-                        ${ride.assigned_driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.assigned_driver.name}</div>` : '<div class="planning-driver"><i class="fas fa-user-clock"></i> Nog geen chauffeur toegewezen</div>'}
-                    </div>
-                `).join('');
+                return '<div class="empty-planning"><i class="fas fa-calendar-day"></i> Geen ritten op deze dag</div>';
             }
+            rides.sort((a, b) => a.time.localeCompare(b.time));
+            return rides.map(ride => `
+                <div class="planning-item">
+                    <div class="planning-time"><i class="fas fa-clock"></i> ${ride.time} uur ${ride.status === 'completed' ? '<span style="color:#10b981;">✓ Uitgevoerd</span>' : (ride.status === 'cancelled' ? '<span style="color:#ef4444;">✗ Geannuleerd</span>' : '')}</div>
+                    <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
+                    <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
+                    ${ride.assigned_driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.assigned_driver.name}</div>` : '<div class="planning-driver"><i class="fas fa-user-clock"></i> Nog geen chauffeur toegewezen</div>'}
+                </div>
+            `).join('');
+        }
+
+        function renderToekomstigeRitten(futureRides) {
+            if (futureRides.length === 0) {
+                return '<div class="empty-planning"><i class="fas fa-calendar-plus"></i> Geen toekomstige ritten</div>';
+            }
+            futureRides.sort((a, b) => DateUtils.parse(a.datetime, a.time) - DateUtils.parse(b.datetime, b.time));
+            return futureRides.slice(0, 10).map(ride => `
+                <div class="planning-item">
+                    <div class="planning-time"><i class="fas fa-calendar-alt"></i> ${ride.datetime} om ${ride.time} uur</div>
+                    <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
+                    <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
+                    ${ride.assigned_driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.assigned_driver.name}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderPlanning() {
+            const selectedDateStr = `${state.selectedDate.getDate().toString().padStart(2,'0')}-${(state.selectedDate.getMonth()+1).toString().padStart(2,'0')}-${state.selectedDate.getFullYear()}`;
+            const rides = getRidesByDate(selectedDateStr);
+            const formattedDate = state.selectedDate.toLocaleDateString('nl-NL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             
-            const futureRidesAll = allBookings.filter(booking => {
-                const rideDateTime = parseDateTime(toDateKey(booking.datetime), booking.time);
-                return rideDateTime > NOW && booking.status !== 'completed' && booking.status !== 'cancelled';
+            const futureRidesAll = state.allBookings.filter(booking => {
+                const rideDateTime = DateUtils.parse(booking.datetime, booking.time);
+                return rideDateTime > state.NOW && booking.status !== 'completed' && booking.status !== 'cancelled';
             });
-            
-            let futureHtml = '';
-            if (futureRidesAll.length === 0) {
-                futureHtml = '<div class="empty-planning"><i class="fas fa-calendar-plus"></i> Geen toekomstige ritten</div>';
-            } else {
-                futureRidesAll.sort((a, b) => parseDateTime(a.datetime, a.time) - parseDateTime(b.datetime, b.time));
-                futureHtml = futureRidesAll.slice(0, 10).map(ride => `
-                    <div class="planning-item">
-                        <div class="planning-time"><i class="fas fa-calendar-alt"></i> ${ride.datetime} om ${ride.time} uur</div>
-                        <div class="planning-ride"><strong>${ride.name}</strong> - ${ride.pickup} → ${ride.destination}</div>
-                        <div class="planning-ride"><i class="fas fa-car"></i> ${ride.vehicle}</div>
-                        ${ride.assigned_driver ? `<div class="planning-driver"><i class="fas fa-user-check"></i> Chauffeur: ${ride.assigned_driver.name}</div>` : ''}
-                    </div>
-                `).join('');
-            }
             
             return `
                 <div class="planning-container">
-                    <div class="flip-card ${isFlipped ? 'flipped' : ''}" id="flipCard">
+                    <div class="flip-card ${state.isFlipped ? 'flipped' : ''}" id="flipCard">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
                                 <div class="flip-header">
@@ -736,7 +718,7 @@
                                     <button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Toekomst</button>
                                 </div>
                                 <div class="planning-list">
-                                    ${ridesHtml}
+                                    ${renderRittenLijst(rides)}
                                 </div>
                             </div>
                             <div class="flip-card-back">
@@ -745,7 +727,7 @@
                                     <button class="flip-btn" onclick="toggleFlip()"><i class="fas fa-sync-alt"></i> Terug</button>
                                 </div>
                                 <div class="planning-list">
-                                    ${futureHtml}
+                                    ${renderToekomstigeRitten(futureRidesAll)}
                                 </div>
                             </div>
                         </div>
@@ -755,7 +737,7 @@
         }
         
         function refreshAgenda() {
-            if (currentTab === 'agenda') {
+            if (state.currentTab === 'agenda') {
                 document.getElementById('contentArea').innerHTML = `
                     ${renderDashboardGrid()}
                     ${renderCalendar()}
@@ -766,25 +748,25 @@
         
         function selectDateByString(dateStr) {
             const parts = dateStr.split('-');
-            selectedDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-            isFlipped = false;
+            state.selectedDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            state.isFlipped = false;
             refreshAgenda();
         }
         
         function toggleFlip() {
-            isFlipped = !isFlipped;
+            state.isFlipped = !state.isFlipped;
             refreshAgenda();
         }
         
         function changeMonth(delta) {
-            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            state.currentMonth.setMonth(state.currentMonth.getMonth() + delta);
             refreshAgenda();
         }
         
         function goToToday() {
-            currentMonth = new Date(NOW);
-            selectedDate = new Date(NOW);
-            isFlipped = false;
+            state.currentMonth = new Date(state.NOW);
+            state.selectedDate = new Date(state.NOW);
+            state.isFlipped = false;
             refreshAgenda();
         }
 
@@ -809,8 +791,8 @@
                 </div>
             `;
             document.getElementById('contentArea').innerHTML = html;
-            renderNewOrdersTable(newOrders);
-            document.getElementById('pageTitle').innerHTML = `New Orders <span class="order-count">${newOrders.length}</span>`;
+            renderNewOrdersTable(state.newOrders);
+            document.getElementById('pageTitle').innerHTML = `New Orders <span class="order-count">${state.newOrders.length}</span>`;
         }
 
         function renderNewOrdersTable(orders) {
@@ -836,7 +818,7 @@
         function applyFiltersNewOrders() {
             const orderFilter = document.getElementById("filterOrderNew")?.value.toLowerCase() || "";
             const nameFilter = document.getElementById("filterNameNew")?.value.toLowerCase() || "";
-            const filtered = newOrders.filter(order => {
+            const filtered = state.newOrders.filter(order => {
                 return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
                        (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
             });
@@ -846,7 +828,7 @@
         function resetFiltersNewOrders() {
             document.getElementById("filterOrderNew").value = "";
             document.getElementById("filterNameNew").value = "";
-            renderNewOrdersTable(newOrders);
+            renderNewOrdersTable(state.newOrders);
         }
 
         // ============================================
@@ -870,8 +852,8 @@
                 </div>
             `;
             document.getElementById('contentArea').innerHTML = html;
-            renderOrdersTable(ordersList);
-            document.getElementById('pageTitle').innerHTML = `Orders <span class="order-count">${ordersList.length}</span>`;
+            renderOrdersTable(state.ordersList);
+            document.getElementById('pageTitle').innerHTML = `Orders <span class="order-count">${state.ordersList.length}</span>`;
         }
 
         function renderOrdersTable(orders) {
@@ -897,7 +879,7 @@
         function applyFiltersOrders() {
             const orderFilter = document.getElementById("filterOrderOrders")?.value.toLowerCase() || "";
             const nameFilter = document.getElementById("filterNameOrders")?.value.toLowerCase() || "";
-            const filtered = ordersList.filter(order => {
+            const filtered = state.ordersList.filter(order => {
                 return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
                        (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
             });
@@ -907,7 +889,7 @@
         function resetFiltersOrders() {
             document.getElementById("filterOrderOrders").value = "";
             document.getElementById("filterNameOrders").value = "";
-            renderOrdersTable(ordersList);
+            renderOrdersTable(state.ordersList);
         }
 
         // ============================================
@@ -931,8 +913,8 @@
                 </div>
             `;
             document.getElementById('contentArea').innerHTML = html;
-            renderHistoryTable(historyOrders);
-            document.getElementById('pageTitle').innerHTML = `History <span class="order-count">${historyOrders.length}</span>`;
+            renderHistoryTable(state.historyOrders);
+            document.getElementById('pageTitle').innerHTML = `History <span class="order-count">${state.historyOrders.length}</span>`;
             document.getElementById('downloadButtons').classList.remove('hidden');
         }
 
@@ -962,7 +944,7 @@
         function applyFiltersHistory() {
             const orderFilter = document.getElementById("filterOrderHistory")?.value.toLowerCase() || "";
             const nameFilter = document.getElementById("filterNameHistory")?.value.toLowerCase() || "";
-            const filtered = historyOrders.filter(order => {
+            const filtered = state.historyOrders.filter(order => {
                 return (orderFilter === "" || order.id.toLowerCase().includes(orderFilter)) &&
                        (nameFilter === "" || order.name.toLowerCase().includes(nameFilter));
             });
@@ -972,7 +954,7 @@
         function resetFiltersHistory() {
             document.getElementById("filterOrderHistory").value = "";
             document.getElementById("filterNameHistory").value = "";
-            renderHistoryTable(historyOrders);
+            renderHistoryTable(state.historyOrders);
         }
 
         // ============================================
@@ -985,13 +967,11 @@
                 closeModal();
 
                 // *** Extra stap: spring naar de ritdatum in de agenda ***
-                const order = allBookings.find(b => b.id === orderId);
+                const order = state.allBookings.find(b => b.id === orderId);
                 if (order && order.datetime) {
-                    const [year, day, month] = order.datetime.split('T')[0].split('-');
-                    // Zet de geselecteerde dag
-                    selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                    // Zet de juiste maand in de kalenderweergave
-                    currentMonth = new Date(parseInt(year), parseInt(month) - 1, 1);
+                    const d = DateUtils.parse(order.datetime);
+                    state.selectedDate = d;
+                    state.currentMonth = new Date(d.getFullYear(), d.getMonth(), 1);
                 }
                 // *** Einde extra stap ***
 
@@ -1001,12 +981,12 @@
         }
 
         async function confirmAssignDriver(orderId) {
-            if (!selectedDriverId) { 
+            if (!state.selectedDriverId) {
                 alert("Selecteer eerst een chauffeur."); 
                 return; 
             }
-            // Zoek de geselecteerde chauffeur in chauffeursList
-            const chauffeur = chauffeursList.find(c => c.id == selectedDriverId);
+            // Zoek de geselecteerde chauffeur in state.chauffeursList
+            const chauffeur = state.chauffeursList.find(c => c.id == state.selectedDriverId);
             if (!chauffeur) {
                 alert("Chauffeur niet gevonden.");
                 return;
@@ -1020,7 +1000,7 @@
         }
 
         function showNewOrderFiche(order) {
-            currentSelectedOrder = order;
+            state.currentSelectedOrder = order;
             const ficheBody = document.getElementById('ficheBody');
             ficheBody.innerHTML = `
                 <div class="fiche-section"><h4>Boekingsinformatie</h4>
@@ -1050,10 +1030,10 @@
         }
 
         function showOrderFiche(order) {
-            currentSelectedOrder = order;
-            selectedDriverId = order.assigned_driver ? (order.assigned_driver.id || null) : null;
+            state.currentSelectedOrder = order;
+            state.selectedDriverId = order.assigned_driver ? (order.assigned_driver.id || null) : null;
             
-            let driverOptions = chauffeursList.map(c => `<option value="${c.id}" ${order.assigned_driver && order.assigned_driver.id == c.id ? 'selected' : ''}>${c.chauffeur_id} – ${c.voornaam} ${c.achternaam} ${c.voertuig_type ? `(${c.voertuig_type})` : ''}</option>`).join('');
+            let driverOptions = state.chauffeursList.map(c => `<option value="${c.id}" ${order.assigned_driver && order.assigned_driver.id == c.id ? 'selected' : ''}>${c.chauffeur_id} – ${c.voornaam} ${c.achternaam} ${c.voertuig_type ? `(${c.voertuig_type})` : ''}</option>`).join('');
             
             const ficheBody = document.getElementById('ficheBody');
             ficheBody.innerHTML = `
@@ -1075,7 +1055,7 @@
                     <div class="fiche-row"><span class="fiche-label">Extra's:</span><span class="fiche-value">${order.extras || '-'}</span></div>
                 </div>
                 <div class="fiche-section"><h4>Chauffeur Toewijzen</h4>
-                    <select id="driverSelect" onchange="selectedDriverId = this.value">
+                    <select id="driverSelect" onchange="state.selectedDriverId = this.value">
                         <option value="">-- Selecteer Chauffeur --</option>
                         ${driverOptions}
                     </select>
@@ -1091,17 +1071,17 @@
 
         function closeModal() { 
             document.getElementById('bookingModal').style.display = 'none'; 
-            currentSelectedOrder = null; 
-            selectedDriverId = null; 
+            state.currentSelectedOrder = null;
+            state.selectedDriverId = null;
         }
 
         // ============================================
         // FINANCIEEL (vereenvoudigd maar werkt)
         // ============================================
         function renderFinance() {
-            const totalRevenue = allBookings.reduce((sum, b) => sum + (b.amount || 0), 0);
-            const cashRevenue = allBookings.filter(b => b.payment === 'Cash').reduce((sum, b) => sum + (b.amount || 0), 0);
-            const factuurRevenue = allBookings.filter(b => b.payment === 'Factuur').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const totalRevenue = state.allBookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+            const cashRevenue = state.allBookings.filter(b => b.payment === 'Cash').reduce((sum, b) => sum + (b.amount || 0), 0);
+            const factuurRevenue = state.allBookings.filter(b => b.payment === 'Factuur').reduce((sum, b) => sum + (b.amount || 0), 0);
             const commission = totalRevenue * 0.10;
             
             const html = `
@@ -1109,13 +1089,13 @@
                     <div class="kpi-card"><div class="value">€ ${totalRevenue.toFixed(2)}</div><div class="label">Totale Omzet</div></div>
                     <div class="kpi-card"><div class="value">€ ${cashRevenue.toFixed(2)}</div><div class="label">Cash Betalingen</div></div>
                     <div class="kpi-card"><div class="value">€ ${factuurRevenue.toFixed(2)}</div><div class="label">Factuur Betalingen</div></div>
-                    <div class="kpi-card"><div class="value">${allBookings.length}</div><div class="label">Aantal Ritten</div></div>
+                    <div class="kpi-card"><div class="value">${state.allBookings.length}</div><div class="label">Aantal Ritten</div></div>
                     <div class="kpi-card"><div class="value">€ ${commission.toFixed(2)}</div><div class="label">10% Commissie</div></div>
                 </div>
                 <div class="stats-grid">
-                    <div class="stat-card"><h4>📋 New Orders</h4><div class="value">${newOrders.length}</div></div>
-                    <div class="stat-card"><h4>✅ Actieve Orders</h4><div class="value">${ordersList.length}</div></div>
-                    <div class="stat-card"><h4>📜 History</h4><div class="value">${historyOrders.length}</div></div>
+                    <div class="stat-card"><h4>📋 New Orders</h4><div class="value">${state.newOrders.length}</div></div>
+                    <div class="stat-card"><h4>✅ Actieve Orders</h4><div class="value">${state.ordersList.length}</div></div>
+                    <div class="stat-card"><h4>📜 History</h4><div class="value">${state.historyOrders.length}</div></div>
                 </div>
                 <div class="finance-summary">
                     <h3>📋 Boekingen Overzicht</h3>
@@ -1123,14 +1103,14 @@
                         <table class="orders-table">
                             <thead><tr><th>ID</th><th>Datum</th><th>Klant</th><th>Bedrag</th><th>Status</th></tr></thead>
                             <tbody>
-                                ${allBookings.slice(0, 10).map(b => `
+                                ${state.allBookings.slice(0, 10).map(b => `
                                     <tr><td>${b.id}</span></td>
                                     <td>${b.datetime}</span></span></td>
                                     <td>${b.name}</span></span></td>
                                     <td>€${(b.amount || 0).toFixed(2)}</span></span></td>
                                     <td>${b.status || 'pending'}</span></span></td>
                                 `).join('')}
-                                ${allBookings.length === 0 ? '<tr><td colspan="5" class="no-results">Geen boekingen</span></tr>' : ''}
+                                ${state.allBookings.length === 0 ? '<tr><td colspan="5" class="no-results">Geen boekingen</span></tr>' : ''}
                             </tbody>
                         </table>
                     </div>
@@ -1143,13 +1123,13 @@
         // ANDERE TABS
         // ============================================
         function renderDrivers() {
-            if (chauffeursList.length === 0) {
+            if (state.chauffeursList.length === 0) {
                 document.getElementById('contentArea').innerHTML = `<div class="people-card"><h3>Chauffeurs / Drivers</h3><div class="empty-planning">Geen chauffeurs gevonden</div></div>`;
                 return;
             }
             let html = `<div class="people-card"><h3>Chauffeurs / Drivers</h3><div style="margin-top: 20px;">`;
-            for (let c of chauffeursList) {
-                const onderaannemer = onderaannemersList.find(o => o.id === c.onderaannemer_id);
+            for (let c of state.chauffeursList) {
+                const onderaannemer = state.onderaannemersList.find(o => o.id === c.onderaannemer_id);
                 const bedrijfsnaam = onderaannemer ? onderaannemer.bedrijfsnaam : 'Onbekend';
                 html += `
                     <div style="border:1px solid #ccc; border-radius:12px; padding:12px; margin-bottom:12px;">
@@ -1171,58 +1151,74 @@
             document.getElementById('contentArea').innerHTML = html;
         }
 
+        function renderOnderaannemerCard(oa) {
+            const chauffeursVanOa = state.chauffeursList.filter(c => c.onderaannemer_id === oa.id);
+            return `
+                <div style="border:1px solid #ccc; border-radius:16px; padding:16px; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h4>${escapeHtml(oa.bedrijfsnaam)} <small>(BTW: ${escapeHtml(oa.btw_nummer || '-')})</small></h4>
+                        <button class="delete-btn" onclick="verwijderOnderaannemer(${oa.id})">🗑 Verwijder</button>
+                    </div>
+                    <p><strong>Contact:</strong> ${escapeHtml(oa.contactnaam || '-')} | ${escapeHtml(oa.mobiel || '-')} | ${escapeHtml(oa.email || '-')}</p>
+                    <p><strong>Prefix voor ID:</strong> ${escapeHtml(oa.prefix || 'Auto')}</p>
+                    <hr style="margin: 10px 0;">
+                    <h5>Chauffeurs</h5>
+                    ${renderChauffeursLijst(chauffeursVanOa)}
+                    ${renderNieuwChauffeurFormulier(oa.id)}
+                </div>
+            `;
+        }
+
+        function renderChauffeursLijst(chauffeurs) {
+            return `
+                <ul style="list-style: none; padding: 0; margin-top: 10px;">
+                    ${chauffeurs.map(c => `
+                        <li style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${escapeHtml(c.chauffeur_id)}</strong> – ${escapeHtml(c.voornaam)} ${escapeHtml(c.achternaam)}
+                                ${c.voertuig_type ? `<br><small>🚗 ${escapeHtml(c.voertuig_type)} (${escapeHtml(c.nummerplaat || '-')})</small>` : ''}
+                            </div>
+                            <button class="delete-btn" style="padding: 2px 8px;" onclick="verwijderChauffeur(${c.id})">✖</button>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        function renderNieuwChauffeurFormulier(oaId) {
+            return `
+                <div style="margin-top:20px; background: #f8fafc; padding: 15px; border-radius: 12px;">
+                    <h6>Nieuwe chauffeur toevoegen</h6>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <input type="text" id="voornaam_${oaId}" placeholder="Voornaam" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <input type="text" id="achternaam_${oaId}" placeholder="Achternaam" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <input type="text" id="mobiel_${oaId}" placeholder="Mobiel" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <input type="text" id="email_${oaId}" placeholder="Email" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <input type="text" id="voertuig_${oaId}" placeholder="Type Voertuig" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <input type="text" id="plaat_${oaId}" placeholder="Nummerplaat" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    </div>
+                    <button class="action-btn" style="margin-top: 10px; width: 100%;" onclick="voegChauffeurToe(${oaId},
+                        document.getElementById('voornaam_${oaId}').value,
+                        document.getElementById('achternaam_${oaId}').value,
+                        document.getElementById('mobiel_${oaId}').value,
+                        document.getElementById('email_${oaId}').value,
+                        document.getElementById('voertuig_${oaId}').value,
+                        document.getElementById('plaat_${oaId}').value
+                    )">➕ Chauffeur toevoegen</button>
+                </div>
+            `;
+        }
+
         function renderOnderaannemers() {
             let html = `<div class="people-card">
                 <h3>Onderaannemers</h3>
                 <button class="add-btn" onclick="toonFormOnderaannemer()">➕ Nieuwe onderaannemer</button>
                 <div style="margin-top: 20px;">`;
 
-            for (let oa of onderaannemersList) {
-                const chauffeursVanOa = chauffeursList.filter(c => c.onderaannemer_id === oa.id);
-                html += `
-                    <div style="border:1px solid #ccc; border-radius:16px; padding:16px; margin-bottom:20px;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <h4>${escapeHtml(oa.bedrijfsnaam)} <small>(BTW: ${escapeHtml(oa.btw_nummer || '-')})</small></h4>
-                            <button class="delete-btn" onclick="verwijderOnderaannemer(${oa.id})">🗑 Verwijder</button>
-                        </div>
-                        <p><strong>Contact:</strong> ${escapeHtml(oa.contactnaam || '-')} | ${escapeHtml(oa.mobiel || '-')} | ${escapeHtml(oa.email || '-')}</p>
-                        <p><strong>Prefix voor ID:</strong> ${escapeHtml(oa.prefix || 'Auto')}</p>
-                        <hr style="margin: 10px 0;">
-                        <h5>Chauffeurs</h5>
-                        <ul style="list-style: none; padding: 0; margin-top: 10px;">
-                            ${chauffeursVanOa.map(c => `
-                                <li style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <strong>${escapeHtml(c.chauffeur_id)}</strong> – ${escapeHtml(c.voornaam)} ${escapeHtml(c.achternaam)}
-                                        ${c.voertuig_type ? `<br><small>🚗 ${escapeHtml(c.voertuig_type)} (${escapeHtml(c.nummerplaat || '-')})</small>` : ''}
-                                    </div>
-                                    <button class="delete-btn" style="padding: 2px 8px;" onclick="verwijderChauffeur(${c.id})">✖</button>
-                                </li>
-                            `).join('')}
-                        </ul>
-                        <div style="margin-top:20px; background: #f8fafc; padding: 15px; border-radius: 12px;">
-                            <h6>Nieuwe chauffeur toevoegen</h6>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                                <input type="text" id="voornaam_${oa.id}" placeholder="Voornaam" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <input type="text" id="achternaam_${oa.id}" placeholder="Achternaam" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <input type="text" id="mobiel_${oa.id}" placeholder="Mobiel" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <input type="text" id="email_${oa.id}" placeholder="Email" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <input type="text" id="voertuig_${oa.id}" placeholder="Type Voertuig" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <input type="text" id="plaat_${oa.id}" placeholder="Nummerplaat" style="padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            </div>
-                            <button class="action-btn" style="margin-top: 10px; width: 100%;" onclick="voegChauffeurToe(${oa.id},
-                                document.getElementById('voornaam_${oa.id}').value,
-                                document.getElementById('achternaam_${oa.id}').value,
-                                document.getElementById('mobiel_${oa.id}').value,
-                                document.getElementById('email_${oa.id}').value,
-                                document.getElementById('voertuig_${oa.id}').value,
-                                document.getElementById('plaat_${oa.id}').value
-                            )">➕ Chauffeur toevoegen</button>
-                        </div>
-                    </div>
-                `;
+            for (let oa of state.onderaannemersList) {
+                html += renderOnderaannemerCard(oa);
             }
-            if (onderaannemersList.length === 0) {
+            if (state.onderaannemersList.length === 0) {
                 html += '<div class="empty-planning">Geen onderaannemers gevonden</div>';
             }
             html += `</div></div>`;
@@ -1262,7 +1258,7 @@
                         <p>Wanneer een klant een boeking maakt via een van de vijf boekingswebsites, worden de gegevens direct opgeslagen in de centrale database (Supabase). De initiële status van elke nieuwe boeking is altijd <code>pending</code>.</p>
 
                         <h3 style="color: #2dd4bf; margin-top: 20px;">2. Laden in het Admin Paneel</h3>
-                        <p>Bij het openen of verversen van het paneel haalt de functie <code>loadBookingsFromSupabase()</code> alle orders op. Vervolgens verdeelt de functie <code>filterAndSortData()</code> deze automatisch over drie tabbladen op basis van hun status:</p>
+                        <p>Bij het openen of verversen van het paneel haalt de functie <code>laadBoekingen()</code> alle orders op. Vervolgens verdeelt de functie <code>filterAndSortData()</code> deze automatisch over drie tabbladen op basis van hun status:</p>
                         <ul style="margin-left: 20px; margin-bottom: 15px;">
                             <li><strong>New Orders:</strong> Bevat alle orders met status <code>pending</code> of <code>new</code>.</li>
                             <li><strong>Orders:</strong> Bevat bevestigde (<code>confirmed</code>) of actieve (<code>active</code>) ritten die nog in de toekomst liggen.</li>
@@ -1304,45 +1300,39 @@
         // REFRESH & SWITCH TAB
         // ============================================
         async function refreshAllData() {
-            await loadBookingsFromSupabase();
-            await loadDriversFromSupabase();
-            await loadOnderaannemersFromSupabase();
+            await laadAlleData();
             refreshCurrentTab();
         }
 
         function refreshCurrentTab() {
-            if (currentTab === 'neworders') renderNewOrders();
-            else if (currentTab === 'orders') renderOrders();
-            else if (currentTab === 'history') renderHistory();
-            else if (currentTab === 'agenda') refreshAgenda();
-            else if (currentTab === 'drivers') renderDrivers();
-            else if (currentTab === 'onderaannemers') renderOnderaannemers();
-            else if (currentTab === 'financieel') renderFinance();
-            else if (currentTab === 'wiki') renderWiki();
+            if (state.currentTab === 'neworders') renderNewOrders();
+            else if (state.currentTab === 'orders') renderOrders();
+            else if (state.currentTab === 'history') renderHistory();
+            else if (state.currentTab === 'agenda') refreshAgenda();
+            else if (state.currentTab === 'drivers') renderDrivers();
+            else if (state.currentTab === 'onderaannemers') renderOnderaannemers();
+            else if (state.currentTab === 'financieel') renderFinance();
+            else if (state.currentTab === 'wiki') renderWiki();
         }
 
         function switchTab(tabName) {
-            currentTab = tabName;
+            state.currentTab = tabName;
+            // update active class in menu
             document.querySelectorAll('.nav-item').forEach(item => {
                 if (item.getAttribute('data-tab') === tabName) item.classList.add('active');
                 else item.classList.remove('active');
             });
-            
+            // toon download buttons alleen bij history
             const downloadButtons = document.getElementById('downloadButtons');
             if (tabName === 'history') downloadButtons.classList.remove('hidden');
             else downloadButtons.classList.add('hidden');
-            
-            // *** Als de tab 'drivers' wordt geopend, haal dan eerst de laatste data op ***
-            if (tabName === 'drivers') {
-                loadOnderaannemersFromSupabase();
-            } else {
-                refreshCurrentTab();
-            }
+            // ververs huidige tab (geen data herladen, alleen weergave)
+            refreshCurrentTab();
         }
 
         function downloadCSV() {
             const headers = ["ID", "Template", "Datum", "Tijd", "Naam", "Pickup", "Destination", "Bedrag", "Betaling", "Status"];
-            const rows = historyOrders.map(b => [b.id, b.template, b.datetime, b.time, b.name, b.pickup, b.destination, b.amount, b.payment, b.status]);
+            const rows = state.historyOrders.map(b => [b.id, b.template, b.datetime, b.time, b.name, b.pickup, b.destination, b.amount, b.payment, b.status]);
             const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell || ''}"`).join(";")).join("\n");
             const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement('a');
@@ -1352,7 +1342,7 @@
         }
 
         function downloadJSON() {
-            const blob = new Blob([JSON.stringify(historyOrders, null, 2)], { type: "application/json" });
+            const blob = new Blob([JSON.stringify(state.historyOrders, null, 2)], { type: "application/json" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `fleet_history_${new Date().toISOString().slice(0,10)}.json`;
@@ -1364,7 +1354,7 @@
         // ============================================
         async function init() {
             await initSupabase();
-            await loadOnderaannemersFromSupabase();
+            await laadAlleData();
             setInterval(refreshAllData, 60000); // Auto-refresh elke 60 seconden
         }
         
