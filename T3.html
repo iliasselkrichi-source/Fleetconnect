@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
+        /* ---------- GLOBALE STIJLEN ---------- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0A0A0A;
@@ -15,7 +16,6 @@
             font-weight: 400;
             color: #EDEDED;
             scroll-behavior: smooth;
-            overflow-x: hidden;
         }
         h1, h2, h3, .logo-fixed, .section-title, .flipcard-title, .detail-block h3 {
             font-family: 'Playfair Display', serif;
@@ -27,13 +27,13 @@
             position: relative;
             z-index: 2;
         }
-        /* Radiaal menu */
+
+        /* ---------- RADIAAL MENU ---------- */
         .radial-menu-trigger { position: fixed; top: 1.8rem; right: 2rem; z-index: 2000; }
         .hamburger-radial {
             width: 70px; height: 70px; background: rgba(20,20,20,0.6); backdrop-filter: blur(12px);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; border: 1px solid rgba(212,175,55,0.5); transition: 0.3s;
-            box-shadow: 0 0 15px rgba(212,175,55,0.2);
         }
         .hamburger-radial i { font-size: 2rem; color: #D4AF37; }
         .hamburger-radial:hover { transform: scale(1.08); box-shadow: 0 0 30px rgba(212,175,55,0.5); }
@@ -43,13 +43,13 @@
         }
         .radial-menu .menu-item {
             position: absolute; width: 70px; height: 70px; background: rgba(15,15,15,0.8);
-            backdrop-filter: blur(16px); border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; text-decoration: none; color: #EDEDED; font-weight: 600;
-            font-size: 0.8rem; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            pointer-events: none; opacity: 0; transform: scale(0); box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid rgba(212,175,55,0.4); text-align: center; flex-direction: column;
+            backdrop-filter: blur(16px); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; text-decoration: none;
+            color: #EDEDED; font-weight: 600; font-size: 0.8rem;
+            transition: all 0.3s; pointer-events: none; opacity: 0; transform: scale(0);
+            border: 1px solid rgba(212,175,55,0.4); flex-direction: column;
         }
-        .radial-menu .menu-item:hover { transform: scale(1.2); background: #D4AF37; color: #0A0A0A; box-shadow: 0 0 20px #D4AF37; }
+        .radial-menu .menu-item:hover { transform: scale(1.2); background: #D4AF37; color: #0A0A0A; }
         .radial-menu .menu-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .radial-menu.open .menu-item { pointer-events: auto; opacity: 1; transform: scale(1); }
         .radial-menu .menu-item:nth-child(1) { top: -85px; right: 15px; }
@@ -63,7 +63,7 @@
         .radial-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1998;
-            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; opacity: 0; transition: 0.3s;
         }
         .radial-overlay.active { pointer-events: auto; opacity: 1; }
         .logo-fixed {
@@ -73,12 +73,13 @@
         }
         .logo-fixed span { color: #D4AF37; }
 
-        .hero { min-height: 90vh; display: flex; align-items: center; background-size: cover; background-position: center; background-repeat: no-repeat; }
-        .hero-content h1 { font-size: 5rem; font-weight: 700; background: linear-gradient(135deg, #FFFFFF 0%, #D4AF37 80%); background-clip: text; -webkit-background-clip: text; color: transparent; line-height: 1.1; }
-        .hero-content p { font-size: 1.3rem; margin: 2rem 0; max-width: 550px; border-left: 3px solid #D4AF37; padding-left: 1.5rem; color: #CCCCCC; }
-        .hero-btn { background: #D4AF37; border: none; padding: 16px 48px; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; border-radius: 60px; cursor: pointer; color: #0A0A0A; transition: 0.2s; box-shadow: 0 8px 25px rgba(212,175,55,0.3); }
-        .hero-btn:hover { transform: scale(1.03); background: #c49f30; }
+        /* ---------- HERO ---------- */
+        .hero { min-height: 90vh; display: flex; align-items: center; background-size: cover; background-position: center; background: radial-gradient(circle at top right, #0A0A0A 0%, #1a1a1a 100%); }
+        .hero-content h1 { font-size: 5rem; font-weight: 700; background: linear-gradient(135deg, #FFF 0%, #D4AF37 80%); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .hero-content p { font-size: 1.3rem; margin: 2rem 0; max-width: 550px; border-left: 3px solid #D4AF37; padding-left: 1.5rem; color: #CCC; }
+        .hero-btn { background: #D4AF37; border: none; padding: 16px 48px; font-weight: 700; font-size: 1.1rem; border-radius: 60px; cursor: pointer; color: #0A0A0A; transition: 0.2s; }
 
+        /* ---------- FLIPCARDS ---------- */
         .flip-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -95,7 +96,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: transform 1.2s;
             transform-style: preserve-3d;
             border-radius: 24px;
         }
@@ -111,46 +112,28 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #111111;
+            background: #111;
             border: 1px solid rgba(212,175,55,0.3);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
             text-align: center;
         }
         .small-flip-card .front img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 1rem;
-            border: 2px solid #D4AF37;
+            width: 80px; height: 80px; object-fit: cover; border-radius: 50%;
+            margin-bottom: 1rem; border: 2px solid #D4AF37;
         }
-        .small-flip-card .front i {
-            font-size: 2.5rem;
-            color: #D4AF37;
-            margin-bottom: 1rem;
-        }
-        .small-flip-card .front h3 { font-size: 1.5rem; color: #EDEDED; margin-top: 0.5rem; }
-        .small-flip-card .back {
-            transform: rotateY(180deg);
-            background: #1C1C1C;
-            justify-content: space-between;
-        }
+        .small-flip-card .front i { font-size: 2.5rem; color: #D4AF37; margin-bottom: 1rem; }
+        .small-flip-card .front h3 { font-size: 1.5rem; color: #EDEDED; }
+        .small-flip-card .back { transform: rotateY(180deg); background: #1C1C1C; justify-content: space-between; }
         .read-more {
-            background: #D4AF37;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            color: #0A0A0A;
-            text-decoration: none;
-            margin-top: 1rem;
-            transition: 0.2s;
+            background: #D4AF37; padding: 8px 16px; border-radius: 40px; font-weight: 600;
+            color: #0A0A0A; text-decoration: none; margin-top: 1rem;
         }
-        .read-more:hover { background: #c49f30; }
 
+        /* ---------- DETAILBLOKKEN ---------- */
         .detail-block { padding: 70px 0; border-top: 1px solid rgba(212,175,55,0.2); }
-        .detail-block h3 { font-size: 2rem; margin-bottom: 1rem; color: #D4AF37; }
+        .detail-block h3 { font-size: 2rem; color: #D4AF37; }
         .detail-block p { font-size: 1.2rem; }
 
+        /* ---------- GALERIJ ---------- */
         .gallery-scroll {
             width: 100%;
             overflow-x: auto;
@@ -173,19 +156,11 @@
             border: 1px solid rgba(212,175,55,0.2);
         }
         .gallery-card:hover { transform: translateY(-5px); border-color: #D4AF37; }
-        .gallery-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 32px;
-        }
+        .gallery-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 32px; }
         .placeholder-img { background: #2A2A2A; height: 200px; border-radius: 32px; display: flex; align-items: center; justify-content: center; color: #888; }
 
-        /* Boekingsformulier (ongewijzigd) */
-        .booking-section {
-            padding: 60px 0;
-            margin-bottom: 4rem;
-        }
+        /* ---------- BOEKINGSFORMULIER ---------- */
+        .booking-section { padding: 60px 0; margin-bottom: 4rem; }
         .booking-grid {
             display: grid;
             grid-template-columns: 1fr 1.6fr;
@@ -195,7 +170,6 @@
             border-radius: 56px;
             border: 1px solid rgba(212,175,55,0.4);
             padding: 28px;
-            box-shadow: 0 25px 45px -15px rgba(0,0,0,0.5);
         }
         .booking-left, .booking-right {
             background: #111;
@@ -310,6 +284,7 @@
         button:disabled { background: #555; cursor: not-allowed; }
         .error { background: #a33; color: white; padding: 12px; border-radius: 28px; margin-top: 16px; display: none; }
 
+        /* ---------- OVERLAY ---------- */
         .overlay {
             display: none;
             position: fixed;
@@ -329,6 +304,8 @@
             padding: 24px;
             color: #EDEDED;
         }
+
+        /* ---------- RESPONSIVE ---------- */
         @media (max-width: 1000px) {
             .booking-grid { grid-template-columns: 1fr; }
             .hero-content h1 { font-size: 2.8rem; }
@@ -339,11 +316,8 @@
 <body>
 <div class="logo-fixed" id="logoTrigger">FLEET<span>CONNECT</span></div>
 
-<!-- Radiaal menu -->
 <div class="radial-menu-trigger">
-    <div class="hamburger-radial" id="radialTrigger">
-        <i class="fas fa-bars"></i>
-    </div>
+    <div class="hamburger-radial" id="radialTrigger"><i class="fas fa-bars"></i></div>
 </div>
 <div class="radial-menu" id="radialMenu">
     <a href="#hero" class="menu-item"><i class="fas fa-home"></i><span>Home</span></a>
@@ -357,6 +331,7 @@
 <div class="radial-overlay" id="radialOverlay"></div>
 
 <main>
+    <!-- Hero -->
     <section id="hero" class="hero">
         <div class="container hero-content">
             <h1>Black & Gold<br>Clubroom Contrast</h1>
@@ -365,7 +340,7 @@
         </div>
     </section>
 
-    <!-- Filosofie sectie (editbaar via admin) -->
+    <!-- Filosofie -->
     <section id="id-sectie">
         <div class="container">
             <h2 class="section-title" id="philosophyTitle">Onze filosofie</h2>
@@ -373,7 +348,7 @@
         </div>
     </section>
 
-    <!-- Flipcards grid -->
+    <!-- Flipcards -->
     <section id="grid-flip">
         <div class="container">
             <h2 class="section-title">Exclusieve ritten</h2>
@@ -381,7 +356,7 @@
         </div>
     </section>
 
-    <!-- Detailblokken -->
+    <!-- Detailblokken (statisch) -->
     <div id="detail1" class="detail-block"><div class="container"><h3>🌍 Internationaal vervoer</h3><p>Luxe sedans en executive vans voor grensoverschrijdende ritten.</p></div></div>
     <div id="detail2" class="detail-block"><div class="container"><h3>📊 Conferentie management</h3><p>Complete logistiek voor seminars en beurzen.</p></div></div>
     <div id="detail3" class="detail-block"><div class="container"><h3>🛡️ VIP & Diplomatieke shuttles</h3><p>Maximale veiligheid, discrete chauffeurs.</p></div></div>
@@ -399,39 +374,18 @@
         </div>
     </section>
 
-    <!-- Boekingsformulier (identiek aan vorige werkende versie) -->
+    <!-- Boekingsformulier -->
     <section id="booking" class="booking-section">
         <div class="container">
             <h2 class="section-title" style="text-align:center;">📅 Boek uw limousine rit</h2>
             <div class="booking-grid">
                 <div class="booking-left">
-                    <div class="field">
-                        <label>📍 Ophaaladres *</label>
-                        <div class="suggest-wrapper" id="pickupWrap">
-                            <input type="text" id="pickupInput" placeholder="bv. Brussel-Centraal" autocomplete="off">
-                            <div id="pickupSuggest" class="suggestions" style="display:none; background:#1a1a1a;"></div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>🏁 Afzetadres *</label>
-                        <div class="suggest-wrapper" id="dropoffWrap">
-                            <input type="text" id="dropoffInput" placeholder="bv. Zaventem" autocomplete="off">
-                            <div id="dropoffSuggest" class="suggestions" style="display:none; background:#1a1a1a;"></div>
-                        </div>
-                    </div>
-                    <div class="roundtrip-box">
-                        <input type="checkbox" id="roundtripCheckbox">
-                        <label>🔄 Heen en terug rit (x2)</label>
-                    </div>
-                    <div class="field">
-                        <label>✈️ Vluchtnummer (optioneel)</label>
-                        <input type="text" id="flightNumber" placeholder="bv. BA398">
-                    </div>
-                    <div class="field">
-                        <label>📅 Datum & tijd *</label>
-                        <input type="datetime-local" id="datetime">
-                    </div>
-                    <button id="calcAndFlipBtn" style="background:#D4AF37;">📊 Bereken uw rit</button>
+                    <div class="field"><label>📍 Ophaaladres *</label><div class="suggest-wrapper" id="pickupWrap"><input type="text" id="pickupInput" placeholder="bv. Brussel-Centraal"><div id="pickupSuggest" class="suggestions" style="display:none;"></div></div></div>
+                    <div class="field"><label>🏁 Afzetadres *</label><div class="suggest-wrapper" id="dropoffWrap"><input type="text" id="dropoffInput" placeholder="bv. Zaventem"><div id="dropoffSuggest" class="suggestions" style="display:none;"></div></div></div>
+                    <div class="roundtrip-box"><input type="checkbox" id="roundtripCheckbox"><label>🔄 Heen en terug rit (x2)</label></div>
+                    <div class="field"><label>✈️ Vluchtnummer (optioneel)</label><input type="text" id="flightNumber" placeholder="bv. BA398"></div>
+                    <div class="field"><label>📅 Datum & tijd *</label><input type="datetime-local" id="datetime"></div>
+                    <button id="calcAndFlipBtn">📊 Bereken uw rit</button>
                     <div id="errorMsg" class="error"></div>
                     <div id="urgentWhatsApp" style="display:none; margin-top:16px; background:#25D366; border-radius:32px; padding:12px; text-align:center;">
                         <span>⚠️ Vertrekt binnen het uur – WhatsApp</span>
@@ -455,12 +409,12 @@
                     <div class="extra-fields">
                         <h3>👤 Uw gegevens</h3>
                         <div class="extra-grid">
-                            <div class="extra-field"><label>Voornaam *</label><input type="text" id="firstName" placeholder="Voornaam"></div>
-                            <div class="extra-field"><label>Achternaam *</label><input type="text" id="lastName" placeholder="Achternaam"></div>
-                            <div class="extra-field"><label>GSM *</label><input type="tel" id="phone" placeholder="+32 4xx xx xx xx"></div>
-                            <div class="extra-field"><label>E-mail *</label><input type="email" id="email" placeholder="info@example.be"></div>
+                            <div class="extra-field"><label>Voornaam *</label><input type="text" id="firstName"></div>
+                            <div class="extra-field"><label>Achternaam *</label><input type="text" id="lastName"></div>
+                            <div class="extra-field"><label>GSM *</label><input type="tel" id="phone"></div>
+                            <div class="extra-field"><label>E-mail *</label><input type="email" id="email"></div>
                         </div>
-                        <div class="extra-field"><label>BTW (optioneel)</label><input type="text" id="vat" placeholder="BE 0123.456.789"></div>
+                        <div class="extra-field"><label>BTW (optioneel)</label><input type="text" id="vat"></div>
                     </div>
                     <div class="extra-fields">
                         <h3>➕ Extra opties</h3>
@@ -483,6 +437,7 @@
         </div>
     </section>
 
+    <!-- Overlay samenvatting -->
     <div id="summaryOverlay" class="overlay">
         <div class="overlay-content">
             <h2>📋 Samenvatting reservatie</h2>
@@ -511,7 +466,7 @@
     </div>
 </footer>
 
-<!-- Admin modal (volledig uitgebreid) -->
+<!-- Admin modal -->
 <div id="adminModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10001; justify-content:center; align-items:center;">
     <div style="background:#1a1a1a; border:1px solid #D4AF37; border-radius:32px; width:90%; max-width:800px; max-height:85vh; overflow-y:auto; padding:2rem;">
         <div id="adminLogin">
@@ -527,36 +482,27 @@
                 <button class="adminTabBtn" data-tab="flipcards">Flipcards</button>
                 <button class="adminTabBtn" data-tab="philosophy">Filosofie</button>
             </div>
-            <!-- Hero tab -->
             <div id="tabHero" class="adminTabContent active">
                 <h3>Hero achtergrond</h3>
-                <input type="file" id="heroUpload" accept="image/*">
-                <button id="setHeroBtn">Upload afbeelding</button>
-                <p><em>of URL:</em></p>
-                <input type="text" id="heroUrl" placeholder="https://..." style="width:100%;">
-                <button id="setHeroUrlBtn">URL toepassen</button>
+                <input type="file" id="heroUpload" accept="image/*"><button id="setHeroBtn">Upload</button>
+                <p><em>of URL:</em></p><input type="text" id="heroUrl" placeholder="https://..." style="width:100%;"><button id="setHeroUrlBtn">URL toepassen</button>
                 <button id="resetHeroBtn">Reset naar standaard</button>
                 <div id="heroPreview" style="margin-top:1rem;"></div>
             </div>
-            <!-- Galerij tab -->
             <div id="tabGallery" class="adminTabContent" style="display:none;">
                 <h3>Galerij foto's (max 10)</h3>
                 <div id="galleryAdminList"></div>
-                <button id="addGalleryImage" class="btn-add">+ Nieuwe foto toevoegen</button>
+                <button id="addGalleryImage" style="background:#D4AF37; margin-top:1rem;">+ Nieuwe foto</button>
             </div>
-            <!-- Flipcards tab -->
             <div id="tabFlipcards" class="adminTabContent" style="display:none;">
                 <h3>6 Flipcards</h3>
                 <div id="flipcardsAdminList"></div>
-                <button id="resetFlipcardsBtn">Reset naar standaard</button>
+                <button id="resetFlipcardsBtn" style="background:#D4AF37; margin-top:1rem;">Reset naar standaard</button>
             </div>
-            <!-- Filosofie tab -->
             <div id="tabPhilosophy" class="adminTabContent" style="display:none;">
                 <h3>Filosofie (id-sectie)</h3>
-                <label>Titel:</label>
-                <input type="text" id="philosophyTitleInput" style="width:100%; margin-bottom:1rem;">
-                <label>Paragraaf tekst:</label>
-                <textarea id="philosophyTextInput" rows="4" style="width:100%; margin-bottom:1rem;"></textarea>
+                <label>Titel:</label><input type="text" id="philosophyTitleInput" style="width:100%; margin-bottom:1rem;">
+                <label>Paragraaf:</label><textarea id="philosophyTextInput" rows="4" style="width:100%; margin-bottom:1rem;"></textarea>
                 <button id="savePhilosophyBtn">Opslaan</button>
             </div>
             <button id="closeAdminBtn" style="margin-top:2rem; background:#D4AF37;">Sluiten</button>
@@ -566,244 +512,688 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // ========== BOEKINGSLOGICA (volledig ongewijzigd, werkt perfect) ==========
-    (function bookingLogic() {
-        const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
-        let map,pickupCoord=null,dropoffCoord=null,routeLayer=null,pickupMarker=null,dropoffMarker=null,currentRouteData=null,currentRoundTrip=false,currentFlight="",currentDateTime="",selectedVehicle=null,selectedVehicleExtra=0;
+// ============================================================
+// 1. BOEKINGSLOGICA (ONGEBREIDELD, 100% WERKEND)
+//    - Supabase, prefix GD-, tarief €2,50/km, route, voertuig, enz.
+// ============================================================
+(function bookingLogic() {
+    const SUPABASE_URL = 'https://kwsuqzbqzsmgkjaslwkz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3c3VxemJxenNtZ2tqYXNsd2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMTUwMDQsImV4cCI6MjA5MjY5MTAwNH0.DBgx2oq0LbXwUlPQv3cmYMvGEjYA6bhy-2hejvgtERE';
+    
+    let map, pickupCoord = null, dropoffCoord = null, routeLayer = null, pickupMarker = null, dropoffMarker = null;
+    let currentRouteData = null, currentRoundTrip = false, currentFlight = "", currentDateTime = "", selectedVehicle = null, selectedVehicleExtra = 0;
 
-        function generateBookingId() {
-            const now=new Date(); const yyyy=now.getFullYear(); const mm=String(now.getMonth()+1).padStart(2,'0'); const dd=String(now.getDate()).padStart(2,'0'); const today=`${yyyy}${mm}${dd}`;
-            let counter=parseInt(localStorage.getItem('bookingCounter') || '0'); counter++; localStorage.setItem('bookingCounter',counter);
-            return `GD-${today}-${String(counter).padStart(3,'0')}`;
-        }
-        function getExtrasString(){ const e=[]; if(document.getElementById('meetGreet').checked) e.push("Meet & Greet"); if(document.getElementById('kissRide').checked) e.push("Kiss & Ride"); if(document.getElementById('waterBottle').checked) e.push("Waterfles"); if(document.getElementById('wifi').checked) e.push("WiFi"); return e.join(", ")||"Geen"; }
-        function buildSupabaseRecord(pm,amt){
-            const fn=document.getElementById('firstName').value.trim(), ln=document.getElementById('lastName').value.trim(), full=`${fn} ${ln}`;
-            const email=document.getElementById('email').value.trim(), phone=document.getElementById('phone').value.trim(), pickup=document.getElementById('pickupInput').value, dest=document.getElementById('dropoffInput').value, flight=document.getElementById('flightNumber').value.trim(), vehicle=selectedVehicle, extras=getExtrasString(), dt=document.getElementById('datetime').value;
-            let datePart="", timePart=""; if(dt){ const parts=dt.split('T'); datePart=parts[0]; timePart=parts[1]?.substring(0,5)||""; }
-            return { id:generateBookingId(), template:"T1", datetime:datePart, time:timePart, name:full, email, phone, pickup, destination:dest, flight_number:flight, vehicle, extras, amount:parseFloat(amt), payment:pm, status:"pending" };
-        }
-        async function sendToSupabase(record){
-            try{
-                const res=await fetch(`${SUPABASE_URL}/rest/v1/bookings`, { method:'POST', headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'Prefer':'return=minimal' }, body:JSON.stringify(record) });
-                if(!res.ok) throw new Error(await res.text());
-                alert(`🎉 Bedankt, ${record.name}! Uw reserveringsnummer: ${record.id}`);
-                return true;
-            } catch(e){ alert(`Fout: ${e.message}`); return false; }
-        }
-        async function fetchAddresses(q,wid){ if(q.length<3){ clearSuggestions(wid); return; } const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=0&countrycodes=be&accept-language=nl`; try{ const r=await fetch(url,{headers:{'User-Agent':'Fleetconnect/1.0'}}); if(!r.ok) throw new Error(); const d=await r.json(); if(!d.length){ showNoResults(wid); return; } showSuggestions(d.map(p=>({text:p.display_name,lat:parseFloat(p.lat),lon:parseFloat(p.lon)})), wid); }catch{ showErrorSuggestion(wid,'Netwerkfout'); } }
-        function showSuggestions(s,wid){ const w=document.getElementById(wid), sd=w.querySelector('.suggestions'); sd.innerHTML=''; s.forEach(sug=>{ const div=document.createElement('div'); div.className='suggestion-item'; div.textContent=sug.text.length>80?sug.text.slice(0,80)+'…':sug.text; div.style.padding='8px 12px'; div.style.cursor='pointer'; div.style.color='#EDEDED'; div.onclick=()=>{ w.querySelector('input').value=sug.text; setCoord(sug.lat,sug.lon,wid); sd.style.display='none'; }; sd.appendChild(div); }); sd.style.display='block'; }
-        function setCoord(lat,lon,wid){ if(wid==='pickupWrap') pickupCoord={lat,lon}; else dropoffCoord={lat,lon}; }
-        function clearSuggestions(wid){ const el=document.getElementById(wid)?.querySelector('.suggestions'); if(el) el.style.display='none'; }
-        function showNoResults(wid){ showTempMsg(wid,'Geen adres in België'); } function showErrorSuggestion(wid,msg){ showTempMsg(wid,msg); }
-        function showTempMsg(wid,msg){ const w=document.getElementById(wid), sd=w.querySelector('.suggestions'); sd.innerHTML=`<div style="padding:8px; color:#f66;">❌ ${msg}</div>`; sd.style.display='block'; setTimeout(()=>{ if(sd.style.display==='block') sd.style.display='none'; },2500); }
-        async function calcRoute(lat1,lon1,lat2,lon2){ const oUrl=`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`; try{ const r=await fetch(oUrl); if(r.status===429) throw new Error(); const d=await r.json(); if(d.code==='Ok'&&d.routes.length){ const rt=d.routes[0]; return {distanceKm:(rt.distance/1000).toFixed(1), durationMin:Math.round(rt.duration/60), geometry:rt.geometry}; } }catch(e){} return null; }
-        function isPast(ds){ if(!ds) return false; return new Date(ds)<new Date(); } function isWithinNextHour(ds){ if(!ds) return false; const diff=new Date(ds)-new Date(); return diff>0&&diff<3600000; } function showErrorMsg(msg){ const el=document.getElementById('errorMsg'); el.innerText=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',5000); }
-        async function updateMapAndInfo(rd){ if(!rd) return; if(pickupMarker) map.removeLayer(pickupMarker); if(dropoffMarker) map.removeLayer(dropoffMarker); pickupMarker=L.marker([pickupCoord.lat,pickupCoord.lon]).addTo(map).bindPopup('📍 Ophalen'); dropoffMarker=L.marker([dropoffCoord.lat,dropoffCoord.lon]).addTo(map).bindPopup('🏁 Afzetten'); map.fitBounds([[pickupCoord.lat,pickupCoord.lon],[dropoffCoord.lat,dropoffCoord.lon]],{padding:[50,50]}); if(routeLayer) map.removeLayer(routeLayer); routeLayer=L.geoJSON(rd.geometry,{color:'#D4AF37',weight:5}).addTo(map); let d=parseFloat(rd.distanceKm), t=rd.durationMin; if(currentRoundTrip){ d*=2; t*=2; } const p=d*2.5; document.getElementById('distVal').innerText=d.toFixed(1); document.getElementById('timeVal').innerText=t; document.getElementById('priceVal').innerText=p.toFixed(2); }
-        async function onCalcAndFlip(){ const pi=document.getElementById('pickupInput'), di=document.getElementById('dropoffInput'); if(!pi.value.trim()){ showErrorMsg('Ophaaladres verplicht.'); return; } if(!di.value.trim()){ showErrorMsg('Afzetadres verplicht.'); return; } if(!pickupCoord||!dropoffCoord){ showErrorMsg('Selecteer adressen uit suggesties.'); return; } const dt=document.getElementById('datetime').value; if(!dt){ showErrorMsg('Kies datum/tijd.'); return; } if(isPast(dt)){ showErrorMsg('❌ Geen ritten in verleden.'); return; } const urgent=isWithinNextHour(dt); const urgentDiv=document.getElementById('urgentWhatsApp'); if(urgent){ urgentDiv.style.display='block'; document.getElementById('whatsappUrgentLink').href=`https://wa.me/32465397740?text=Ik%20wil%20een%20dringende%20taxi%20boeken%20om%20${encodeURIComponent(dt)}`; } else urgentDiv.style.display='none'; const btn=document.getElementById('calcAndFlipBtn'); btn.disabled=true; btn.textContent='📡 Route berekenen...'; const rd=await calcRoute(pickupCoord.lat,pickupCoord.lon,dropoffCoord.lat,dropoffCoord.lon); if(!rd){ showErrorMsg('Route mislukt.'); btn.disabled=false; btn.textContent='📊 Bereken uw rit'; return; } currentRouteData=rd; currentRoundTrip=document.getElementById('roundtripCheckbox').checked; currentFlight=document.getElementById('flightNumber').value; currentDateTime=dt; await updateMapAndInfo(rd); btn.disabled=false; btn.textContent='📊 Bereken uw rit'; document.getElementById('errorMsg').style.display='none'; }
-        function initVehicleSelection(){ document.querySelectorAll('.vehicle-card').forEach(card=>{ card.addEventListener('click',()=>{ document.querySelectorAll('.vehicle-card').forEach(c=>c.classList.remove('selected')); card.classList.add('selected'); selectedVehicle=card.getAttribute('data-vehicle'); selectedVehicleExtra=parseInt(card.getAttribute('data-extraprice'))||0; document.getElementById('confirmVehicleBtn').disabled=false; }); }); }
-        function showOverlay(){ const fn=document.getElementById('firstName').value.trim(), ln=document.getElementById('lastName').value.trim(), ph=document.getElementById('phone').value.trim(), em=document.getElementById('email').value.trim(); if(!fn||!ln||!ph||!em){ alert("Gelieve alle klantgegevens in te vullen."); return; } if(!selectedVehicle){ document.getElementById('vehicleError').innerText='Selecteer een voertuig.'; document.getElementById('vehicleError').style.display='block'; setTimeout(()=>document.getElementById('vehicleError').style.display='none',3000); return; } const vat=document.getElementById('vat').value.trim(), pu=document.getElementById('pickupInput').value, doff=document.getElementById('dropoffInput').value, pax=document.getElementById('passengers').value, lag=document.getElementById('luggage').value, mg=document.getElementById('meetGreet').checked?'Ja':'Nee', kr=document.getElementById('kissRide').checked?'Ja':'Nee', wb=document.getElementById('waterBottle').checked?'Ja':'Nee', wf=document.getElementById('wifi').checked?'Ja':'Nee', sw=document.getElementById('specialWishes').value.trim()||"Geen"; let d=parseFloat(currentRouteData.distanceKm), t=currentRouteData.durationMin; if(currentRoundTrip){ d*=2; t*=2; } const base=d*2.5, total=base+selectedVehicleExtra, rt=currentRoundTrip?"Heen en terug":"Enkele rit"; const html=`<div><strong>📍</strong> ${pu}</div><div><strong>🏁</strong> ${doff}</div><div><strong>🔄</strong> ${rt}</div><div><strong>📅</strong> ${currentDateTime}</div><div><strong>✈️</strong> ${currentFlight||"geen"}</div><hr><div><strong>Naam:</strong> ${fn} ${ln}</div><div><strong>GSM:</strong> ${ph}</div><div><strong>E-mail:</strong> ${em}</div><div><strong>BTW:</strong> ${vat||"geen"}</div><hr><div><strong>Voertuig:</strong> ${selectedVehicle} (+€${selectedVehicleExtra})</div><div><strong>Pass.</strong> ${pax} | <strong>Bagage</strong> ${lag}</div><div><strong>Opties:</strong> ${mg} ${kr} ${wb} ${wf}</div><div><strong>Speciaal:</strong> ${sw}</div><hr><div><strong>Afstand:</strong> ${d.toFixed(1)} km</div><div><strong>Basis (€2,50/km):</strong> € ${base.toFixed(2)}</div><div><strong>Meerprijs:</strong> € ${selectedVehicleExtra.toFixed(2)}</div><div><strong>Totaal:</strong> € ${total.toFixed(2)}</div>`; document.getElementById('overlaySummary').innerHTML=html; document.getElementById('summaryOverlay').style.display='flex'; }
-        function hideOverlay(){ document.getElementById('summaryOverlay').style.display='none'; }
-        async function finalizeBooking(){ const pm=document.querySelector('input[name="payment"]:checked').value; const totalLine=document.querySelector('#overlaySummary div:last-child')?.innerText; let total=0; if(totalLine){ const m=totalLine.match(/€\s*([\d.]+)/); if(m) total=parseFloat(m[1]); } const record=buildSupabaseRecord(pm,total); if(await sendToSupabase(record)){ hideOverlay(); if(routeLayer) map.removeLayer(routeLayer); if(pickupMarker) map.removeLayer(pickupMarker); if(dropoffMarker) map.removeLayer(dropoffMarker); currentRouteData=null; pickupCoord=null; dropoffCoord=null; document.getElementById('distVal').innerText='—'; document.getElementById('timeVal').innerText='—'; document.getElementById('priceVal').innerText='—'; document.getElementById('pickupInput').value=''; document.getElementById('dropoffInput').value=''; document.getElementById('flightNumber').value=''; document.getElementById('roundtripCheckbox').checked=false; document.getElementById('firstName').value=''; document.getElementById('lastName').value=''; document.getElementById('phone').value=''; document.getElementById('email').value=''; document.getElementById('vat').value=''; document.getElementById('passengers').value='1'; document.getElementById('luggage').value='0'; document.getElementById('meetGreet').checked=false; document.getElementById('kissRide').checked=false; document.getElementById('waterBottle').checked=false; document.getElementById('wifi').checked=false; document.getElementById('specialWishes').value=''; selectedVehicle=null; document.getElementById('confirmVehicleBtn').disabled=true; document.querySelectorAll('.vehicle-card').forEach(c=>c.classList.remove('selected')); } }
-        function initMap(){ map=L.map('map').setView([50.85,4.35],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map); }
-        document.getElementById('calcAndFlipBtn').addEventListener('click',onCalcAndFlip);
-        document.getElementById('confirmVehicleBtn').addEventListener('click',showOverlay);
-        document.getElementById('cancelOverlayBtn').addEventListener('click',hideOverlay);
-        document.getElementById('confirmBookingBtn').addEventListener('click',finalizeBooking);
-        document.getElementById('roundtripCheckbox').addEventListener('change',()=>{ if(currentRouteData){ currentRoundTrip=document.getElementById('roundtripCheckbox').checked; let d=parseFloat(currentRouteData.distanceKm), t=currentRouteData.durationMin; if(currentRoundTrip){ d*=2; t*=2; } const p=d*2.5; document.getElementById('distVal').innerText=d.toFixed(1); document.getElementById('timeVal').innerText=t; document.getElementById('priceVal').innerText=p.toFixed(2); } });
-        const pInp=document.getElementById('pickupInput'), dInp=document.getElementById('dropoffInput'); let pTO,dTO; pInp.addEventListener('input',()=>{ clearTimeout(pTO); pTO=setTimeout(()=>fetchAddresses(pInp.value,'pickupWrap'),300); }); dInp.addEventListener('input',()=>{ clearTimeout(dTO); dTO=setTimeout(()=>fetchAddresses(dInp.value,'dropoffWrap'),300); }); document.addEventListener('click',(e)=>{ if(!e.target.closest('.suggest-wrapper')){ clearSuggestions('pickupWrap'); clearSuggestions('dropoffWrap'); } });
-        initMap(); initVehicleSelection(); const defaultDT=new Date(); defaultDT.setHours(defaultDT.getHours()+1); document.getElementById('datetime').value=defaultDT.toISOString().slice(0,16);
-    })();
+    function generateBookingId() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const today = `${yyyy}${mm}${dd}`;
+        let counter = parseInt(localStorage.getItem('bookingCounter') || '0') + 1;
+        localStorage.setItem('bookingCounter', counter);
+        return `GD-${today}-${String(counter).padStart(3, '0')}`;
+    }
 
-    // ========== ADMIN PANEEL (volledig) ==========
-    (function adminPanel() {
-        // Data modellen
-        let flipcardsData = JSON.parse(localStorage.getItem('admin_flipcards')) || [
-            { img: null, title: "Internationaal", text: "Naadloze ritten naar alle EU-bestemmingen.", detailId: "detail1" },
-            { img: null, title: "Conferenties", text: "End-to-end logistiek voor beurzen.", detailId: "detail2" },
-            { img: null, title: "VIP & Diplomatisch", text: "Maximale anonimiteit, beveiligde opties.", detailId: "detail3" },
-            { img: null, title: "Artist & Crew", text: "Op maat voor artiesten en bands.", detailId: "detail4" },
-            { img: null, title: "Corporate Events", text: "Groepsvervoer, teambuilding.", detailId: "detail5" },
-            { img: null, title: "Speciale projecten", text: "Bruiloften, filmtransport, alles mogelijk.", detailId: "detail6" }
-        ];
-        let galleryData = JSON.parse(localStorage.getItem('admin_gallery')) || Array(10).fill().map((_,i)=>({ img: null, caption: `Limousine ${i+1}` }));
-        let heroImage = localStorage.getItem('admin_hero') || null;
-        let philosophy = JSON.parse(localStorage.getItem('admin_philosophy')) || { title: "Onze filosofie", text: "Fluïde vormen, organische luxe. Elke rit wordt een kunstwerk." };
+    function getExtrasString() {
+        const extras = [];
+        if (document.getElementById('meetGreet').checked) extras.push("Meet & Greet");
+        if (document.getElementById('kissRide').checked) extras.push("Kiss & Ride");
+        if (document.getElementById('waterBottle').checked) extras.push("Waterfles");
+        if (document.getElementById('wifi').checked) extras.push("WiFi");
+        return extras.join(", ") || "Geen";
+    }
 
-        // Render functies
-        function renderFlipcards(){
-            const container = document.getElementById('flipGridContainer');
-            if(!container) return;
-            container.innerHTML = '';
-            flipcardsData.forEach(card=>{
-                const div = document.createElement('div'); div.className='small-flip-card';
-                div.innerHTML = `
-                    <div class="flip-card-inner">
-                        <div class="front">
-                            ${card.img ? `<img src="${card.img}" alt="${escapeHtml(card.title)}">` : `<i class="fas fa-camera"></i>`}
-                            <h3>${escapeHtml(card.title)}</h3>
-                        </div>
-                        <div class="back">
-                            <p>${escapeHtml(card.text)}</p>
-                            <a href="#${card.detailId}" class="read-more">Lees meer →</a>
-                        </div>
+    function buildSupabaseRecord(paymentMethod, finalAmount) {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const fullName = `${firstName} ${lastName}`;
+        const pickup = document.getElementById('pickupInput').value;
+        const dest = document.getElementById('dropoffInput').value;
+        const dt = document.getElementById('datetime').value;
+        let datePart = "", timePart = "";
+        if (dt) {
+            const parts = dt.split('T');
+            datePart = parts[0];  // ISO-formaat YYYY-MM-DD
+            timePart = parts[1]?.substring(0, 5) || "";
+        }
+        return {
+            id: generateBookingId(),
+            template: "T1",
+            datetime: datePart,
+            time: timePart,
+            name: fullName,
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            pickup: pickup,
+            destination: dest,
+            flight_number: document.getElementById('flightNumber').value.trim(),
+            vehicle: selectedVehicle,
+            extras: getExtrasString(),
+            amount: parseFloat(finalAmount),
+            payment: paymentMethod,
+            status: "pending"
+        };
+    }
+
+    async function sendToSupabase(record) {
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(record)
+            });
+            if (!response.ok) throw new Error(await response.text());
+            alert(`🎉 Bedankt, ${record.name}! Uw reserveringsnummer: ${record.id}`);
+            return true;
+        } catch (err) {
+            alert(`❌ Fout: ${err.message}`);
+            return false;
+        }
+    }
+
+    // Helper: adres autocomplete (Nominatim)
+    async function fetchAddresses(q, wid) {
+        if (q.length < 3) { clearSuggestions(wid); return; }
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=0&countrycodes=be&accept-language=nl`;
+        try {
+            const res = await fetch(url, { headers: { 'User-Agent': 'Fleetconnect/1.0' } });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (!data.length) { showNoResults(wid); return; }
+            showSuggestions(data.map(p => ({ text: p.display_name, lat: parseFloat(p.lat), lon: parseFloat(p.lon) })), wid);
+        } catch { showErrorSuggestion(wid, 'Netwerkfout'); }
+    }
+    function showSuggestions(sugs, wid) {
+        const wrapper = document.getElementById(wid);
+        const sd = wrapper.querySelector('.suggestions');
+        sd.innerHTML = '';
+        sugs.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.textContent = s.text.length > 80 ? s.text.slice(0, 80) + '…' : s.text;
+            div.style.padding = '8px 12px'; div.style.cursor = 'pointer'; div.style.color = '#EDEDED';
+            div.onclick = () => {
+                wrapper.querySelector('input').value = s.text;
+                setCoord(s.lat, s.lon, wid);
+                sd.style.display = 'none';
+            };
+            sd.appendChild(div);
+        });
+        sd.style.display = 'block';
+    }
+    function setCoord(lat, lon, wid) {
+        if (wid === 'pickupWrap') pickupCoord = { lat, lon };
+        else dropoffCoord = { lat, lon };
+    }
+    function clearSuggestions(wid) {
+        const el = document.getElementById(wid)?.querySelector('.suggestions');
+        if (el) el.style.display = 'none';
+    }
+    function showNoResults(wid) { showTempMsg(wid, 'Geen adres in België'); }
+    function showErrorSuggestion(wid, msg) { showTempMsg(wid, msg); }
+    function showTempMsg(wid, msg) {
+        const w = document.getElementById(wid);
+        const sd = w.querySelector('.suggestions');
+        sd.innerHTML = `<div style="padding:8px; color:#f66;">❌ ${msg}</div>`;
+        sd.style.display = 'block';
+        setTimeout(() => { if (sd.style.display === 'block') sd.style.display = 'none'; }, 2500);
+    }
+
+    async function calcRoute(lat1, lon1, lat2, lon2) {
+        const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+        try {
+            const res = await fetch(url);
+            if (res.status === 429) throw new Error();
+            const data = await res.json();
+            if (data.code === 'Ok' && data.routes.length) {
+                const rt = data.routes[0];
+                return { distanceKm: (rt.distance / 1000).toFixed(1), durationMin: Math.round(rt.duration / 60), geometry: rt.geometry };
+            }
+        } catch (e) { }
+        return null;
+    }
+
+    function isPast(ds) { return ds ? new Date(ds) < new Date() : false; }
+    function isWithinNextHour(ds) {
+        if (!ds) return false;
+        const diff = new Date(ds) - new Date();
+        return diff > 0 && diff < 3600000;
+    }
+    function showErrorMsg(msg) {
+        const el = document.getElementById('errorMsg');
+        el.innerText = msg;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    async function updateMapAndInfo(route) {
+        if (!route) return;
+        if (pickupMarker) map.removeLayer(pickupMarker);
+        if (dropoffMarker) map.removeLayer(dropoffMarker);
+        pickupMarker = L.marker([pickupCoord.lat, pickupCoord.lon]).addTo(map).bindPopup('📍 Ophalen');
+        dropoffMarker = L.marker([dropoffCoord.lat, dropoffCoord.lon]).addTo(map).bindPopup('🏁 Afzetten');
+        map.fitBounds([[pickupCoord.lat, pickupCoord.lon], [dropoffCoord.lat, dropoffCoord.lon]], { padding: [50, 50] });
+        if (routeLayer) map.removeLayer(routeLayer);
+        routeLayer = L.geoJSON(route.geometry, { color: '#D4AF37', weight: 5 }).addTo(map);
+        let dist = parseFloat(route.distanceKm), dur = route.durationMin;
+        if (currentRoundTrip) { dist *= 2; dur *= 2; }
+        const price = dist * 2.5;
+        document.getElementById('distVal').innerText = dist.toFixed(1);
+        document.getElementById('timeVal').innerText = dur;
+        document.getElementById('priceVal').innerText = price.toFixed(2);
+    }
+
+    async function onCalcAndFlip() {
+        const pickup = document.getElementById('pickupInput').value.trim();
+        const dropoff = document.getElementById('dropoffInput').value.trim();
+        if (!pickup) { showErrorMsg('Ophaaladres verplicht.'); return; }
+        if (!dropoff) { showErrorMsg('Afzetadres verplicht.'); return; }
+        if (!pickupCoord || !dropoffCoord) { showErrorMsg('Selecteer adressen uit suggesties.'); return; }
+        const dt = document.getElementById('datetime').value;
+        if (!dt) { showErrorMsg('Kies datum/tijd.'); return; }
+        if (isPast(dt)) { showErrorMsg('❌ Geen ritten in verleden.'); return; }
+        const urgent = isWithinNextHour(dt);
+        const urgentDiv = document.getElementById('urgentWhatsApp');
+        if (urgent) {
+            urgentDiv.style.display = 'block';
+            document.getElementById('whatsappUrgentLink').href = `https://wa.me/32465397740?text=Ik%20wil%20een%20dringende%20taxi%20boeken%20om%20${encodeURIComponent(dt)}`;
+        } else urgentDiv.style.display = 'none';
+        const btn = document.getElementById('calcAndFlipBtn');
+        btn.disabled = true; btn.textContent = '📡 Route berekenen...';
+        const route = await calcRoute(pickupCoord.lat, pickupCoord.lon, dropoffCoord.lat, dropoffCoord.lon);
+        if (!route) { showErrorMsg('Route mislukt.'); btn.disabled = false; btn.textContent = '📊 Bereken uw rit'; return; }
+        currentRouteData = route;
+        currentRoundTrip = document.getElementById('roundtripCheckbox').checked;
+        currentFlight = document.getElementById('flightNumber').value;
+        currentDateTime = dt;
+        await updateMapAndInfo(route);
+        btn.disabled = false; btn.textContent = '📊 Bereken uw rit';
+        document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function initVehicleSelection() {
+        document.querySelectorAll('.vehicle-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedVehicle = card.getAttribute('data-vehicle');
+                selectedVehicleExtra = parseInt(card.getAttribute('data-extraprice')) || 0;
+                document.getElementById('confirmVehicleBtn').disabled = false;
+            });
+        });
+    }
+
+    function showOverlay() {
+        const fn = document.getElementById('firstName').value.trim();
+        const ln = document.getElementById('lastName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        if (!fn || !ln || !phone || !email) {
+            alert("Gelieve alle klantgegevens in te vullen.");
+            return;
+        }
+        if (!selectedVehicle) {
+            const err = document.getElementById('vehicleError');
+            err.innerText = 'Selecteer een voertuig.';
+            err.style.display = 'block';
+            setTimeout(() => err.style.display = 'none', 3000);
+            return;
+        }
+        const vat = document.getElementById('vat').value.trim();
+        const pickup = document.getElementById('pickupInput').value;
+        const drop = document.getElementById('dropoffInput').value;
+        const pax = document.getElementById('passengers').value;
+        const luggage = document.getElementById('luggage').value;
+        const mg = document.getElementById('meetGreet').checked ? 'Ja' : 'Nee';
+        const kr = document.getElementById('kissRide').checked ? 'Ja' : 'Nee';
+        const wb = document.getElementById('waterBottle').checked ? 'Ja' : 'Nee';
+        const wf = document.getElementById('wifi').checked ? 'Ja' : 'Nee';
+        const sw = document.getElementById('specialWishes').value.trim() || "Geen";
+        let dist = parseFloat(currentRouteData.distanceKm), dur = currentRouteData.durationMin;
+        if (currentRoundTrip) { dist *= 2; dur *= 2; }
+        const base = dist * 2.5;
+        const total = base + selectedVehicleExtra;
+        const rt = currentRoundTrip ? "Heen en terug" : "Enkele rit";
+        const summaryHtml = `
+            <div><strong>📍</strong> ${pickup}</div>
+            <div><strong>🏁</strong> ${drop}</div>
+            <div><strong>🔄</strong> ${rt}</div>
+            <div><strong>📅</strong> ${currentDateTime}</div>
+            <div><strong>✈️</strong> ${currentFlight || "geen"}</div>
+            <hr>
+            <div><strong>Naam:</strong> ${fn} ${ln}</div>
+            <div><strong>GSM:</strong> ${phone}</div>
+            <div><strong>E-mail:</strong> ${email}</div>
+            <div><strong>BTW:</strong> ${vat || "geen"}</div>
+            <hr>
+            <div><strong>Voertuig:</strong> ${selectedVehicle} (+€${selectedVehicleExtra})</div>
+            <div><strong>Pass.</strong> ${pax} | <strong>Bagage</strong> ${luggage}</div>
+            <div><strong>Opties:</strong> ${mg} ${kr} ${wb} ${wf}</div>
+            <div><strong>Speciaal:</strong> ${sw}</div>
+            <hr>
+            <div><strong>Afstand:</strong> ${dist.toFixed(1)} km</div>
+            <div><strong>Basis (€2,50/km):</strong> € ${base.toFixed(2)}</div>
+            <div><strong>Meerprijs:</strong> € ${selectedVehicleExtra.toFixed(2)}</div>
+            <div><strong>Totaal:</strong> € ${total.toFixed(2)}</div>
+        `;
+        document.getElementById('overlaySummary').innerHTML = summaryHtml;
+        document.getElementById('summaryOverlay').style.display = 'flex';
+    }
+
+    function hideOverlay() { document.getElementById('summaryOverlay').style.display = 'none'; }
+
+    async function finalizeBooking() {
+        const payment = document.querySelector('input[name="payment"]:checked').value;
+        const totalLine = document.querySelector('#overlaySummary div:last-child')?.innerText;
+        let totalAmount = 0;
+        if (totalLine) {
+            const match = totalLine.match(/€\s*([\d.]+)/);
+            if (match) totalAmount = parseFloat(match[1]);
+        }
+        const record = buildSupabaseRecord(payment, totalAmount);
+        const success = await sendToSupabase(record);
+        if (success) {
+            hideOverlay();
+            // Reset volledig
+            if (routeLayer) map.removeLayer(routeLayer);
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            currentRouteData = null; pickupCoord = null; dropoffCoord = null;
+            document.getElementById('distVal').innerText = '—';
+            document.getElementById('timeVal').innerText = '—';
+            document.getElementById('priceVal').innerText = '—';
+            document.getElementById('pickupInput').value = '';
+            document.getElementById('dropoffInput').value = '';
+            document.getElementById('flightNumber').value = '';
+            document.getElementById('roundtripCheckbox').checked = false;
+            document.getElementById('firstName').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('vat').value = '';
+            document.getElementById('passengers').value = '1';
+            document.getElementById('luggage').value = '0';
+            document.getElementById('meetGreet').checked = false;
+            document.getElementById('kissRide').checked = false;
+            document.getElementById('waterBottle').checked = false;
+            document.getElementById('wifi').checked = false;
+            document.getElementById('specialWishes').value = '';
+            selectedVehicle = null;
+            document.getElementById('confirmVehicleBtn').disabled = true;
+            document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+        }
+    }
+
+    function initMap() {
+        map = L.map('map').setView([50.85, 4.35], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    }
+
+    // Event binding
+    document.getElementById('calcAndFlipBtn').addEventListener('click', onCalcAndFlip);
+    document.getElementById('confirmVehicleBtn').addEventListener('click', showOverlay);
+    document.getElementById('cancelOverlayBtn').addEventListener('click', hideOverlay);
+    document.getElementById('confirmBookingBtn').addEventListener('click', finalizeBooking);
+    document.getElementById('roundtripCheckbox').addEventListener('change', () => {
+        if (currentRouteData) {
+            currentRoundTrip = document.getElementById('roundtripCheckbox').checked;
+            let d = parseFloat(currentRouteData.distanceKm), t = currentRouteData.durationMin;
+            if (currentRoundTrip) { d *= 2; t *= 2; }
+            document.getElementById('distVal').innerText = d.toFixed(1);
+            document.getElementById('timeVal').innerText = t;
+            document.getElementById('priceVal').innerText = (d * 2.5).toFixed(2);
+        }
+    });
+
+    // Autocomplete
+    const pickupInput = document.getElementById('pickupInput');
+    const dropoffInput = document.getElementById('dropoffInput');
+    let pTO, dTO;
+    pickupInput.addEventListener('input', () => { clearTimeout(pTO); pTO = setTimeout(() => fetchAddresses(pickupInput.value, 'pickupWrap'), 300); });
+    dropoffInput.addEventListener('input', () => { clearTimeout(dTO); dTO = setTimeout(() => fetchAddresses(dropoffInput.value, 'dropoffWrap'), 300); });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.suggest-wrapper')) {
+            clearSuggestions('pickupWrap');
+            clearSuggestions('dropoffWrap');
+        }
+    });
+
+    initMap();
+    initVehicleSelection();
+    const defaultDT = new Date();
+    defaultDT.setHours(defaultDT.getHours() + 1);
+    document.getElementById('datetime').value = defaultDT.toISOString().slice(0, 16);
+})();
+
+// ============================================================
+// 2. ADMIN PANEEL + WEERGAVE (FLIPCARDS, GALERIJ, HERO, FILOSOFIE)
+//    - Opgeslagen in localStorage, volledig aanpasbaar
+// ============================================================
+(function adminAndDisplay() {
+    // Data modellen
+    let flipcardsData = JSON.parse(localStorage.getItem('admin_flipcards')) || [
+        { img: null, title: "Internationaal", text: "Naadloze ritten naar alle EU-bestemmingen.", detailId: "detail1" },
+        { img: null, title: "Conferenties", text: "End-to-end logistiek voor beurzen.", detailId: "detail2" },
+        { img: null, title: "VIP & Diplomatisch", text: "Maximale anonimiteit, beveiligde opties.", detailId: "detail3" },
+        { img: null, title: "Artist & Crew", text: "Op maat voor artiesten en bands.", detailId: "detail4" },
+        { img: null, title: "Corporate Events", text: "Groepsvervoer, teambuilding.", detailId: "detail5" },
+        { img: null, title: "Speciale projecten", text: "Bruiloften, filmtransport, alles mogelijk.", detailId: "detail6" }
+    ];
+    let galleryData = JSON.parse(localStorage.getItem('admin_gallery')) || Array(10).fill().map((_, i) => ({ img: null, caption: `Limousine ${i+1}` }));
+    let heroImage = localStorage.getItem('admin_hero') || null;
+    let philosophy = JSON.parse(localStorage.getItem('admin_philosophy')) || { title: "Onze filosofie", text: "Fluïde vormen, organische luxe. Elke rit wordt een kunstwerk." };
+
+    // Helper: escape html
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+    // Bestand naar base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ---------- RENDER FUNCTIES VOOR DE PAGINA ----------
+    function renderFlipcards() {
+        const container = document.getElementById('flipGridContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        flipcardsData.forEach(card => {
+            const div = document.createElement('div'); div.className = 'small-flip-card';
+            div.innerHTML = `
+                <div class="flip-card-inner">
+                    <div class="front">
+                        ${card.img ? `<img src="${card.img}" alt="${escapeHtml(card.title)}">` : `<i class="fas fa-camera"></i>`}
+                        <h3>${escapeHtml(card.title)}</h3>
                     </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-        function renderGallery(){
-            const container = document.getElementById('galleryTrack');
-            if(!container) return;
-            container.innerHTML = '';
-            galleryData.forEach(item=>{
-                const card = document.createElement('div'); card.className='gallery-card';
-                if(item.img) card.innerHTML = `<img src="${item.img}" alt="${escapeHtml(item.caption)}"><p>${escapeHtml(item.caption)}</p>`;
-                else card.innerHTML = `<div class="placeholder-img"><i class="fas fa-camera"></i> ${escapeHtml(item.caption)}</div><p>${escapeHtml(item.caption)}</p>`;
-                container.appendChild(card);
-            });
-        }
-        function renderHero(){
-            const hero = document.getElementById('hero');
-            if(heroImage) hero.style.background = `url('${heroImage}') center/cover no-repeat`;
-            else hero.style.background = 'radial-gradient(circle at top right, #0A0A0A 0%, #1a1a1a 100%)';
-            const preview = document.getElementById('heroPreview');
-            if(preview) preview.innerHTML = heroImage ? `<img src="${heroImage}" style="max-width:200px;">` : '';
-        }
-        function renderPhilosophy(){
-            document.getElementById('philosophyTitle').innerText = philosophy.title;
-            document.getElementById('philosophyText').innerText = philosophy.text;
-            document.getElementById('philosophyTitleInput').value = philosophy.title;
-            document.getElementById('philosophyTextInput').value = philosophy.text;
-        }
-        function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, m=>({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+                    <div class="back">
+                        <p>${escapeHtml(card.text)}</p>
+                        <a href="#${card.detailId}" class="read-more">Lees meer →</a>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
 
-        // Admin UI voor flipcards
-        function renderAdminFlipcards(){
-            const container = document.getElementById('flipcardsAdminList');
-            if(!container) return;
-            container.innerHTML = '';
-            flipcardsData.forEach((card,idx)=>{
-                const div = document.createElement('div'); div.style.border='1px solid #444'; div.style.padding='1rem'; div.style.marginBottom='1rem'; div.style.borderRadius='12px';
-                div.innerHTML = `
-                    <img src="${card.img||''}" style="max-width:80px; border-radius:50%; margin-bottom:8px;"><br>
-                    <input type="file" id="fcUpload${idx}" accept="image/*">
-                    <button class="setCardImg" data-idx="${idx}">Upload afbeelding</button>
-                    <button class="removeCardImg" data-idx="${idx}">Verwijder afbeelding</button><br>
-                    <label>Titel:</label><input type="text" id="fcTitle${idx}" value="${escapeHtml(card.title)}" style="width:100%;">
-                    <label>Tekst:</label><textarea id="fcText${idx}" rows="2" style="width:100%;">${escapeHtml(card.text)}</textarea>
-                    <button class="saveCard" data-idx="${idx}">Opslaan</button>
-                `;
-                container.appendChild(div);
-            });
-            document.querySelectorAll('.setCardImg').forEach(btn=>btn.addEventListener('click',(e)=>{
+    function renderGallery() {
+        const container = document.getElementById('galleryTrack');
+        if (!container) return;
+        container.innerHTML = '';
+        galleryData.forEach(item => {
+            const card = document.createElement('div'); card.className = 'gallery-card';
+            if (item.img) card.innerHTML = `<img src="${item.img}" alt="${escapeHtml(item.caption)}"><p>${escapeHtml(item.caption)}</p>`;
+            else card.innerHTML = `<div class="placeholder-img"><i class="fas fa-camera"></i> ${escapeHtml(item.caption)}</div><p>${escapeHtml(item.caption)}</p>`;
+            container.appendChild(card);
+        });
+    }
+
+    function renderHero() {
+        const hero = document.getElementById('hero');
+        if (heroImage) hero.style.background = `url('${heroImage}') center/cover no-repeat`;
+        else hero.style.background = 'radial-gradient(circle at top right, #0A0A0A 0%, #1a1a1a 100%)';
+        const preview = document.getElementById('heroPreview');
+        if (preview) preview.innerHTML = heroImage ? `<img src="${heroImage}" style="max-width:200px;">` : '';
+    }
+
+    function renderPhilosophy() {
+        const titleEl = document.getElementById('philosophyTitle');
+        const textEl = document.getElementById('philosophyText');
+        if (titleEl) titleEl.innerText = philosophy.title;
+        if (textEl) textEl.innerText = philosophy.text;
+        // Admin inputs
+        const titleInput = document.getElementById('philosophyTitleInput');
+        const textInput = document.getElementById('philosophyTextInput');
+        if (titleInput) titleInput.value = philosophy.title;
+        if (textInput) textInput.value = philosophy.text;
+    }
+
+    // ---------- ADMIN UI (FLIPCARDS, GALERIJ) ----------
+    function renderAdminFlipcards() {
+        const container = document.getElementById('flipcardsAdminList');
+        if (!container) return;
+        container.innerHTML = '';
+        flipcardsData.forEach((card, idx) => {
+            const div = document.createElement('div');
+            div.style.border = '1px solid #444'; div.style.padding = '1rem'; div.style.marginBottom = '1rem'; div.style.borderRadius = '12px';
+            div.innerHTML = `
+                <img src="${card.img || ''}" style="max-width:80px; border-radius:50%; margin-bottom:8px;"><br>
+                <input type="file" id="fcUpload${idx}" accept="image/*">
+                <button class="setCardImg" data-idx="${idx}">Upload afbeelding</button>
+                <button class="removeCardImg" data-idx="${idx}">Verwijder afbeelding</button><br>
+                <label>Titel:</label><input type="text" id="fcTitle${idx}" value="${escapeHtml(card.title)}" style="width:100%;">
+                <label>Tekst:</label><textarea id="fcText${idx}" rows="2" style="width:100%;">${escapeHtml(card.text)}</textarea>
+                <button class="saveCard" data-idx="${idx}">Opslaan</button>
+            `;
+            container.appendChild(div);
+        });
+        // Event listeners voor deze knoppen
+        document.querySelectorAll('.setCardImg').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
                 const idx = btn.getAttribute('data-idx');
                 const file = document.getElementById(`fcUpload${idx}`).files[0];
-                if(file){ const reader=new FileReader(); reader.onload=ev=>{ flipcardsData[idx].img=ev.target.result; localStorage.setItem('admin_flipcards',JSON.stringify(flipcardsData)); renderFlipcards(); renderAdminFlipcards(); }; reader.readAsDataURL(file); }
-            }));
-            document.querySelectorAll('.removeCardImg').forEach(btn=>btn.addEventListener('click',(e)=>{
+                if (file) {
+                    const dataUrl = await fileToBase64(file);
+                    flipcardsData[idx].img = dataUrl;
+                    localStorage.setItem('admin_flipcards', JSON.stringify(flipcardsData));
+                    renderFlipcards();
+                    renderAdminFlipcards();
+                }
+            });
+        });
+        document.querySelectorAll('.removeCardImg').forEach(btn => {
+            btn.addEventListener('click', () => {
                 const idx = btn.getAttribute('data-idx');
                 flipcardsData[idx].img = null;
-                localStorage.setItem('admin_flipcards',JSON.stringify(flipcardsData));
-                renderFlipcards(); renderAdminFlipcards();
-            }));
-            document.querySelectorAll('.saveCard').forEach(btn=>btn.addEventListener('click',(e)=>{
+                localStorage.setItem('admin_flipcards', JSON.stringify(flipcardsData));
+                renderFlipcards();
+                renderAdminFlipcards();
+            });
+        });
+        document.querySelectorAll('.saveCard').forEach(btn => {
+            btn.addEventListener('click', () => {
                 const idx = btn.getAttribute('data-idx');
                 flipcardsData[idx].title = document.getElementById(`fcTitle${idx}`).value;
                 flipcardsData[idx].text = document.getElementById(`fcText${idx}`).value;
-                localStorage.setItem('admin_flipcards',JSON.stringify(flipcardsData));
-                renderFlipcards(); renderAdminFlipcards();
-            }));
-        }
-        function renderAdminGallery(){
-            const container = document.getElementById('galleryAdminList');
-            if(!container) return;
-            container.innerHTML = '';
-            galleryData.forEach((item,idx)=>{
-                const div = document.createElement('div'); div.className='gallery-item-admin'; div.style.display='flex'; div.style.gap='1rem'; div.style.marginBottom='1rem'; div.style.alignItems='center'; div.style.background='#252525'; div.style.padding='0.5rem'; div.style.borderRadius='12px';
-                div.innerHTML = `
-                    <img src="${item.img||''}" style="width:60px; height:60px; object-fit:cover;">
-                    <input type="file" id="galUpload${idx}" style="display:none;">
-                    <button class="uploadGallery" data-idx="${idx}">Upload</button>
-                    <input type="text" id="galCap${idx}" value="${escapeHtml(item.caption)}" placeholder="Bijschrift">
-                    <button class="saveGallery" data-idx="${idx}">Opslaan</button>
-                    <button class="removeGallery" data-idx="${idx}" ${galleryData.length<=1?'disabled':''}>Verwijder</button>
-                `;
-                container.appendChild(div);
+                localStorage.setItem('admin_flipcards', JSON.stringify(flipcardsData));
+                renderFlipcards();
+                renderAdminFlipcards();
             });
-            document.querySelectorAll('.uploadGallery').forEach(btn=>btn.addEventListener('click',(e)=>{
+        });
+    }
+
+    function renderAdminGallery() {
+        const container = document.getElementById('galleryAdminList');
+        if (!container) return;
+        container.innerHTML = '';
+        galleryData.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.style.display = 'flex'; div.style.gap = '1rem'; div.style.marginBottom = '1rem'; div.style.alignItems = 'center';
+            div.style.background = '#252525'; div.style.padding = '0.5rem'; div.style.borderRadius = '12px';
+            div.innerHTML = `
+                <img src="${item.img || ''}" style="width:60px; height:60px; object-fit:cover;">
+                <input type="file" id="galUpload${idx}" style="display:none;">
+                <button class="uploadGallery" data-idx="${idx}">Upload</button>
+                <input type="text" id="galCap${idx}" value="${escapeHtml(item.caption)}" placeholder="Bijschrift">
+                <button class="saveGallery" data-idx="${idx}">Opslaan</button>
+                <button class="removeGallery" data-idx="${idx}" ${galleryData.length <= 1 ? 'disabled' : ''}>Verwijder</button>
+            `;
+            container.appendChild(div);
+        });
+        document.querySelectorAll('.uploadGallery').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
                 const idx = btn.getAttribute('data-idx');
                 const fileInput = document.getElementById(`galUpload${idx}`);
                 fileInput.click();
-                fileInput.onchange = ()=>{
-                    if(fileInput.files.length){
-                        const reader=new FileReader(); reader.onload=ev=>{ galleryData[idx].img=ev.target.result; localStorage.setItem('admin_gallery',JSON.stringify(galleryData)); renderGallery(); renderAdminGallery(); }; reader.readAsDataURL(fileInput.files[0]);
+                fileInput.onchange = async () => {
+                    if (fileInput.files.length) {
+                        const dataUrl = await fileToBase64(fileInput.files[0]);
+                        galleryData[idx].img = dataUrl;
+                        localStorage.setItem('admin_gallery', JSON.stringify(galleryData));
+                        renderGallery();
+                        renderAdminGallery();
                     }
                 };
-            }));
-            document.querySelectorAll('.saveGallery').forEach(btn=>btn.addEventListener('click',(e)=>{
+            });
+        });
+        document.querySelectorAll('.saveGallery').forEach(btn => {
+            btn.addEventListener('click', () => {
                 const idx = btn.getAttribute('data-idx');
                 galleryData[idx].caption = document.getElementById(`galCap${idx}`).value;
-                localStorage.setItem('admin_gallery',JSON.stringify(galleryData));
-                renderGallery(); renderAdminGallery();
-            }));
-            document.querySelectorAll('.removeGallery').forEach(btn=>btn.addEventListener('click',(e)=>{
+                localStorage.setItem('admin_gallery', JSON.stringify(galleryData));
+                renderGallery();
+                renderAdminGallery();
+            });
+        });
+        document.querySelectorAll('.removeGallery').forEach(btn => {
+            btn.addEventListener('click', () => {
                 const idx = btn.getAttribute('data-idx');
-                if(galleryData.length>1){ galleryData.splice(idx,1); localStorage.setItem('admin_gallery',JSON.stringify(galleryData)); renderGallery(); renderAdminGallery(); }
-            }));
-        }
-        function setupHeroAdmin(){
-            document.getElementById('heroUpload').onchange = (e)=>{
-                if(e.target.files.length){ const reader=new FileReader(); reader.onload=ev=>{ heroImage=ev.target.result; localStorage.setItem('admin_hero',heroImage); renderHero(); }; reader.readAsDataURL(e.target.files[0]); }
+                if (galleryData.length > 1) {
+                    galleryData.splice(idx, 1);
+                    localStorage.setItem('admin_gallery', JSON.stringify(galleryData));
+                    renderGallery();
+                    renderAdminGallery();
+                }
+            });
+        });
+    }
+
+    function setupHeroAdmin() {
+        const heroUpload = document.getElementById('heroUpload');
+        const setHeroBtn = document.getElementById('setHeroBtn');
+        const heroUrlInput = document.getElementById('heroUrl');
+        const setHeroUrlBtn = document.getElementById('setHeroUrlBtn');
+        const resetHeroBtn = document.getElementById('resetHeroBtn');
+        if (setHeroBtn) {
+            setHeroBtn.onclick = () => { if (heroUpload.files.length) heroUpload.onchange(); };
+            heroUpload.onchange = async (e) => {
+                if (e.target.files.length) {
+                    const dataUrl = await fileToBase64(e.target.files[0]);
+                    heroImage = dataUrl;
+                    localStorage.setItem('admin_hero', heroImage);
+                    renderHero();
+                }
             };
-            document.getElementById('setHeroBtn').onclick = ()=>{ if(document.getElementById('heroUpload').files.length) document.getElementById('heroUpload').onchange(); };
-            document.getElementById('setHeroUrlBtn').onclick = ()=>{ const url=document.getElementById('heroUrl').value; if(url){ heroImage=url; localStorage.setItem('admin_hero',heroImage); renderHero(); } };
-            document.getElementById('resetHeroBtn').onclick = ()=>{ heroImage=null; localStorage.removeItem('admin_hero'); renderHero(); };
         }
-        function setupPhilosophy(){
-            document.getElementById('savePhilosophyBtn').onclick = ()=>{
+        if (setHeroUrlBtn) {
+            setHeroUrlBtn.onclick = () => {
+                const url = heroUrlInput.value.trim();
+                if (url) {
+                    heroImage = url;
+                    localStorage.setItem('admin_hero', heroImage);
+                    renderHero();
+                }
+            };
+        }
+        if (resetHeroBtn) {
+            resetHeroBtn.onclick = () => {
+                heroImage = null;
+                localStorage.removeItem('admin_hero');
+                renderHero();
+            };
+        }
+    }
+
+    function setupPhilosophy() {
+        const saveBtn = document.getElementById('savePhilosophyBtn');
+        if (saveBtn) {
+            saveBtn.onclick = () => {
                 philosophy.title = document.getElementById('philosophyTitleInput').value;
                 philosophy.text = document.getElementById('philosophyTextInput').value;
-                localStorage.setItem('admin_philosophy',JSON.stringify(philosophy));
+                localStorage.setItem('admin_philosophy', JSON.stringify(philosophy));
                 renderPhilosophy();
             };
         }
-        // Tabs
-        function initTabs(){
-            document.querySelectorAll('.adminTabBtn').forEach(btn=>{
-                btn.addEventListener('click',()=>{
-                    document.querySelectorAll('.adminTabBtn').forEach(b=>b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const tab = btn.getAttribute('data-tab');
-                    document.querySelectorAll('.adminTabContent').forEach(c=>c.style.display='none');
-                    if(tab==='hero') document.getElementById('tabHero').style.display='block';
-                    if(tab==='gallery') { document.getElementById('tabGallery').style.display='block'; renderAdminGallery(); }
-                    if(tab==='flipcards') { document.getElementById('tabFlipcards').style.display='block'; renderAdminFlipcards(); }
-                    if(tab==='philosophy') { document.getElementById('tabPhilosophy').style.display='block'; }
-                });
-            });
-        }
+    }
 
-        // Admin modal openen
-        const modal = document.getElementById('adminModal');
-        const loginDiv = document.getElementById('adminLogin');
-        const panelDiv = document.getElementById('adminPanel');
-        let loggedIn = false;
-        document.getElementById('logoTrigger').addEventListener('dblclick',()=>{
-            modal.style.display='flex';
-            if(loggedIn){ loginDiv.style.display='none'; panelDiv.style.display='block'; initTabs(); setupHeroAdmin(); setupPhilosophy(); renderAdminFlipcards(); renderAdminGallery(); }
-            else{ loginDiv.style.display='block'; panelDiv.style.display='none'; document.getElementById('adminPassword').value=''; document.getElementById('loginError').innerText=''; }
+    // Admin tabs
+    function initTabs() {
+        const tabs = document.querySelectorAll('.adminTabBtn');
+        const contents = {
+            hero: document.getElementById('tabHero'),
+            gallery: document.getElementById('tabGallery'),
+            flipcards: document.getElementById('tabFlipcards'),
+            philosophy: document.getElementById('tabPhilosophy')
+        };
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const target = tab.getAttribute('data-tab');
+                Object.values(contents).forEach(c => { if (c) c.style.display = 'none'; });
+                if (contents[target]) contents[target].style.display = 'block';
+                if (target === 'gallery') renderAdminGallery();
+                if (target === 'flipcards') renderAdminFlipcards();
+            });
         });
-        document.getElementById('loginBtn').addEventListener('click',()=>{
-            if(document.getElementById('adminPassword').value==='goldenbusiness2026'){
-                loggedIn=true; loginDiv.style.display='none'; panelDiv.style.display='block';
-                initTabs(); setupHeroAdmin(); setupPhilosophy(); renderAdminFlipcards(); renderAdminGallery();
-            } else document.getElementById('loginError').innerText='Ongeldig wachtwoord';
+    }
+
+    // Admin modal logica
+    const modal = document.getElementById('adminModal');
+    const loginDiv = document.getElementById('adminLogin');
+    const panelDiv = document.getElementById('adminPanel');
+    let loggedIn = false;
+    const logo = document.getElementById('logoTrigger');
+    if (logo) {
+        logo.addEventListener('dblclick', () => {
+            modal.style.display = 'flex';
+            if (loggedIn) {
+                loginDiv.style.display = 'none';
+                panelDiv.style.display = 'block';
+                initTabs();
+                setupHeroAdmin();
+                setupPhilosophy();
+                renderAdminFlipcards();
+                renderAdminGallery();
+            } else {
+                loginDiv.style.display = 'block';
+                panelDiv.style.display = 'none';
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('loginError').innerText = '';
+            }
         });
-        document.getElementById('closeAdminBtn').addEventListener('click',()=>{ modal.style.display='none'; });
-        document.getElementById('addGalleryImage').addEventListener('click',()=>{ if(galleryData.length<10){ galleryData.push({img:null,caption:'Nieuwe limousine'}); localStorage.setItem('admin_gallery',JSON.stringify(galleryData)); renderGallery(); renderAdminGallery(); } else alert('Maximaal 10 foto\'s'); });
-        document.getElementById('resetFlipcardsBtn').addEventListener('click',()=>{
+    }
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === 'goldenbusiness2026') {
+                loggedIn = true;
+                loginDiv.style.display = 'none';
+                panelDiv.style.display = 'block';
+                initTabs();
+                setupHeroAdmin();
+                setupPhilosophy();
+                renderAdminFlipcards();
+                renderAdminGallery();
+            } else {
+                document.getElementById('loginError').innerText = 'Ongeldig wachtwoord';
+            }
+        });
+    }
+    const closeAdmin = document.getElementById('closeAdminBtn');
+    if (closeAdmin) closeAdmin.addEventListener('click', () => { modal.style.display = 'none'; });
+    const addGalleryBtn = document.getElementById('addGalleryImage');
+    if (addGalleryBtn) {
+        addGalleryBtn.addEventListener('click', () => {
+            if (galleryData.length < 10) {
+                galleryData.push({ img: null, caption: 'Nieuwe limousine' });
+                localStorage.setItem('admin_gallery', JSON.stringify(galleryData));
+                renderGallery();
+                if (panelDiv.style.display === 'block') renderAdminGallery();
+            } else alert('Max 10 foto\'s');
+        });
+    }
+    const resetFlipcardsBtn = document.getElementById('resetFlipcardsBtn');
+    if (resetFlipcardsBtn) {
+        resetFlipcardsBtn.addEventListener('click', () => {
             flipcardsData = [
                 { img: null, title: "Internationaal", text: "Naadloze ritten naar alle EU-bestemmingen.", detailId: "detail1" },
                 { img: null, title: "Conferenties", text: "End-to-end logistiek voor beurzen.", detailId: "detail2" },
@@ -812,37 +1202,57 @@
                 { img: null, title: "Corporate Events", text: "Groepsvervoer, teambuilding.", detailId: "detail5" },
                 { img: null, title: "Speciale projecten", text: "Bruiloften, filmtransport, alles mogelijk.", detailId: "detail6" }
             ];
-            localStorage.setItem('admin_flipcards',JSON.stringify(flipcardsData));
-            renderFlipcards(); if(panelDiv.style.display==='block') renderAdminFlipcards();
+            localStorage.setItem('admin_flipcards', JSON.stringify(flipcardsData));
+            renderFlipcards();
+            if (panelDiv.style.display === 'block') renderAdminFlipcards();
         });
+    }
 
-        // Eerste renders
-        renderFlipcards(); renderGallery(); renderHero(); renderPhilosophy();
+    // Eerste weergave
+    renderFlipcards();
+    renderGallery();
+    renderHero();
+    renderPhilosophy();
 
-        // Radiaal menu (onveranderd)
-        const radialTrigger = document.getElementById('radialTrigger');
-        const radialMenu = document.getElementById('radialMenu');
-        const radialOverlay = document.getElementById('radialOverlay');
-        let menuOpen=false;
-        function toggleMenu(){ menuOpen=!menuOpen; if(menuOpen){ radialMenu.classList.add('open'); radialOverlay.classList.add('active'); } else { radialMenu.classList.remove('open'); radialOverlay.classList.remove('active'); } }
-        radialTrigger.addEventListener('click',toggleMenu);
-        radialOverlay.addEventListener('click',toggleMenu);
-        document.querySelectorAll('.radial-menu .menu-item').forEach(item=>{
-            item.addEventListener('click',(e)=>{
-                const href=item.getAttribute('href');
-                if(href && href!=='#' && href!==''){
-                    e.preventDefault(); document.querySelector(href)?.scrollIntoView({behavior:'smooth'}); toggleMenu();
-                } else toggleMenu();
-            });
+    // Radiaal menu (eenvoudig, werkt)
+    const radialTrigger = document.getElementById('radialTrigger');
+    const radialMenu = document.getElementById('radialMenu');
+    const radialOverlay = document.getElementById('radialOverlay');
+    let menuOpen = false;
+    function toggleMenu() {
+        menuOpen = !menuOpen;
+        if (menuOpen) { radialMenu.classList.add('open'); radialOverlay.classList.add('active'); }
+        else { radialMenu.classList.remove('open'); radialOverlay.classList.remove('active'); }
+    }
+    if (radialTrigger) radialTrigger.addEventListener('click', toggleMenu);
+    if (radialOverlay) radialOverlay.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.radial-menu .menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const href = item.getAttribute('href');
+            if (href && href !== '#' && href !== '') {
+                e.preventDefault();
+                document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+                toggleMenu();
+            } else toggleMenu();
         });
-        // Galerij auto-scroll
-        const gal=document.getElementById('autoGallery');
-        if(gal && window.innerWidth>768){
-            let iv=setInterval(()=>{ gal.scrollLeft+=0.7; if(gal.scrollLeft+gal.clientWidth>=gal.scrollWidth-2) gal.scrollLeft=1; },20);
-            gal.addEventListener('mouseenter',()=>clearInterval(iv));
-            gal.addEventListener('mouseleave',()=>iv=setInterval(()=>{ gal.scrollLeft+=0.7; if(gal.scrollLeft+gal.clientWidth>=gal.scrollWidth-2) gal.scrollLeft=1; },20));
-        }
-    })();
+    });
+
+    // Galerij auto-scroll
+    const gal = document.getElementById('autoGallery');
+    if (gal && window.innerWidth > 768) {
+        let interval = setInterval(() => {
+            gal.scrollLeft += 0.7;
+            if (gal.scrollLeft + gal.clientWidth >= gal.scrollWidth - 2) gal.scrollLeft = 1;
+        }, 20);
+        gal.addEventListener('mouseenter', () => clearInterval(interval));
+        gal.addEventListener('mouseleave', () => {
+            interval = setInterval(() => {
+                gal.scrollLeft += 0.7;
+                if (gal.scrollLeft + gal.clientWidth >= gal.scrollWidth - 2) gal.scrollLeft = 1;
+            }, 20);
+        });
+    }
+})();
 </script>
 </body>
 </html>
