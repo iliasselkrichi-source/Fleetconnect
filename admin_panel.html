@@ -976,7 +976,7 @@
                 // *** Extra stap: spring naar de ritdatum in de agenda ***
                 const order = state.allBookings.find(b => b.id === orderId);
                 if (order && order.datetime) {
-                    const d = DateUtils.parse(order.datetime);
+                    const d = DateUtils.parse(order.datetime, order.time);  // ← time toegevoegd
                     state.selectedDate = d;
                     state.currentMonth = new Date(d.getFullYear(), d.getMonth(), 1);
                 }
@@ -1313,6 +1313,7 @@
         // REFRESH & SWITCH TAB
         // ============================================
         async function refreshAllData() {
+            state.NOW = new Date();   // ← toevoegen
             await laadAlleData();
             refreshCurrentTab();
         }
@@ -1367,7 +1368,6 @@
         // ============================================
         async function init() {
             await initSupabase();
-            await laadAlleData();
             setInterval(refreshAllData, 60000); // Auto-refresh elke 60 seconden
         }
         
