@@ -587,8 +587,9 @@
             let datePart="", timePart="";
             if(dtRaw){
                 const parts=dtRaw.split('T');
-                datePart=parts[0].split('-').reverse().join('-');
-                timePart=parts[1]?.substring(0,5) || "";
+                // FIX: verwijder de reverse() zodat de datum in ISO-formaat (YYYY-MM-DD) blijft
+                datePart = parts[0];  // direct gebruiken, niet omkeren
+                timePart = parts[1]?.substring(0,5) || "";
             }
             return {
                 id: generateBookingId(),
