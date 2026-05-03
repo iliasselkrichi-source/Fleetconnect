@@ -586,7 +586,7 @@
             }
             
             const futureRidesAll = allBookings.filter(booking => {
-                const rideDateTime = parseDateTime(booking.datetime, booking.time);
+                const rideDateTime = parseDateTime(toDateKey(booking.datetime), booking.time);
                 return rideDateTime > NOW && booking.status !== 'completed' && booking.status !== 'cancelled';
             });
             
@@ -1046,10 +1046,46 @@
         function renderWiki() {
             document.getElementById('contentArea').innerHTML = `
                 <div class="wiki-container">
-                    <div class="wiki-empty">
-                        <i class="fas fa-robot"></i>
-                        <h3>Wiki Agent</h3>
-                        <p>Documentatie wordt nog geladen...</p>
+                    <div class="wiki-content" style="text-align:left; max-width:800px; margin:0 auto; padding: 20px; line-height: 1.6;">
+                        <h2 style="margin-bottom: 20px; color: #0f172a; border-bottom: 2px solid #2dd4bf; padding-bottom: 10px;">Orderverwerking in Fleet Connect Admin Paneel</h2>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">1. Order ontvangst</h3>
+                        <p>Wanneer een klant een boeking maakt via een van de vijf boekingswebsites, worden de gegevens direct opgeslagen in de centrale database (Supabase). De initiële status van elke nieuwe boeking is altijd <code>pending</code>.</p>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">2. Laden in het Admin Paneel</h3>
+                        <p>Bij het openen of verversen van het paneel haalt de functie <code>loadBookingsFromSupabase()</code> alle orders op. Vervolgens verdeelt de functie <code>filterAndSortData()</code> deze automatisch over drie tabbladen op basis van hun status:</p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li><strong>New Orders:</strong> Bevat alle orders met status <code>pending</code> of <code>new</code>.</li>
+                            <li><strong>Orders:</strong> Bevat bevestigde (<code>confirmed</code>) of actieve (<code>active</code>) ritten die nog in de toekomst liggen.</li>
+                            <li><strong>History:</strong> Bevat voltooide (<code>completed</code>) of geannuleerde (<code>cancelled</code>) ritten, evenals bevestigde ritten die reeds hebben plaatsgevonden.</li>
+                        </ul>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">3. Order beoordelen in New Orders</h3>
+                        <p>De beheerder kan in de lijst met nieuwe orders op <strong>“Bekijk Fiche”</strong> klikken. Dit opent een pop-up venster met alle relevante details van de klant, de rit, de prijs, het vluchtnummer en eventuele extra's.</p>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">4. Order bevestigen</h3>
+                        <p>Door op de knop <strong>“Bevestig Order”</strong> te klikken, wordt de status in de database aangepast naar <code>confirmed</code>.</p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>De data wordt direct opnieuw geladen.</li>
+                            <li>De order verdwijnt uit <em>New Orders</em> en verschijnt in de tab <em>Orders</em>.</li>
+                            <li>De agenda springt automatisch naar de ritdatum, zodat de nieuwe planning direct zichtbaar is.</li>
+                        </ul>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">5. Beheer in de Orders tab</h3>
+                        <p>In de tab <em>Orders</em> kan de beheerder via de fiche een chauffeur selecteren uit een dropdown-menu. Na het klikken op <strong>“Assign Driver”</strong> wordt de chauffeur aan de rit gekoppeld (<code>assigned_driver</code>). De order blijft in dit overzicht staan tot het moment van de rit is verstreken.</p>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">6. Automatische verplaatsing naar History</h3>
+                        <p>Het paneel controleert elke 60 seconden (of bij een handmatige verversing) of bevestigde ritten inmiddels in het verleden liggen via de functie <code>isOrderInFuture()</code>. Zodra een ritdatum en -tijd zijn gepasseerd, verhuist de order automatisch van <em>Orders</em> naar <em>History</em>. De status in de database verandert hierbij niet.</p>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">7. Agenda en Planning</h3>
+                        <p>De agenda biedt een visueel overzicht:</p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Dagen met ritten zijn gemarkeerd met een stipje.</li>
+                            <li>Door op een dag te klikken, verschijnt onder de kalender de volledige planning van die dag, inclusief tijden en toegewezen chauffeurs.</li>
+                        </ul>
+
+                        <h3 style="color: #2dd4bf; margin-top: 20px;">8. Export van gegevens</h3>
+                        <p>Vanuit de tab <em>History</em> kunnen alle historische gegevens (inclusief alle detailvelden zoals vluchtnummers) worden geëxporteerd naar <strong>CSV</strong> of <strong>JSON</strong> bestanden voor verdere administratieve verwerking.</p>
                     </div>
                 </div>
             `;
