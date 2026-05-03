@@ -1301,7 +1301,12 @@
             if (tabName === 'history') downloadButtons.classList.remove('hidden');
             else downloadButtons.classList.add('hidden');
             
-            refreshCurrentTab();
+            // *** Als de tab 'drivers' wordt geopend, haal dan eerst de laatste data op ***
+            if (tabName === 'drivers') {
+                loadOnderaannemersFromSupabase();
+            } else {
+                refreshCurrentTab();
+            }
         }
 
         function downloadCSV() {
