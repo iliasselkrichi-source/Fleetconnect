@@ -438,6 +438,7 @@
 
         async function assignChauffeurToBooking(bookingId, chauffeur) {
             if (!chauffeur) return false;
+            console.log("Updating booking", bookingId, "with", chauffeur);
             try {
                 // Bouw een object dat lijkt op het oude driver object (voor compatibiliteit)
                 const driverObject = {
@@ -451,7 +452,13 @@
                     .from('bookings')
                     .update({ assigned_driver: driverObject })
                     .eq('id', bookingId);
-                if (error) throw error;
+
+                if (error) {
+                    console.error("Update error:", error);
+                    throw error;
+                }
+
+                console.log("Update succesvol");
                 await laadAlleData();
                 return true;
             } catch (error) {
@@ -981,13 +988,16 @@
         }
 
         async function confirmAssignDriver(orderId) {
-            if (!state.selectedDriverId) {
+            if (!state.selectedDriverId || isNaN(state.selectedDriverId)) {
                 alert("Selecteer eerst een chauffeur."); 
                 return; 
             }
+            console.log("Geselecteerde ID:", state.selectedDriverId);
+            console.log("Chauffeurs lijst:", state.chauffeursList);
             // Zoek de geselecteerde chauffeur in state.chauffeursList
             const chauffeur = state.chauffeursList.find(c => c.id == state.selectedDriverId);
             if (!chauffeur) {
+                console.error("Chauffeur niet gevonden met ID", state.selectedDriverId);
                 alert("Chauffeur niet gevonden.");
                 return;
             }
@@ -1029,10 +1039,13 @@
             document.getElementById('bookingModal').style.display = 'flex';
         }
 
-        function showOrderFiche(order) {
+        async function showOrderFiche(order) {
+            if (state.chauffeursList.length === 0) {
+                await laadOnderaannemers();
+            }
             state.currentSelectedOrder = order;
             state.selectedDriverId = order.assigned_driver ? (order.assigned_driver.id || null) : null;
-            
+
             let driverOptions = state.chauffeursList.map(c => `<option value="${c.id}" ${order.assigned_driver && order.assigned_driver.id == c.id ? 'selected' : ''}>${c.chauffeur_id} – ${c.voornaam} ${c.achternaam} ${c.voertuig_type ? `(${c.voertuig_type})` : ''}</option>`).join('');
             
             const ficheBody = document.getElementById('ficheBody');
@@ -1055,7 +1068,7 @@
                     <div class="fiche-row"><span class="fiche-label">Extra's:</span><span class="fiche-value">${order.extras || '-'}</span></div>
                 </div>
                 <div class="fiche-section"><h4>Chauffeur Toewijzen</h4>
-                    <select id="driverSelect" onchange="state.selectedDriverId = this.value">
+                    <select id="driverSelect" onchange="state.selectedDriverId = parseInt(this.value)">
                         <option value="">-- Selecteer Chauffeur --</option>
                         ${driverOptions}
                     </select>
