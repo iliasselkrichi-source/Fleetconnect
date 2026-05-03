@@ -212,6 +212,7 @@
         let historyOrders = [];
         let driversList = [];
         let onderaannemersList = [];
+        let chauffeursList = [];
         
         // Huidige tijd (gebruik echte huidige tijd)
         const NOW = new Date();
@@ -311,6 +312,85 @@
             } catch (error) {
                 console.error('Fout bij laden chauffeurs:', error);
                 driversList = [];
+            }
+        }
+
+        // ============================================
+        // ONDERAANNEMERS & CHAUFFEURS
+        // ============================================
+        async function loadOnderaannemersFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('onderaannemers')
+                    .select('*')
+                    .order('id');
+                if (error) throw error;
+                onderaannemersList = data || [];
+
+                const { data: chauffeurs, error: err2 } = await supabaseClient
+                    .from('chauffeurs')
+                    .select('*')
+                    .order('id');
+                if (!err2) chauffeursList = chauffeurs || [];
+
+                if (currentTab === 'onderaannemers') renderOnderaannemers();
+            } catch (error) {
+                console.error('Fout bij laden onderaannemers:', error);
+            }
+        }
+
+        async function voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email) {
+            const { error } = await supabaseClient
+                .from('onderaannemers')
+                .insert([{ bedrijfsnaam, btw_nummer: btw, contactnaam: contact, mobiel, email }]);
+            if (error) alert('Fout: ' + error.message);
+            else await loadOnderaannemersFromSupabase();
+        }
+
+        async function verwijderOnderaannemer(id) {
+            if (confirm('Weet je zeker dat je deze onderaannemer en alle chauffeurs wilt verwijderen?')) {
+                const { error } = await supabaseClient
+                    .from('onderaannemers')
+                    .delete()
+                    .eq('id', id);
+                if (error) alert('Fout: ' + error.message);
+                else await loadOnderaannemersFromSupabase();
+            }
+        }
+
+        function genereerPrefix(bedrijfsnaam) {
+            let woorden = bedrijfsnaam.trim().split(/\s+/);
+            let prefix = woorden.map(w => w[0].toUpperCase()).join('');
+            return prefix.slice(0, 4);
+        }
+
+        async function voegChauffeurToe(onderaannemerId, voornaam, achternaam) {
+            if (!voornaam || !achternaam) {
+                alert('Vul zowel voornaam als achternaam in.');
+                return;
+            }
+            const bestaande = chauffeursList.filter(c => c.onderaannemer_id === onderaannemerId);
+            const volgnummer = bestaande.length + 1;
+            const onderaannemer = onderaannemersList.find(o => o.id === onderaannemerId);
+            if (!onderaannemer) return;
+            const prefix = genereerPrefix(onderaannemer.bedrijfsnaam);
+            const chauffeurId = `${prefix}-${String(volgnummer).padStart(2, '0')}`;
+
+            const { error } = await supabaseClient
+                .from('chauffeurs')
+                .insert([{ onderaannemer_id: onderaannemerId, chauffeur_id: chauffeurId, voornaam, achternaam }]);
+            if (error) alert('Fout: ' + error.message);
+            else await loadOnderaannemersFromSupabase();
+        }
+
+        async function verwijderChauffeur(chauffeurId) {
+            if (confirm('Verwijder deze chauffeur?')) {
+                const { error } = await supabaseClient
+                    .from('chauffeurs')
+                    .delete()
+                    .eq('id', chauffeurId);
+                if (error) alert('Fout: ' + error.message);
+                else await loadOnderaannemersFromSupabase();
             }
         }
 
@@ -1035,12 +1115,59 @@
         }
 
         function renderOnderaannemers() {
-            document.getElementById('contentArea').innerHTML = `
-                <div class="people-card">
-                    <h3>Onderaannemers</h3>
-                    <div class="empty-planning">Geen onderaannemers gevonden</div>
-                </div>
-            `;
+            let html = `<div class="people-card">
+                <h3>Onderaannemers</h3>
+                <button class="add-btn" onclick="toonFormOnderaannemer()">➕ Nieuwe onderaannemer</button>
+                <div style="margin-top: 20px;">`;
+
+            for (let oa of onderaannemersList) {
+                const chauffeursVanOa = chauffeursList.filter(c => c.onderaannemer_id === oa.id);
+                html += `
+                    <div style="border:1px solid #ccc; border-radius:16px; padding:16px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <h4>${escapeHtml(oa.bedrijfsnaam)} <small>(BTW: ${escapeHtml(oa.btw_nummer || '-')})</small></h4>
+                            <button class="delete-btn" onclick="verwijderOnderaannemer(${oa.id})">🗑 Verwijder</button>
+                        </div>
+                        <p><strong>Contact:</strong> ${escapeHtml(oa.contactnaam || '-')} | ${escapeHtml(oa.mobiel || '-')} | ${escapeHtml(oa.email || '-')}</p>
+                        <hr style="margin: 10px 0;">
+                        <h5>Chauffeurs</h5>
+                        <ul style="list-style: none; padding: 0; margin-top: 10px;">
+                            ${chauffeursVanOa.map(c => `<li style="padding: 5px 0;">${escapeHtml(c.chauffeur_id)} - ${escapeHtml(c.voornaam)} ${escapeHtml(c.achternaam)} <button class="delete-btn" style="margin-left:10px; padding: 2px 8px;" onclick="verwijderChauffeur(${c.id})">✖</button></li>`).join('')}
+                        </ul>
+                        <div style="margin-top:15px; display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="voornaam_${oa.id}" placeholder="Voornaam" style="width:120px; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <input type="text" id="achternaam_${oa.id}" placeholder="Achternaam" style="width:120px; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <button class="action-btn" onclick="voegChauffeurToe(${oa.id}, document.getElementById('voornaam_${oa.id}').value, document.getElementById('achternaam_${oa.id}').value)">➕ Chauffeur toevoegen</button>
+                        </div>
+                    </div>
+                `;
+            }
+            if (onderaannemersList.length === 0) {
+                html += '<div class="empty-planning">Geen onderaannemers gevonden</div>';
+            }
+            html += `</div></div>`;
+            document.getElementById('contentArea').innerHTML = html;
+        }
+
+        function toonFormOnderaannemer() {
+            const bedrijfsnaam = prompt("Bedrijfsnaam:");
+            if (!bedrijfsnaam) return;
+            const btw = prompt("BTW nummer (optioneel):") || "";
+            const contact = prompt("Contactnaam:");
+            const mobiel = prompt("Mobiel:");
+            const email = prompt("Email:");
+            voegOnderaannemerToe(bedrijfsnaam, btw, contact, mobiel, email);
+        }
+
+        // Kleine helper om XSS te voorkomen (optioneel maar netjes)
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
 
         function renderWiki() {
@@ -1149,6 +1276,7 @@
         // ============================================
         async function init() {
             await initSupabase();
+            await loadOnderaannemersFromSupabase();
             setInterval(refreshAllData, 60000); // Auto-refresh elke 60 seconden
         }
         
